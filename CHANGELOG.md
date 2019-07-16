@@ -6,4 +6,4 @@ Special thanks to external contributors on this release:
 
 ### Initial Release
 
-- Addition of `db`, `random.go`, `bytes.go` and `os.go` from the tendermint repo.
+- `db`, `random.go`, `bytes.go` and `os.go` from the tendermint repo.
