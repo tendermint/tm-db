@@ -1,6 +1,6 @@
-## 0.1
+## 0.2
 
-\*\* **DD-MM-YYYY**
+\*\* **YYYY-MM-DD**
 
 Special thanks to external contributors on this release:
 
