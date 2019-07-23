@@ -7,3 +7,5 @@ Special thanks to external contributors on this release:
 ### BREAKING CHANGES
 
 ### IMPROVEMENTS
+
+- [tests] Added tests package from tendermint
