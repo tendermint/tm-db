@@ -35,7 +35,7 @@ const (
 	// RocksDBBackend represents rocksdb (uses tecbot's wrapper)
 	//   - EXPERIMENTAL
 	//   - requires gcc
-	//   - use boltdb build tag (go build -tags rocksdb)
+	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend DBBackendType = "rocksdb"
 )
 

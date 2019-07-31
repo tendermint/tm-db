@@ -68,7 +68,6 @@ func (db *RocksDB) Get(key []byte) []byte {
 	key = nonNilBytes(key)
 	res, err := db.db.Get(db.ro, key)
 	if err != nil {
-		res.Free()
 		panic(err)
 	}
 	return moveSliceToBytes(res)

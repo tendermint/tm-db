@@ -8,8 +8,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	cmn "github.com/tendermint/tm-cmn/common"
 )
 
 func TestRocksDBBackend(t *testing.T) {
