@@ -11,7 +11,7 @@ import (
 )
 
 func TestRocksDBBackend(t *testing.T) {
-	name := fmt.Sprintf("test_%x", cmn.RandStr(12))
+	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
 	db := NewDB(name, RocksDBBackend, dir)
 	defer cleanupDBDir(dir, name)
@@ -21,7 +21,7 @@ func TestRocksDBBackend(t *testing.T) {
 }
 
 func TestCLevelDBStats(t *testing.T) {
-	name := fmt.Sprintf("test_%x", cmn.RandStr(12))
+	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
 	db := NewDB(name, RocksDBBackend, dir)
 	defer cleanupDBDir(dir, name)
