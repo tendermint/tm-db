@@ -1,3 +1,13 @@
+## 0.2
+
+**2019-09-19**
+
+Special thanks to external contributors on this release: @stumble
+
+### Features
+
+- Add `RocksDB`
+
 ## 0.1
 
 **2019-07-16**
