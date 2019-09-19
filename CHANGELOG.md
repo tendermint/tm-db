@@ -6,7 +6,7 @@ Special thanks to external contributors on this release: @stumble
 
 ### Features
 
-- Add `RocksDB`
+- [\#12](https://github.com/tendermint/tm-db/pull/12) Add `RocksDB` (@stumble)
 
 ## 0.1
 
