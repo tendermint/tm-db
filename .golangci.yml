@@ -6,7 +6,7 @@ linters:
     - depguard
     - dogsled
     - dupl
-    # - errcheck
+    - errcheck
     # - funlen
     # - gochecknoglobals
     # - gochecknoinits
@@ -16,7 +16,7 @@ linters:
     # - godox
     - gofmt
     - goimports
-    # - golint
+    - golint
     - gosec
     - gosimple
     - govet
@@ -28,11 +28,11 @@ linters:
     - nakedret
     - prealloc
     # - scopelint
-    # - staticcheck
+    - staticcheck
     - structcheck
-    # - stylecheck
+    - stylecheck
     - typecheck
-    # - unconvert
+    - unconvert
     # - unparam
     - unused
     - varcheck
@@ -41,8 +41,6 @@ linters:
     # - gocognit
 
 linters-settings:
-  dogsled:
-    max-blank-identifiers: 3
   maligned:
     # print struct with more effective memory layout or not, false by default
     suggest-new: true
