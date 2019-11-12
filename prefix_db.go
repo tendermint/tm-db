@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 // IteratePrefix is a convenience function for iterating over a key domain
@@ -52,13 +54,16 @@ func (pdb *PrefixDB) Mutex() *sync.Mutex {
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Get(key []byte) []byte {
+func (pdb *PrefixDB) Get(key []byte) ([]byte, error) {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
 	pkey := pdb.prefixed(key)
-	value := pdb.db.Get(pkey)
-	return value
+	value, err := pdb.db.Get(pkey)
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
 }
 
 // Implements DB.
@@ -70,36 +75,39 @@ func (pdb *PrefixDB) Has(key []byte) bool {
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Set(key []byte, value []byte) {
+func (pdb *PrefixDB) Set(key []byte, value []byte) error {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
 	pkey := pdb.prefixed(key)
-	pdb.db.Set(pkey, value)
+	if err := pdb.db.Set(pkey, value); err != nil {
+		return err
+	}
+	return nil
 }
 
 // Implements DB.
-func (pdb *PrefixDB) SetSync(key []byte, value []byte) {
+func (pdb *PrefixDB) SetSync(key []byte, value []byte) error {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
-	pdb.db.SetSync(pdb.prefixed(key), value)
+	return pdb.db.SetSync(pdb.prefixed(key), value)
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Delete(key []byte) {
+func (pdb *PrefixDB) Delete(key []byte) error {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
-	pdb.db.Delete(pdb.prefixed(key))
+	return pdb.db.Delete(pdb.prefixed(key))
 }
 
 // Implements DB.
-func (pdb *PrefixDB) DeleteSync(key []byte) {
+func (pdb *PrefixDB) DeleteSync(key []byte) error {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
-	pdb.db.DeleteSync(pdb.prefixed(key))
+	return pdb.db.DeleteSync(pdb.prefixed(key))
 }
 
 // Implements DB.
@@ -193,8 +201,8 @@ func (pdb *PrefixDB) Print() {
 	itr := pdb.Iterator(nil, nil)
 	defer itr.Close()
 	for ; itr.Valid(); itr.Next() {
-		key := itr.Key()
-		value := itr.Value()
+		key, _ := itr.Key()
+		value, _ := itr.Value()
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
 }
@@ -240,12 +248,12 @@ func (pb prefixBatch) Delete(key []byte) {
 	pb.source.Delete(pkey)
 }
 
-func (pb prefixBatch) Write() {
-	pb.source.Write()
+func (pb prefixBatch) Write() error {
+	return pb.source.Write()
 }
 
-func (pb prefixBatch) WriteSync() {
-	pb.source.WriteSync()
+func (pb prefixBatch) WriteSync() error {
+	return pb.source.WriteSync()
 }
 
 func (pb prefixBatch) Close() {
@@ -267,7 +275,11 @@ type prefixIterator struct {
 }
 
 func newPrefixIterator(prefix, start, end []byte, source Iterator) *prefixIterator {
-	if !source.Valid() || !bytes.HasPrefix(source.Key(), prefix) {
+	key, err := source.Key()
+	if err != nil {
+
+	}
+	if !source.Valid() || !bytes.HasPrefix(key, prefix) {
 		return &prefixIterator{
 			prefix: prefix,
 			start:  start,
@@ -293,29 +305,45 @@ func (itr *prefixIterator) Valid() bool {
 	return itr.valid && itr.source.Valid()
 }
 
-func (itr *prefixIterator) Next() {
+func (itr *prefixIterator) Next() error {
 	if !itr.valid {
 		panic("prefixIterator invalid, cannot call Next()")
 	}
-	itr.source.Next()
-	if !itr.source.Valid() || !bytes.HasPrefix(itr.source.Key(), itr.prefix) {
+	err := itr.source.Next()
+	if err != nil {
+		return err
+	}
+	key, err := itr.source.Key()
+	if err != nil {
+		return err
+	}
+	if !itr.source.Valid() || !bytes.HasPrefix(key, itr.prefix) {
 		itr.valid = false
-		return
+		return nil
 	}
+	return nil
 }
 
-func (itr *prefixIterator) Key() (key []byte) {
+func (itr *prefixIterator) Key() (key []byte, err error) {
 	if !itr.valid {
-		panic("prefixIterator invalid, cannot call Key()")
+		return nil, errors.New("prefixIterator invalid, cannot call Key()")
 	}
-	return stripPrefix(itr.source.Key(), itr.prefix)
+	key, err = itr.source.Key()
+	if err != nil {
+		return nil, err
+	}
+	return stripPrefix(key, itr.prefix), nil
 }
 
-func (itr *prefixIterator) Value() (value []byte) {
+func (itr *prefixIterator) Value() (value []byte, err error) {
 	if !itr.valid {
-		panic("prefixIterator invalid, cannot call Value()")
+		return nil, errors.New("prefixIterator invalid, cannot call Value()")
 	}
-	return itr.source.Value()
+	value, err = itr.source.Value()
+	if err != nil {
+		return nil, err
+	}
+	return value, nil
 }
 
 func (itr *prefixIterator) Close() {

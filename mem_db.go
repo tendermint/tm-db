@@ -218,20 +218,24 @@ func (itr *memDBIterator) Next() error {
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Key() []byte {
-	itr.assertIsValid()
-	return []byte(itr.keys[itr.cur])
+func (itr *memDBIterator) Key() ([]byte, error) {
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
+	return []byte(itr.keys[itr.cur]), nil
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Value() []byte {
-	itr.assertIsValid()
+func (itr *memDBIterator) Value() ([]byte, error) {
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
 	key := []byte(itr.keys[itr.cur])
 	bytes, err := itr.db.Get(key)
 	if err != nil {
-
+		return nil, err
 	}
-	return bytes
+	return bytes, nil
 }
 
 // Implements Iterator.

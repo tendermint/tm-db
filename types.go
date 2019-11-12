@@ -42,7 +42,7 @@ type DB interface {
 	ReverseIterator(start, end []byte) Iterator
 
 	// Closes the connection.
-	Close() error
+	Close() error // possibly remove me
 
 	// Creates a batch for atomic updates.
 	NewBatch() Batch

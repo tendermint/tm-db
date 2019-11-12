@@ -75,7 +75,13 @@ func TestDBIteratorMany(t *testing.T) {
 			itr := db.Iterator(nil, nil)
 			defer itr.Close()
 			for ; itr.Valid(); itr.Next() {
-				assert.Equal(t, db.Get(itr.Key()), itr.Value())
+				key, err := itr.Key()
+				assert.NoError(t, err)
+				value, err = itr.Value()
+				assert.NoError(t, err)
+				value1, err := db.Get(key)
+				assert.NoError(t, err)
+				assert.Equal(t, value1, value)
 			}
 		})
 	}
