@@ -4,12 +4,12 @@ package db
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/etcd-io/bbolt"
+	"github.com/pkg/errors"
 )
 
 var bucket = []byte("tm")
@@ -62,9 +62,9 @@ func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error)
 	return &BoltDB{db: db}, nil
 }
 
-func (bdb *BoltDB) Get(key []byte) (value []byte) {
+func (bdb *BoltDB) Get(key []byte) (value []byte, err error) {
 	key = nonEmptyKey(nonNilBytes(key))
-	err := bdb.db.View(func(tx *bbolt.Tx) error {
+	err = bdb.db.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucket)
 		if v := b.Get(key); v != nil {
 			value = append([]byte{}, v...)
@@ -72,16 +72,20 @@ func (bdb *BoltDB) Get(key []byte) (value []byte) {
 		return nil
 	})
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 	return
 }
 
 func (bdb *BoltDB) Has(key []byte) bool {
-	return bdb.Get(key) != nil
+	bytes, err := bdb.Get(key)
+	if err != nil {
+		return false
+	}
+	return bytes != nil
 }
 
-func (bdb *BoltDB) Set(key, value []byte) {
+func (bdb *BoltDB) Set(key, value []byte) error {
 	key = nonEmptyKey(nonNilBytes(key))
 	value = nonNilBytes(value)
 	err := bdb.db.Update(func(tx *bbolt.Tx) error {
@@ -89,30 +93,32 @@ func (bdb *BoltDB) Set(key, value []byte) {
 		return b.Put(key, value)
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (bdb *BoltDB) SetSync(key, value []byte) {
-	bdb.Set(key, value)
+func (bdb *BoltDB) SetSync(key, value []byte) error {
+	return bdb.Set(key, value)
 }
 
-func (bdb *BoltDB) Delete(key []byte) {
+func (bdb *BoltDB) Delete(key []byte) error {
 	key = nonEmptyKey(nonNilBytes(key))
 	err := bdb.db.Update(func(tx *bbolt.Tx) error {
 		return tx.Bucket(bucket).Delete(key)
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (bdb *BoltDB) DeleteSync(key []byte) {
-	bdb.Delete(key)
+func (bdb *BoltDB) DeleteSync(key []byte) error {
+	return bdb.Delete(key)
 }
 
-func (bdb *BoltDB) Close() {
-	bdb.db.Close()
+func (bdb *BoltDB) Close() error {
+	return bdb.db.Close()
 }
 
 func (bdb *BoltDB) Print() {
@@ -176,7 +182,7 @@ func (bdb *boltDBBatch) Delete(key []byte) {
 }
 
 // NOTE: the operation is synchronous (see BoltDB for reasons)
-func (bdb *boltDBBatch) Write() {
+func (bdb *boltDBBatch) Write() error {
 	err := bdb.db.db.Batch(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucket)
 		for _, op := range bdb.ops {
@@ -195,12 +201,13 @@ func (bdb *boltDBBatch) Write() {
 		return nil
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (bdb *boltDBBatch) WriteSync() {
-	bdb.Write()
+func (bdb *boltDBBatch) WriteSync() error {
+	return bdb.Write()
 }
 
 func (bdb *boltDBBatch) Close() {}
@@ -303,27 +310,32 @@ func (itr *boltDBIterator) Valid() bool {
 	return true
 }
 
-func (itr *boltDBIterator) Next() {
-	itr.assertIsValid()
+func (itr *boltDBIterator) Next() error {
+	if err := itr.assertIsValid(); err != nil {
+		return err
+	}
 	if itr.isReverse {
 		itr.currentKey, itr.currentValue = itr.itr.Prev()
 	} else {
 		itr.currentKey, itr.currentValue = itr.itr.Next()
 	}
+	return nil
 }
 
-func (itr *boltDBIterator) Key() []byte {
-	itr.assertIsValid()
-	return append([]byte{}, itr.currentKey...)
+func (itr *boltDBIterator) Key() ([]byte, error) {
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
+	return append([]byte{}, itr.currentKey...), nil
 }
 
-func (itr *boltDBIterator) Value() []byte {
+func (itr *boltDBIterator) Value() ([]byte, error) {
 	itr.assertIsValid()
 	var value []byte
 	if itr.currentValue != nil {
 		value = append([]byte{}, itr.currentValue...)
 	}
-	return value
+	return value, nil
 }
 
 func (itr *boltDBIterator) Close() {
@@ -333,10 +345,11 @@ func (itr *boltDBIterator) Close() {
 	}
 }
 
-func (itr *boltDBIterator) assertIsValid() {
+func (itr *boltDBIterator) assertIsValid() error {
 	if !itr.Valid() {
-		panic("Boltdb-iterator is invalid")
+		return errors.New("Boltdb-iterator is invalid")
 	}
+	return nil
 }
 
 // nonEmptyKey returns a []byte("nil") if key is empty.

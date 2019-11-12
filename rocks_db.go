@@ -9,6 +9,7 @@ import (
 	"runtime"
 
 	"github.com/tecbot/gorocksdb"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -64,55 +65,63 @@ func NewRocksDBWithOptions(name string, dir string, opts *gorocksdb.Options) (*R
 }
 
 // Implements DB.
-func (db *RocksDB) Get(key []byte) []byte {
+func (db *RocksDB) Get(key []byte) ([]byte, error) {
 	key = nonNilBytes(key)
 	res, err := db.db.Get(db.ro, key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return moveSliceToBytes(res)
+	return moveSliceToBytes(res), nil
 }
 
 // Implements DB.
 func (db *RocksDB) Has(key []byte) bool {
-	return db.Get(key) != nil
+		bytes, err := db.Get(key)
+		if err != nil {
+			return false
+		}
+		return bytes != nil
+	}
 }
 
 // Implements DB.
-func (db *RocksDB) Set(key []byte, value []byte) {
+func (db *RocksDB) Set(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
 	err := db.db.Put(db.wo, key, value)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *RocksDB) SetSync(key []byte, value []byte) {
+func (db *RocksDB) SetSync(key []byte, value []byte)  error{
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
 	err := db.db.Put(db.woSync, key, value)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *RocksDB) Delete(key []byte) {
+func (db *RocksDB) Delete(key []byte) error {
 	key = nonNilBytes(key)
 	err := db.db.Delete(db.wo, key)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *RocksDB) DeleteSync(key []byte) {
+func (db *RocksDB) DeleteSync(key []byte) error {
 	key = nonNilBytes(key)
 	err := db.db.Delete(db.woSync, key)
 	if err != nil {
-		panic(err)
+		return nil
 	}
 }
 
@@ -174,19 +183,21 @@ func (mBatch *rocksDBBatch) Delete(key []byte) {
 }
 
 // Implements Batch.
-func (mBatch *rocksDBBatch) Write() {
+func (mBatch *rocksDBBatch) Write() error {
 	err := mBatch.db.db.Write(mBatch.db.wo, mBatch.batch)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements Batch.
-func (mBatch *rocksDBBatch) WriteSync() {
+func (mBatch *rocksDBBatch) WriteSync() error {
 	err := mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements Batch.
@@ -253,7 +264,7 @@ func (itr rocksDBIterator) Domain() ([]byte, []byte) {
 	return itr.start, itr.end
 }
 
-func (itr rocksDBIterator) Valid() bool {
+func (itr rocksDBIterator) Valid() (bool, error) {
 
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
@@ -261,12 +272,14 @@ func (itr rocksDBIterator) Valid() bool {
 	}
 
 	// Panic on DB error.  No way to recover.
-	itr.assertNoError()
+	if err := itr.assertNoError(); err != nil {
+		return nil, err
+	}
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
 		itr.isInvalid = true
-		return false
+		return false, nil 
 	}
 
 	// If key is end or past it, invalid.
@@ -289,42 +302,57 @@ func (itr rocksDBIterator) Valid() bool {
 	return true
 }
 
-func (itr rocksDBIterator) Key() []byte {
-	itr.assertNoError()
-	itr.assertIsValid()
-	return moveSliceToBytes(itr.source.Key())
+func (itr rocksDBIterator) Key() ([]byte, error) {
+	if err := itr.assertNoError(); err != nil {
+		return nil, err
+	}
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
+	return moveSliceToBytes(itr.source.Key()), nil
 }
 
 func (itr rocksDBIterator) Value() []byte {
-	itr.assertNoError()
-	itr.assertIsValid()
-	return moveSliceToBytes(itr.source.Value())
+	if err := itr.assertNoError(); err != nil {
+		return nil, err
+	}
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
+	return moveSliceToBytes(itr.source.Value()), nil
 }
 
-func (itr rocksDBIterator) Next() {
-	itr.assertNoError()
-	itr.assertIsValid()
+func (itr rocksDBIterator) Next() error {
+	if err := itr.assertNoError(); err != nil {
+		return nil, err
+	}
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
 		itr.source.Next()
 	}
+	return nil
 }
 
 func (itr rocksDBIterator) Close() {
 	itr.source.Close()
 }
 
-func (itr rocksDBIterator) assertNoError() {
+func (itr rocksDBIterator) assertNoError() error {
 	if err := itr.source.Err(); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (itr rocksDBIterator) assertIsValid() {
+func (itr rocksDBIterator) assertIsValid() error {
 	if !itr.Valid() {
-		panic("rocksDBIterator is invalid")
+		return errors.New("rocksDBIterator is invalid")
 	}
+	return nil
 }
 
 // moveSliceToBytes will free the slice and copy out a go []byte

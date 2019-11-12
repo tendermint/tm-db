@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 
 	"github.com/jmhodges/levigo"
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -50,56 +51,64 @@ func NewCLevelDB(name string, dir string) (*CLevelDB, error) {
 }
 
 // Implements DB.
-func (db *CLevelDB) Get(key []byte) []byte {
+func (db *CLevelDB) Get(key []byte) ([]byte, error) {
 	key = nonNilBytes(key)
 	res, err := db.db.Get(db.ro, key)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return res
+	return res, nil
 }
 
 // Implements DB.
 func (db *CLevelDB) Has(key []byte) bool {
-	return db.Get(key) != nil
+	bytes, err := db.Get(key)
+	if err != nil {
+		return false
+	}
+	return bytes != nil
 }
 
 // Implements DB.
-func (db *CLevelDB) Set(key []byte, value []byte) {
+func (db *CLevelDB) Set(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
 	err := db.db.Put(db.wo, key, value)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *CLevelDB) SetSync(key []byte, value []byte) {
+func (db *CLevelDB) SetSync(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
 	err := db.db.Put(db.woSync, key, value)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *CLevelDB) Delete(key []byte) {
+func (db *CLevelDB) Delete(key []byte) error {
 	key = nonNilBytes(key)
 	err := db.db.Delete(db.wo, key)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements DB.
-func (db *CLevelDB) DeleteSync(key []byte) {
+func (db *CLevelDB) DeleteSync(key []byte) error {
 	key = nonNilBytes(key)
 	err := db.db.Delete(db.woSync, key)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 func (db *CLevelDB) DB() *levigo.DB {
@@ -312,14 +321,16 @@ func (itr cLevelDBIterator) Close() {
 	itr.source.Close()
 }
 
-func (itr cLevelDBIterator) assertNoError() {
+func (itr cLevelDBIterator) assertNoError() error {
 	if err := itr.source.GetError(); err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
-func (itr cLevelDBIterator) assertIsValid() {
+func (itr cLevelDBIterator) assertIsValid() error {
 	if !itr.Valid() {
-		panic("cLevelDBIterator is invalid")
+		return errors.New("cLevelDBIterator is invalid")
 	}
+	return nil
 }

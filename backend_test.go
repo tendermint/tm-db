@@ -26,9 +26,12 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	defer cleanupDBDir(dirname, "testdb")
 
 	// A nonexistent key should return nil, even if the key is empty
-	require.Nil(t, db.Get([]byte("")))
+	item, err := db.Get([]byte(""))
+	require.NoError(t, err)
+	require.Nil(t, item)
 
 	// A nonexistent key should return nil, even if the key is nil
+
 	require.Nil(t, db.Get(nil))
 
 	// A nonexistent key should return nil.

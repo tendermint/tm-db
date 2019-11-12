@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+
+	"github.com/pkg/errors"
 )
 
 func init() {
@@ -32,13 +34,13 @@ func (db *MemDB) Mutex() *sync.Mutex {
 }
 
 // Implements DB.
-func (db *MemDB) Get(key []byte) []byte {
+func (db *MemDB) Get(key []byte) ([]byte, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 	key = nonNilBytes(key)
 
 	value := db.db[string(key)]
-	return value
+	return value, nil
 }
 
 // Implements DB.
@@ -52,19 +54,21 @@ func (db *MemDB) Has(key []byte) bool {
 }
 
 // Implements DB.
-func (db *MemDB) Set(key []byte, value []byte) {
+func (db *MemDB) Set(key []byte, value []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	db.SetNoLock(key, value)
+	return nil
 }
 
 // Implements DB.
-func (db *MemDB) SetSync(key []byte, value []byte) {
+func (db *MemDB) SetSync(key []byte, value []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	db.SetNoLock(key, value)
+	return nil
 }
 
 // Implements atomicSetDeleter.
@@ -81,19 +85,21 @@ func (db *MemDB) SetNoLockSync(key []byte, value []byte) {
 }
 
 // Implements DB.
-func (db *MemDB) Delete(key []byte) {
+func (db *MemDB) Delete(key []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	db.DeleteNoLock(key)
+	return nil
 }
 
 // Implements DB.
-func (db *MemDB) DeleteSync(key []byte) {
+func (db *MemDB) DeleteSync(key []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	db.DeleteNoLock(key)
+	return nil
 }
 
 // Implements atomicSetDeleter.
@@ -109,12 +115,13 @@ func (db *MemDB) DeleteNoLockSync(key []byte) {
 }
 
 // Implements DB.
-func (db *MemDB) Close() {
+func (db *MemDB) Close() error {
 	// Close is a noop since for an in-memory
 	// database, we don't have a destination
 	// to flush contents to nor do we want
 	// any data loss on invoking Close()
 	// See the discussion in https://github.com/tendermint/tendermint/libs/pull/56
+	return nil
 }
 
 // Implements DB.
@@ -201,9 +208,13 @@ func (itr *memDBIterator) Valid() bool {
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Next() {
-	itr.assertIsValid()
+func (itr *memDBIterator) Next() error {
+	err := itr.assertIsValid()
+	if err != nil {
+		return err
+	}
 	itr.cur++
+	return nil
 }
 
 // Implements Iterator.
@@ -216,7 +227,11 @@ func (itr *memDBIterator) Key() []byte {
 func (itr *memDBIterator) Value() []byte {
 	itr.assertIsValid()
 	key := []byte(itr.keys[itr.cur])
-	return itr.db.Get(key)
+	bytes, err := itr.db.Get(key)
+	if err != nil {
+
+	}
+	return bytes
 }
 
 // Implements Iterator.
@@ -225,10 +240,11 @@ func (itr *memDBIterator) Close() {
 	itr.db = nil
 }
 
-func (itr *memDBIterator) assertIsValid() {
+func (itr *memDBIterator) assertIsValid() error {
 	if !itr.Valid() {
-		panic("memDBIterator is invalid")
+		return errors.New("memDBIterator is invalid")
 	}
+	return nil
 }
 
 //----------------------------------------
