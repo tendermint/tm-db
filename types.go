@@ -11,7 +11,7 @@ type DB interface {
 	// Has checks if a key exists.
 	// A nil key is interpreted as an empty byteslice.
 	// CONTRACT: key, value readonly []byte
-	Has(key []byte) bool
+	Has(key []byte) bool // maybe return the error from get here
 
 	// Set sets the key.
 	// A nil key is interpreted as an empty byteslice.

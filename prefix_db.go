@@ -187,11 +187,11 @@ func (pdb *PrefixDB) DeleteNoLockSync(key []byte) {
 */
 
 // Implements DB.
-func (pdb *PrefixDB) Close() {
+func (pdb *PrefixDB) Close() error {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
-	pdb.db.Close()
+	return pdb.db.Close()
 }
 
 // Implements DB.
@@ -307,7 +307,7 @@ func (itr *prefixIterator) Valid() bool {
 
 func (itr *prefixIterator) Next() error {
 	if !itr.valid {
-		panic("prefixIterator invalid, cannot call Next()")
+		return errors.New("prefixIterator invalid, cannot call Next()")
 	}
 	err := itr.source.Next()
 	if err != nil {

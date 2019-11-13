@@ -4,6 +4,8 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/pkg/errors"
+
 	db "github.com/tendermint/tm-db"
 	"github.com/tendermint/tm-db/remotedb/grpcdb"
 	protodb "github.com/tendermint/tm-db/remotedb/proto"
@@ -39,45 +41,51 @@ func (rd *RemoteDB) InitRemote(in *Init) error {
 var _ db.DB = (*RemoteDB)(nil)
 
 // Close is a noop currently
-func (rd *RemoteDB) Close() {
+func (rd *RemoteDB) Close() error {
+	return nil
 }
 
-func (rd *RemoteDB) Delete(key []byte) {
+func (rd *RemoteDB) Delete(key []byte) error {
 	if _, err := rd.dc.Delete(rd.ctx, &protodb.Entity{Key: key}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.Delete: %v", err))
+		return errors.Errorf("remoteDB.Delete: %v", err)
 	}
+	return nil
 }
 
-func (rd *RemoteDB) DeleteSync(key []byte) {
+func (rd *RemoteDB) DeleteSync(key []byte) error {
 	if _, err := rd.dc.DeleteSync(rd.ctx, &protodb.Entity{Key: key}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.DeleteSync: %v", err))
+		return errors.Errorf("remoteDB.DeleteSync: %v", err)
 	}
+	return nil
 }
 
-func (rd *RemoteDB) Set(key, value []byte) {
+func (rd *RemoteDB) Set(key, value []byte) error {
 	if _, err := rd.dc.Set(rd.ctx, &protodb.Entity{Key: key, Value: value}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.Set: %v", err))
+		return errors.Errorf("remoteDB.Set: %v", err)
 	}
+	return nil
 }
 
-func (rd *RemoteDB) SetSync(key, value []byte) {
+func (rd *RemoteDB) SetSync(key, value []byte) error {
 	if _, err := rd.dc.SetSync(rd.ctx, &protodb.Entity{Key: key, Value: value}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.SetSync: %v", err))
+		return errors.Errorf("remoteDB.SetSync: %v", err)
 	}
+	return nil
 }
 
-func (rd *RemoteDB) Get(key []byte) []byte {
+func (rd *RemoteDB) Get(key []byte) ([]byte, error) {
 	res, err := rd.dc.Get(rd.ctx, &protodb.Entity{Key: key})
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Get error: %v", err))
+		return nil, errors.Errorf("remoteDB.Get error: %v", err)
 	}
-	return res.Value
+	return res.Value, nil
 }
 
 func (rd *RemoteDB) Has(key []byte) bool {
 	res, err := rd.dc.Has(rd.ctx, &protodb.Entity{Key: key})
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Has error: %v", err))
+		// panic(fmt.Sprintf("RemoteDB.Has error: %v", err))
+		return false
 	}
 	return res.Exists
 }
@@ -149,26 +157,27 @@ func (rItr *reverseIterator) Domain() (start, end []byte) {
 }
 
 // Next advances the current reverseIterator
-func (rItr *reverseIterator) Next() {
+func (rItr *reverseIterator) Next() error {
 	var err error
 	rItr.cur, err = rItr.dric.Recv()
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.ReverseIterator.Next error: %v", err))
+		return errors.Errorf("RemoteDB.ReverseIterator.Next error: %v", err)
 	}
+	return nil
 }
 
-func (rItr *reverseIterator) Key() []byte {
+func (rItr *reverseIterator) Key() ([]byte, error) {
 	if rItr.cur == nil {
-		return nil
+		return nil, errors.New("key does not exist")
 	}
-	return rItr.cur.Key
+	return rItr.cur.Key, nil
 }
 
-func (rItr *reverseIterator) Value() []byte {
+func (rItr *reverseIterator) Value() ([]byte, error) {
 	if rItr.cur == nil {
-		return nil
+		return nil, errors.New("key does not exist")
 	}
-	return rItr.cur.Value
+	return rItr.cur.Value, nil
 }
 
 func (rItr *reverseIterator) Close() {
@@ -197,26 +206,27 @@ func (itr *iterator) Domain() (start, end []byte) {
 }
 
 // Next advances the current iterator
-func (itr *iterator) Next() {
+func (itr *iterator) Next() error {
 	var err error
 	itr.cur, err = itr.dic.Recv()
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Iterator.Next error: %v", err))
+		return errors.Errorf("remoteDB.Iterator.Next error: %v", err)
 	}
+	return nil
 }
 
-func (itr *iterator) Key() []byte {
+func (itr *iterator) Key() ([]byte, error) {
 	if itr.cur == nil {
-		return nil
+		return nil, errors.New("key does not exist")
 	}
-	return itr.cur.Key
+	return itr.cur.Key, nil
 }
 
-func (itr *iterator) Value() []byte {
+func (itr *iterator) Value() ([]byte, error) {
 	if itr.cur == nil {
-		return nil
+		return nil, errors.New("current poisition is not valid")
 	}
-	return itr.cur.Value
+	return itr.cur.Value, nil
 }
 
 func (itr *iterator) Close() {
@@ -249,16 +259,18 @@ func (bat *batch) Delete(key []byte) {
 	bat.ops = append(bat.ops, op)
 }
 
-func (bat *batch) Write() {
+func (bat *batch) Write() error {
 	if _, err := bat.db.dc.BatchWrite(bat.db.ctx, &protodb.Batch{Ops: bat.ops}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.BatchWrite: %v", err))
+		return errors.Errorf("remoteDB.BatchWrite: %v", err)
 	}
+	return nil
 }
 
-func (bat *batch) WriteSync() {
+func (bat *batch) WriteSync() error {
 	if _, err := bat.db.dc.BatchWriteSync(bat.db.ctx, &protodb.Batch{Ops: bat.ops}); err != nil {
-		panic(fmt.Sprintf("RemoteDB.BatchWriteSync: %v", err))
+		return errors.Errorf("RemoteDB.BatchWriteSync: %v", err)
 	}
+	return nil
 }
 
 func (bat *batch) Close() {

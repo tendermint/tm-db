@@ -20,7 +20,7 @@ func TestDBIteratorSingleKey(t *testing.T) {
 			checkValid(t, itr, true)
 			checkNext(t, itr, false)
 			checkValid(t, itr, false)
-			checkNextPanics(t, itr)
+			checkNextErrors(t, itr)
 
 			// Once invalid...
 			checkInvalid(t, itr)
@@ -47,7 +47,7 @@ func TestDBIteratorTwoKeys(t *testing.T) {
 				checkNext(t, itr, false)
 				checkValid(t, itr, false)
 
-				checkNextPanics(t, itr)
+				checkNextErrors(t, itr)
 
 				// Once invalid...
 				checkInvalid(t, itr)
@@ -119,7 +119,8 @@ func TestDBIteratorNonemptyBeginAfter(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
 
-			db.SetSync(bz("1"), bz("value_1"))
+			err := db.SetSync(bz("1"), bz("value_1"))
+			assert.NoError(t, err)
 			itr := db.Iterator(bz("2"), nil)
 
 			checkInvalid(t, itr)

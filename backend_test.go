@@ -31,26 +31,35 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	require.Nil(t, item)
 
 	// A nonexistent key should return nil, even if the key is nil
-
-	require.Nil(t, db.Get(nil))
+	value, err := db.Get(nil)
+	require.NoError(t, err)
+	require.Nil(t, value)
 
 	// A nonexistent key should return nil.
 	key := []byte("abc")
-	require.Nil(t, db.Get(key))
+	value, err = db.Get(key)
+	require.NoError(t, err)
+	require.Nil(t, value)
 
 	// Set empty value.
 	db.Set(key, []byte(""))
-	require.NotNil(t, db.Get(key))
-	require.Empty(t, db.Get(key))
+	value, err = db.Get(key)
+	require.NoError(t, err)
+	require.NotNil(t, value)
+	require.Empty(t, value)
 
 	// Set nil value.
 	db.Set(key, nil)
-	require.NotNil(t, db.Get(key))
-	require.Empty(t, db.Get(key))
+	value, err = db.Get(key)
+	require.NoError(t, err)
+	require.NotNil(t, value)
+	require.Empty(t, value)
 
 	// Delete.
 	db.Delete(key)
-	require.Nil(t, db.Get(key))
+	value, err = db.Get(key)
+	require.NoError(t, err)
+	require.Nil(t, value)
 }
 
 func TestBackendsGetSetDelete(t *testing.T) {
@@ -79,10 +88,15 @@ func TestBackendsNilKeys(t *testing.T) {
 				// Nil keys are treated as the empty key for most operations.
 				expect := func(key, value []byte) {
 					if len(key) == 0 { // nil or empty
-						assert.Equal(t, db.Get(nil), db.Get([]byte("")))
+						nilValue, err := db.Get(nil)
+						assert.NoError(t, err)
+						byteValue, err := db.Get([]byte(""))
+						assert.Equal(t, nilValue, byteValue)
 						assert.Equal(t, db.Has(nil), db.Has([]byte("")))
 					}
-					assert.Equal(t, db.Get(key), value)
+					value2, err := db.Get(key)
+					assert.NoError(t, err)
+					assert.Equal(t, value2, value)
 					assert.Equal(t, db.Has(key), value != nil)
 				}
 
@@ -225,7 +239,9 @@ func testDBIterator(t *testing.T, backend BackendType) {
 func verifyIterator(t *testing.T, itr Iterator, expected []int64, msg string) {
 	var list []int64
 	for itr.Valid() {
-		list = append(list, bytes2Int64(itr.Key()))
+		key, err := itr.Key()
+		assert.NoError(t, err)
+		list = append(list, bytes2Int64(key))
 		itr.Next()
 	}
 	assert.Equal(t, expected, list, msg)

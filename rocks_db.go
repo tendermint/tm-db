@@ -75,7 +75,7 @@ func (db *RocksDB) Get(key []byte) ([]byte, error) {
 }
 
 // Implements DB.
-func (db *RocksDB) Has(key []byte) bool {
+func (db *RocksDB) Has(key []byte) error {
 		bytes, err := db.Get(key)
 		if err != nil {
 			return false

@@ -211,6 +211,7 @@ func (itr *memDBIterator) Valid() bool {
 func (itr *memDBIterator) Next() error {
 	err := itr.assertIsValid()
 	if err != nil {
+		fmt.Println("errhere")
 		return err
 	}
 	itr.cur++

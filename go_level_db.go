@@ -46,7 +46,7 @@ func (db *GoLevelDB) Get(key []byte) ([]byte, error) {
 	res, err := db.db.Get(key, nil)
 	if err != nil {
 		if err == errors.ErrNotFound {
-			return nil, err
+			return nil, nil
 		}
 		return nil, err
 	}

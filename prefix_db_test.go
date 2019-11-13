@@ -1,6 +1,8 @@
 package db
 
-import "testing"
+import (
+	"testing"
+)
 
 func mockDBWithStuff() DB {
 	db := NewMemDB()

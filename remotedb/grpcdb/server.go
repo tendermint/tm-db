@@ -57,7 +57,7 @@ var _ protodb.DBServer = (*server)(nil)
 //  * cleveldb (if built with gcc enabled)
 //  * fsdb
 //  * memdB
-//  * leveldb
+//  * goleveldb
 // See https://godoc.org/github.com/tendermint/tendermint/libs/db#BackendType
 func (s *server) Init(ctx context.Context, in *protodb.Init) (*protodb.Entity, error) {
 	s.mu.Lock()
@@ -80,7 +80,10 @@ func (s *server) DeleteSync(ctx context.Context, in *protodb.Entity) (*protodb.N
 }
 
 func (s *server) Get(ctx context.Context, in *protodb.Entity) (*protodb.Entity, error) {
-	value := s.db.Get(in.Key)
+	value, err := s.db.Get(in.Key)
+	if err != nil {
+		return nil, err
+	}
 	return &protodb.Entity{Value: value}, nil
 }
 
@@ -145,18 +148,29 @@ func (s *server) Iterator(query *protodb.Entity, dis protodb.DB_IteratorServer) 
 func (s *server) handleIterator(it db.Iterator, sendFunc func(*protodb.Iterator) error) error {
 	for it.Valid() {
 		start, end := it.Domain()
+		key, err := it.Key()
+		if err != nil {
+			return err
+		}
+		value, err := it.Value()
+		if err != nil {
+			return err
+		}
 		out := &protodb.Iterator{
 			Domain: &protodb.Domain{Start: start, End: end},
 			Valid:  it.Valid(),
-			Key:    it.Key(),
-			Value:  it.Value(),
+			Key:    key,
+			Value:  value,
 		}
 		if err := sendFunc(out); err != nil {
 			return err
 		}
 
 		// Finally move the iterator forward
-		it.Next()
+		if err = it.Next(); err != nil {
+			return err
+		}
+
 	}
 	return nil
 }
