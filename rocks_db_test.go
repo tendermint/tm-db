@@ -20,6 +20,8 @@ func TestRocksDBBackend(t *testing.T) {
 	assert.True(t, ok)
 }
 
+// TODO: Add tests for rocksdb
+
 func TestCLevelDBStats(t *testing.T) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()

@@ -125,13 +125,14 @@ func (db *MemDB) Close() error {
 }
 
 // Implements DB.
-func (db *MemDB) Print() {
+func (db *MemDB) Print() error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	for key, value := range db.db {
 		fmt.Printf("[%X]:\t[%X]\n", []byte(key), value)
 	}
+	return nil
 }
 
 // Implements DB.
@@ -211,7 +212,6 @@ func (itr *memDBIterator) Valid() bool {
 func (itr *memDBIterator) Next() error {
 	err := itr.assertIsValid()
 	if err != nil {
-		fmt.Println("errhere")
 		return err
 	}
 	itr.cur++

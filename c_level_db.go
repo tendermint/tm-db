@@ -124,7 +124,7 @@ func (db *CLevelDB) Close() {
 }
 
 // Implements DB.
-func (db *CLevelDB) Print() {
+func (db *CLevelDB) Print() error {
 	itr := db.Iterator(nil, nil)
 	defer itr.Close()
 	for ; itr.Valid(); itr.Next() {
@@ -132,6 +132,7 @@ func (db *CLevelDB) Print() {
 		value := itr.Value()
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
+	return nil
 }
 
 // Implements DB.

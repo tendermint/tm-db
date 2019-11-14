@@ -107,8 +107,8 @@ func (rd *RemoteDB) NewBatch() db.Batch {
 
 // TODO: Implement Print when db.DB implements a method
 // to print to a string and not db.Print to stdout.
-func (rd *RemoteDB) Print() {
-	panic("Unimplemented")
+func (rd *RemoteDB) Print() error {
+	return errors.New("remoteDB.Print: unimplemented")
 }
 
 func (rd *RemoteDB) Stats() map[string]string {

@@ -138,7 +138,7 @@ func (db *RocksDB) Close() {
 }
 
 // Implements DB.
-func (db *RocksDB) Print() {
+func (db *RocksDB) Print() error{
 	itr := db.Iterator(nil, nil)
 	defer itr.Close()
 	for ; itr.Valid(); itr.Next() {
@@ -146,6 +146,7 @@ func (db *RocksDB) Print() {
 		value := itr.Value()
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
+	return nil
 }
 
 // Implements DB.

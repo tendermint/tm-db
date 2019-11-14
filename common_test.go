@@ -28,7 +28,7 @@ func checkValid(t *testing.T, itr Iterator, expected bool) {
 }
 
 func checkNext(t *testing.T, itr Iterator, expected bool) {
-	itr.Next()
+	itr.Next() // nolint:errcheck
 	// assert.NoError(t, err) TODO: look at fixing this
 	valid := itr.Valid()
 	require.Equal(t, expected, valid)
@@ -161,9 +161,10 @@ func (mdb *mockDB) NewBatch() Batch {
 	return &memBatch{db: mdb}
 }
 
-func (mdb *mockDB) Print() {
+func (mdb *mockDB) Print() error {
 	mdb.calls["Print"]++
 	fmt.Printf("mockDB{%v}", mdb.Stats())
+	return nil
 }
 
 func (mdb *mockDB) Stats() map[string]string {
@@ -226,7 +227,8 @@ func benchmarkRandomReadsWrites(b *testing.B, db DB) {
 			idxBytes := int642Bytes(idx)
 			valBytes := int642Bytes(val)
 			//fmt.Printf("Set %X -> %X\n", idxBytes, valBytes)
-			db.Set(idxBytes, valBytes)
+			err := db.Set(idxBytes, valBytes)
+			b.Error(err)
 		}
 
 		// Read something

@@ -41,7 +41,9 @@ func TestRemoteDB(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, 0, len(v1), "expecting no key1 to have been stored, got %X (%s)", v1, v1)
 	vv1 := []byte("value-1")
-	client.Set(k1, vv1)
+	err = client.Set(k1, vv1)
+	require.NoError(t, err)
+
 	gv1, err := client.Get(k1)
 	require.NoError(t, err)
 	require.Equal(t, gv1, vv1)
@@ -65,7 +67,8 @@ func TestRemoteDB(t *testing.T) {
 	// Set some more keys
 	k2 := []byte("key-2")
 	v2 := []byte("value-2")
-	client.SetSync(k2, v2)
+	err = client.SetSync(k2, v2)
+	require.NoError(t, err)
 	has := client.Has(k2)
 	require.True(t, has)
 	gv2, err := client.Get(k2)
@@ -99,8 +102,10 @@ func TestRemoteDB(t *testing.T) {
 	itr.Close()
 
 	// Deletion
-	client.Delete(k1)
-	client.DeleteSync(k2)
+	err = client.Delete(k1)
+	require.NoError(t, err)
+	err = client.DeleteSync(k2)
+	require.NoError(t, err)
 	gv1, err = client.Get(k1)
 	require.NoError(t, err)
 	gv2, err = client.Get(k2)
@@ -126,7 +131,8 @@ func TestRemoteDB(t *testing.T) {
 	rv4, err := client.Get(k4)
 	require.NoError(t, err)
 	require.Equal(t, 0, len(rv4), "expecting no k4 to have been stored")
-	bat.Write()
+	err = bat.Write()
+	require.NoError(t, err)
 
 	rv3, err = client.Get(k3)
 	require.NoError(t, err)
@@ -140,7 +146,8 @@ func TestRemoteDB(t *testing.T) {
 	bat = client.NewBatch()
 	bat.Delete(k4)
 	bat.Delete(k3)
-	bat.WriteSync()
+	err = bat.WriteSync()
+	require.NoError(t, err)
 
 	rv3, err = client.Get(k3)
 	require.NoError(t, err)
@@ -155,7 +162,8 @@ func TestRemoteDB(t *testing.T) {
 	bat.Set(k4, v4)
 	bat.Set(k5, v5)
 	bat.Delete(k4)
-	bat.WriteSync()
+	err = bat.WriteSync()
+	require.NoError(t, err)
 
 	rv4, err = client.Get(k4)
 	require.NoError(t, err)

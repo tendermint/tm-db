@@ -195,16 +195,27 @@ func (pdb *PrefixDB) Close() error {
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Print() {
+func (pdb *PrefixDB) Print() error {
 	fmt.Printf("prefix: %X\n", pdb.prefix)
 
 	itr := pdb.Iterator(nil, nil)
 	defer itr.Close()
-	for ; itr.Valid(); itr.Next() {
-		key, _ := itr.Key()
-		value, _ := itr.Value()
+	var err error
+	for ; itr.Valid(); err = itr.Next() {
+		if err != nil {
+			return err
+		}
+		key, err := itr.Key()
+		if err != nil {
+			return err
+		}
+		value, err := itr.Value()
+		if err != nil {
+			return err
+		}
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
+	return nil
 }
 
 // Implements DB.
@@ -275,10 +286,7 @@ type prefixIterator struct {
 }
 
 func newPrefixIterator(prefix, start, end []byte, source Iterator) *prefixIterator {
-	key, err := source.Key()
-	if err != nil {
-
-	}
+	key, _ := source.Key() //nolint:errcheck
 	if !source.Valid() || !bytes.HasPrefix(key, prefix) {
 		return &prefixIterator{
 			prefix: prefix,

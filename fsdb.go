@@ -137,11 +137,11 @@ func (db *FSDB) Close() error {
 	return nil
 }
 
-func (db *FSDB) Print() {
+func (db *FSDB) Print() error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
-	panic("FSDB.Print not yet implemented")
+	return errors.New("fsdb.Print not yet implemented")
 }
 
 func (db *FSDB) Stats() map[string]string {

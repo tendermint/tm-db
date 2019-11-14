@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 // Empty iterator for empty db.
@@ -31,7 +33,8 @@ func TestPrefixIteratorNoMatch1(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
 			itr := IteratePrefix(db, []byte("2"))
-			db.SetSync(bz("1"), bz("value_1"))
+			err := db.SetSync(bz("1"), bz("value_1"))
+			require.NoError(t, err)
 
 			checkInvalid(t, itr)
 		})
@@ -44,7 +47,8 @@ func TestPrefixIteratorNoMatch2(t *testing.T) {
 		t.Run(fmt.Sprintf("Prefix w/ backend %s", backend), func(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
-			db.SetSync(bz("3"), bz("value_3"))
+			err := db.SetSync(bz("3"), bz("value_3"))
+			require.NoError(t, err)
 			itr := IteratePrefix(db, []byte("4"))
 
 			checkInvalid(t, itr)
@@ -58,7 +62,8 @@ func TestPrefixIteratorMatch1(t *testing.T) {
 		t.Run(fmt.Sprintf("Prefix w/ backend %s", backend), func(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
-			db.SetSync(bz("2"), bz("value_2"))
+			err := db.SetSync(bz("2"), bz("value_2"))
+			require.NoError(t, err)
 			itr := IteratePrefix(db, bz("2"))
 
 			checkValid(t, itr, true)
@@ -79,14 +84,20 @@ func TestPrefixIteratorMatches1N(t *testing.T) {
 			defer os.RemoveAll(dir)
 
 			// prefixed
-			db.SetSync(bz("a/1"), bz("value_1"))
-			db.SetSync(bz("a/3"), bz("value_3"))
+			err := db.SetSync(bz("a/1"), bz("value_1"))
+			require.NoError(t, err)
+			err = db.SetSync(bz("a/3"), bz("value_3"))
+			require.NoError(t, err)
 
 			// not
-			db.SetSync(bz("b/3"), bz("value_3"))
-			db.SetSync(bz("a-3"), bz("value_3"))
-			db.SetSync(bz("a.3"), bz("value_3"))
-			db.SetSync(bz("abcdefg"), bz("value_3"))
+			err = db.SetSync(bz("b/3"), bz("value_3"))
+			require.NoError(t, err)
+			err = db.SetSync(bz("a-3"), bz("value_3"))
+			require.NoError(t, err)
+			err = db.SetSync(bz("a.3"), bz("value_3"))
+			require.NoError(t, err)
+			err = db.SetSync(bz("abcdefg"), bz("value_3"))
+			require.NoError(t, err)
 			itr := IteratePrefix(db, bz("a/"))
 
 			checkValid(t, itr, true)

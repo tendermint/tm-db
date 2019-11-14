@@ -117,8 +117,11 @@ func (db *GoLevelDB) Close() error {
 }
 
 // Implements DB.
-func (db *GoLevelDB) Print() {
-	str, _ := db.db.GetProperty("leveldb.stats")
+func (db *GoLevelDB) Print() error {
+	str, err := db.db.GetProperty("leveldb.stats")
+	if err != nil {
+		return err
+	}
 	fmt.Printf("%v\n", str)
 
 	itr := db.db.NewIterator(nil, nil)
@@ -127,6 +130,7 @@ func (db *GoLevelDB) Print() {
 		value := itr.Value()
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
+	return nil
 }
 
 // Implements DB.
@@ -270,7 +274,9 @@ func (itr *goLevelDBIterator) Valid() bool {
 	}
 
 	// Panic on DB error.  No way to recover.
-	itr.assertNoError()
+	if err := itr.assertNoError(); err != nil {
+		panic(err) //TODO:Clean me
+	}
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {

@@ -42,21 +42,27 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	require.Nil(t, value)
 
 	// Set empty value.
-	db.Set(key, []byte(""))
+	err = db.Set(key, []byte(""))
+	require.NoError(t, err)
+
 	value, err = db.Get(key)
 	require.NoError(t, err)
 	require.NotNil(t, value)
 	require.Empty(t, value)
 
 	// Set nil value.
-	db.Set(key, nil)
+	err = db.Set(key, nil)
+	require.NoError(t, err)
+
 	value, err = db.Get(key)
 	require.NoError(t, err)
 	require.NotNil(t, value)
 	require.Empty(t, value)
 
 	// Delete.
-	db.Delete(key)
+	err = db.Delete(key)
+	require.NoError(t, err)
+
 	value, err = db.Get(key)
 	require.NoError(t, err)
 	require.Nil(t, value)
@@ -91,6 +97,7 @@ func TestBackendsNilKeys(t *testing.T) {
 						nilValue, err := db.Get(nil)
 						assert.NoError(t, err)
 						byteValue, err := db.Get([]byte(""))
+						assert.NoError(t, err)
 						assert.Equal(t, nilValue, byteValue)
 						assert.Equal(t, db.Has(nil), db.Has([]byte("")))
 					}
@@ -104,59 +111,78 @@ func TestBackendsNilKeys(t *testing.T) {
 				expect(nil, nil)
 
 				// Set nil value
-				db.Set(nil, nil)
+				err := db.Set(nil, nil)
+				require.NoError(t, err)
 				expect(nil, []byte(""))
 
 				// Set empty value
-				db.Set(nil, []byte(""))
+				err = db.Set(nil, []byte(""))
+				require.NoError(t, err)
 				expect(nil, []byte(""))
 
 				// Set nil, Delete nil
-				db.Set(nil, []byte("abc"))
+				err = db.Set(nil, []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.Delete(nil)
+				err = db.Delete(nil)
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// Set nil, Delete empty
-				db.Set(nil, []byte("abc"))
+				err = db.Set(nil, []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.Delete([]byte(""))
+				err = db.Delete([]byte(""))
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// Set empty, Delete nil
-				db.Set([]byte(""), []byte("abc"))
+				err = db.Set([]byte(""), []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.Delete(nil)
+				err = db.Delete(nil)
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// Set empty, Delete empty
-				db.Set([]byte(""), []byte("abc"))
+				err = db.Set([]byte(""), []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.Delete([]byte(""))
+
+				err = db.Delete([]byte(""))
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// SetSync nil, DeleteSync nil
-				db.SetSync(nil, []byte("abc"))
+				err = db.SetSync(nil, []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.DeleteSync(nil)
+				err = db.DeleteSync(nil)
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// SetSync nil, DeleteSync empty
-				db.SetSync(nil, []byte("abc"))
+				err = db.SetSync(nil, []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.DeleteSync([]byte(""))
+				err = db.DeleteSync([]byte(""))
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// SetSync empty, DeleteSync nil
-				db.SetSync([]byte(""), []byte("abc"))
+				err = db.SetSync([]byte(""), []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.DeleteSync(nil)
+				err = db.DeleteSync(nil)
+				require.NoError(t, err)
 				expect(nil, nil)
 
 				// SetSync empty, DeleteSync empty
-				db.SetSync([]byte(""), []byte("abc"))
+				err = db.SetSync([]byte(""), []byte("abc"))
+				require.NoError(t, err)
 				expect(nil, []byte("abc"))
-				db.DeleteSync([]byte(""))
+				err = db.DeleteSync([]byte(""))
+				require.NoError(t, err)
 				expect(nil, nil)
 			})
 		})
@@ -188,7 +214,8 @@ func testDBIterator(t *testing.T, backend BackendType) {
 
 	for i := 0; i < 10; i++ {
 		if i != 6 { // but skip 6.
-			db.Set(int642Bytes(int64(i)), nil)
+			err := db.Set(int642Bytes(int64(i)), nil)
+			require.NoError(t, err)
 		}
 	}
 
@@ -242,7 +269,8 @@ func verifyIterator(t *testing.T, itr Iterator, expected []int64, msg string) {
 		key, err := itr.Key()
 		assert.NoError(t, err)
 		list = append(list, bytes2Int64(key))
-		itr.Next()
+		err = itr.Next()
+		assert.NoError(t, err)
 	}
 	assert.Equal(t, expected, list, msg)
 }

@@ -68,14 +68,20 @@ func (s *server) Init(ctx context.Context, in *protodb.Init) (*protodb.Entity, e
 }
 
 func (s *server) Delete(ctx context.Context, in *protodb.Entity) (*protodb.Nothing, error) {
-	s.db.Delete(in.Key)
+	err := s.db.Delete(in.Key)
+	if err != nil {
+		return nil, err
+	}
 	return nothing, nil
 }
 
 var nothing = new(protodb.Nothing)
 
 func (s *server) DeleteSync(ctx context.Context, in *protodb.Entity) (*protodb.Nothing, error) {
-	s.db.DeleteSync(in.Key)
+	err := s.db.DeleteSync(in.Key)
+	if err != nil {
+		return nil, err
+	}
 	return nothing, nil
 }
 
@@ -130,12 +136,18 @@ func (s *server) Has(ctx context.Context, in *protodb.Entity) (*protodb.Entity, 
 }
 
 func (s *server) Set(ctx context.Context, in *protodb.Entity) (*protodb.Nothing, error) {
-	s.db.Set(in.Key, in.Value)
+	err := s.db.Set(in.Key, in.Value)
+	if err != nil {
+		return nil, err
+	}
 	return nothing, nil
 }
 
 func (s *server) SetSync(ctx context.Context, in *protodb.Entity) (*protodb.Nothing, error) {
-	s.db.SetSync(in.Key, in.Value)
+	err := s.db.SetSync(in.Key, in.Value)
+	if err != nil {
+		return nil, err
+	}
 	return nothing, nil
 }
 
@@ -206,9 +218,15 @@ func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*pr
 		}
 	}
 	if sync {
-		bat.WriteSync()
+		err := bat.WriteSync()
+		if err != nil {
+			return nil, err
+		}
 	} else {
-		bat.Write()
+		err := bat.Write()
+		if err != nil {
+			return nil, err
+		}
 	}
 	return nothing, nil
 }

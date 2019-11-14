@@ -48,7 +48,7 @@ type DB interface {
 	NewBatch() Batch
 
 	// For debugging
-	Print()
+	Print() error
 
 	// Stats returns a map of property values for all keys and the size of the cache.
 	Stats() map[string]string
@@ -106,12 +106,10 @@ type Iterator interface {
 	Next() error
 
 	// Key returns the key of the cursor.
-	// If Valid returns false, this method will panic.
 	// CONTRACT: key readonly []byte
 	Key() (key []byte, err error)
 
 	// Value returns the value of the cursor.
-	// If Valid returns false, this method will panic.
 	// CONTRACT: value readonly []byte
 	Value() (value []byte, err error)
 

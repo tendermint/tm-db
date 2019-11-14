@@ -4,6 +4,7 @@ import (
 	"testing"
 )
 
+//nolint:errcheck
 func mockDBWithStuff() DB {
 	db := NewMemDB()
 	// Under "key" prefix

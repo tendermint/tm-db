@@ -121,7 +121,7 @@ func (bdb *BoltDB) Close() error {
 	return bdb.db.Close()
 }
 
-func (bdb *BoltDB) Print() {
+func (bdb *BoltDB) Print() error {
 	stats := bdb.db.Stats()
 	fmt.Printf("%v\n", stats)
 
@@ -133,7 +133,7 @@ func (bdb *BoltDB) Print() {
 		return nil
 	})
 	if err != nil {
-		panic(err)
+		return err
 	}
 }
 
