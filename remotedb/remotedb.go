@@ -81,13 +81,12 @@ func (rd *RemoteDB) Get(key []byte) ([]byte, error) {
 	return res.Value, nil
 }
 
-func (rd *RemoteDB) Has(key []byte) bool {
+func (rd *RemoteDB) Has(key []byte) (bool, error) {
 	res, err := rd.dc.Has(rd.ctx, &protodb.Entity{Key: key})
 	if err != nil {
-		// panic(fmt.Sprintf("RemoteDB.Has error: %v", err))
-		return false
+		return false, err
 	}
-	return res.Exists
+	return res.Exists, nil
 }
 
 func (rd *RemoteDB) ReverseIterator(start, end []byte) db.Iterator {

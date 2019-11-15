@@ -58,13 +58,13 @@ func (db *FSDB) Get(key []byte) ([]byte, error) {
 	return value, nil
 }
 
-func (db *FSDB) Has(key []byte) bool {
+func (db *FSDB) Has(key []byte) (bool, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 	key = escapeKey(key)
 
 	path := db.nameToPath(key)
-	return FileExists(path)
+	return FileExists(path), nil
 }
 
 func (db *FSDB) Set(key []byte, value []byte) error {

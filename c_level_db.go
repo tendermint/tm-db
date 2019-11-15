@@ -61,12 +61,12 @@ func (db *CLevelDB) Get(key []byte) ([]byte, error) {
 }
 
 // Implements DB.
-func (db *CLevelDB) Has(key []byte) bool {
-	bytes, err := db.Get(key)
+func (db *CLevelDB) Has(key []byte) (bool, error) {
+	_, err := db.Get(key)
 	if err != nil {
-		return false
+		return false, err
 	}
-	return bytes != nil
+	return true, nil
 }
 
 // Implements DB.

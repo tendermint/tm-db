@@ -44,13 +44,13 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 }
 
 // Implements DB.
-func (db *MemDB) Has(key []byte) bool {
+func (db *MemDB) Has(key []byte) (bool, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 	key = nonNilBytes(key)
 
 	_, ok := db.db[string(key)]
-	return ok
+	return ok, nil
 }
 
 // Implements DB.

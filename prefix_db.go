@@ -67,11 +67,16 @@ func (pdb *PrefixDB) Get(key []byte) ([]byte, error) {
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Has(key []byte) bool {
+func (pdb *PrefixDB) Has(key []byte) (bool, error) {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
-	return pdb.db.Has(pdb.prefixed(key))
+	ok, err := pdb.db.Has(pdb.prefixed(key))
+	if err != nil {
+		return ok, err
+	}
+
+	return ok, nil
 }
 
 // Implements DB.

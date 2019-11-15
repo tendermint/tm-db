@@ -131,7 +131,10 @@ func (s *server) GetStream(ds protodb.DB_GetStreamServer) error {
 }
 
 func (s *server) Has(ctx context.Context, in *protodb.Entity) (*protodb.Entity, error) {
-	exists := s.db.Has(in.Key)
+	exists, err := s.db.Has(in.Key)
+	if err != nil {
+		return nil, err
+	}
 	return &protodb.Entity{Exists: exists}, nil
 }
 
