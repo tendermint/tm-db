@@ -116,20 +116,31 @@ func (db *CLevelDB) DB() *levigo.DB {
 }
 
 // Implements DB.
-func (db *CLevelDB) Close() {
+func (db *CLevelDB) Close() error {
 	db.db.Close()
 	db.ro.Close()
 	db.wo.Close()
 	db.woSync.Close()
+	return nil
 }
 
 // Implements DB.
 func (db *CLevelDB) Print() error {
 	itr := db.Iterator(nil, nil)
 	defer itr.Close()
-	for ; itr.Valid(); itr.Next() {
-		key := itr.Key()
-		value := itr.Value()
+	var err error
+	for ; itr.Valid(); err = itr.Next() {
+		if err != nil {
+			return err
+		}
+		key, err := itr.Key()
+		if err != nil {
+			return err
+		}
+		value, err := itr.Value()
+		if err != nil {
+			return err
+		}
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
 	return nil
@@ -181,19 +192,21 @@ func (mBatch *cLevelDBBatch) Delete(key []byte) {
 }
 
 // Implements Batch.
-func (mBatch *cLevelDBBatch) Write() {
+func (mBatch *cLevelDBBatch) Write() error {
 	err := mBatch.db.db.Write(mBatch.db.wo, mBatch.batch)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements Batch.
-func (mBatch *cLevelDBBatch) WriteSync() {
+func (mBatch *cLevelDBBatch) WriteSync() error {
 	err := mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
 
 // Implements Batch.
@@ -296,26 +309,45 @@ func (itr cLevelDBIterator) Valid() bool {
 	return true
 }
 
-func (itr cLevelDBIterator) Key() []byte {
-	itr.assertNoError()
-	itr.assertIsValid()
-	return itr.source.Key()
+func (itr cLevelDBIterator) Key() ([]byte, error) {
+	err := itr.assertNoError()
+	if err != nil {
+		return nil, err
+	}
+	err = itr.assertIsValid()
+	if err != nil {
+		return nil, err
+	}
+	return itr.source.Key(), nil
 }
 
-func (itr cLevelDBIterator) Value() []byte {
-	itr.assertNoError()
-	itr.assertIsValid()
-	return itr.source.Value()
+func (itr cLevelDBIterator) Value() ([]byte, error) {
+	err := itr.assertNoError()
+	if err != nil {
+		return nil, err
+	}
+	err = itr.assertIsValid()
+	if err != nil {
+		return nil, err
+	}
+	return itr.source.Value(), nil
 }
 
-func (itr cLevelDBIterator) Next() {
-	itr.assertNoError()
-	itr.assertIsValid()
+func (itr cLevelDBIterator) Next() error {
+	err := itr.assertNoError()
+	if err != nil {
+		return err
+	}
+	err = itr.assertIsValid()
+	if err != nil {
+		return err
+	}
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
 		itr.source.Next()
 	}
+	return nil
 }
 
 func (itr cLevelDBIterator) Close() {

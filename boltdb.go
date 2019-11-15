@@ -330,7 +330,9 @@ func (itr *boltDBIterator) Key() ([]byte, error) {
 }
 
 func (itr *boltDBIterator) Value() ([]byte, error) {
-	itr.assertIsValid()
+	if err := itr.assertIsValid(); err != nil {
+		return nil, err
+	}
 	var value []byte
 	if itr.currentValue != nil {
 		value = append([]byte{}, itr.currentValue...)
@@ -347,7 +349,7 @@ func (itr *boltDBIterator) Close() {
 
 func (itr *boltDBIterator) assertIsValid() error {
 	if !itr.Valid() {
-		return errors.New("Boltdb-iterator is invalid")
+		return errors.New("boltdb-iterator is invalid")
 	}
 	return nil
 }

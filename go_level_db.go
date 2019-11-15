@@ -275,7 +275,7 @@ func (itr *goLevelDBIterator) Valid() bool {
 
 	// Panic on DB error.  No way to recover.
 	if err := itr.assertNoError(); err != nil {
-		panic(err) //TODO:Clean me
+		panic(err)
 	}
 
 	// If source is invalid, invalid.

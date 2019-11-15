@@ -53,7 +53,7 @@ func (db *FSDB) Get(key []byte) ([]byte, error) {
 	if os.IsNotExist(err) {
 		return nil, nil
 	} else if err != nil {
-		return nil, errors.Wrapf(err, "Getting key %s (0x%X)", string(key), key)
+		return nil, errors.Wrapf(err, "getting key %s (0x%X)", string(key), key)
 	}
 	return value, nil
 }
@@ -94,7 +94,7 @@ func (db *FSDB) SetNoLock(key []byte, value []byte) error {
 	path := db.nameToPath(key)
 	err := write(path, value)
 	if err != nil {
-		return errors.Wrapf(err, "Setting key %s (0x%X)", string(key), key)
+		return errors.Wrapf(err, "setting key %s (0x%X)", string(key), key)
 	}
 	return nil
 }
@@ -127,7 +127,7 @@ func (db *FSDB) DeleteNoLock(key []byte) error {
 	if os.IsNotExist(err) {
 		return nil
 	} else if err != nil {
-		return errors.Wrapf(err, "Removing key %s (0x%X)", string(key), key)
+		return errors.Wrapf(err, "removing key %s (0x%X)", string(key), key)
 	}
 	return nil
 }

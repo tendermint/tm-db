@@ -42,7 +42,7 @@ type DB interface {
 	ReverseIterator(start, end []byte) Iterator
 
 	// Closes the connection.
-	Close() error // possibly remove me
+	Close() error
 
 	// Creates a batch for atomic updates.
 	NewBatch() Batch
@@ -81,7 +81,7 @@ type SetDeleter interface {
 
 	for ; itr.Valid(); itr.Next() {
 		k, v := itr.Key(); itr.Value()
-		// ...
+		...
 	}
 */
 type Iterator interface {
