@@ -189,8 +189,7 @@ func (mBatch *cLevelDBBatch) Delete(key []byte) {
 
 // Implements Batch.
 func (mBatch *cLevelDBBatch) Write() error {
-	err := mBatch.db.db.Write(mBatch.db.wo, mBatch.batch)
-	if err != nil {
+	if err := mBatch.db.db.Write(mBatch.db.wo, mBatch.batch); err != nil {
 		return err
 	}
 	return nil
@@ -198,8 +197,7 @@ func (mBatch *cLevelDBBatch) Write() error {
 
 // Implements Batch.
 func (mBatch *cLevelDBBatch) WriteSync() error {
-	err := mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch)
-	if err != nil {
+	if err := mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch); err != nil {
 		return err
 	}
 	return nil
@@ -306,36 +304,30 @@ func (itr cLevelDBIterator) Valid() bool {
 }
 
 func (itr cLevelDBIterator) Key() ([]byte, error) {
-	err := itr.assertNoError()
-	if err != nil {
+	if err := itr.assertNoError(); err != nil {
 		return nil, err
 	}
-	err = itr.assertIsValid()
-	if err != nil {
+	if err = itr.assertIsValid(); err != nil {
 		return nil, err
 	}
 	return itr.source.Key(), nil
 }
 
 func (itr cLevelDBIterator) Value() ([]byte, error) {
-	err := itr.assertNoError()
-	if err != nil {
+	if err := itr.assertNoError(); err != nil {
 		return nil, err
 	}
-	err = itr.assertIsValid()
-	if err != nil {
+	if err = itr.assertIsValid(); err != nil {
 		return nil, err
 	}
 	return itr.source.Value(), nil
 }
 
 func (itr cLevelDBIterator) Next() error {
-	err := itr.assertNoError()
-	if err != nil {
+	if err := itr.assertNoError(); err != nil {
 		return err
 	}
-	err = itr.assertIsValid()
-	if err != nil {
+	if err = itr.assertIsValid(); err != nil {
 		return err
 	}
 	if itr.isReverse {

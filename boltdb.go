@@ -82,7 +82,7 @@ func (bdb *BoltDB) Has(key []byte) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return bytes != nil, nil
+	return true, nil
 }
 
 func (bdb *BoltDB) Set(key, value []byte) error {
