@@ -55,8 +55,7 @@ func (db *GoLevelDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *GoLevelDB) Has(key []byte) (bool, error) {
-	_, err := db.Get(key)
-	if err != nil {
+	if _, err := db.Get(key); err != nil {
 		return false, err
 	}
 	return true, nil
@@ -66,8 +65,7 @@ func (db *GoLevelDB) Has(key []byte) (bool, error) {
 func (db *GoLevelDB) Set(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
-	err := db.db.Put(key, value, nil)
-	if err != nil {
+	if err := db.db.Put(key, value, nil); err != nil {
 		return err
 	}
 	return nil
@@ -77,8 +75,7 @@ func (db *GoLevelDB) Set(key []byte, value []byte) error {
 func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
-	err := db.db.Put(key, value, &opt.WriteOptions{Sync: true})
-	if err != nil {
+	if err := db.db.Put(key, value, &opt.WriteOptions{Sync: true}); err != nil {
 		return err
 	}
 	return nil
@@ -87,8 +84,7 @@ func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 // Implements DB.
 func (db *GoLevelDB) Delete(key []byte) error {
 	key = nonNilBytes(key)
-	err := db.db.Delete(key, nil)
-	if err != nil {
+	if err := db.db.Delete(key, nil); err != nil {
 		return err
 	}
 	return nil

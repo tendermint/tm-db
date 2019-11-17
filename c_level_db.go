@@ -73,8 +73,7 @@ func (db *CLevelDB) Has(key []byte) (bool, error) {
 func (db *CLevelDB) Set(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
-	err := db.db.Put(db.wo, key, value)
-	if err != nil {
+	if err := db.db.Put(db.wo, key, value); err != nil {
 		return err
 	}
 	return nil
@@ -84,8 +83,7 @@ func (db *CLevelDB) Set(key []byte, value []byte) error {
 func (db *CLevelDB) SetSync(key []byte, value []byte) error {
 	key = nonNilBytes(key)
 	value = nonNilBytes(value)
-	err := db.db.Put(db.woSync, key, value)
-	if err != nil {
+	if err := db.db.Put(db.woSync, key, value); err != nil {
 		return err
 	}
 	return nil
@@ -94,8 +92,7 @@ func (db *CLevelDB) SetSync(key []byte, value []byte) error {
 // Implements DB.
 func (db *CLevelDB) Delete(key []byte) error {
 	key = nonNilBytes(key)
-	err := db.db.Delete(db.wo, key)
-	if err != nil {
+	if err := db.db.Delete(db.wo, key); err != nil {
 		return err
 	}
 	return nil
@@ -104,8 +101,7 @@ func (db *CLevelDB) Delete(key []byte) error {
 // Implements DB.
 func (db *CLevelDB) DeleteSync(key []byte) error {
 	key = nonNilBytes(key)
-	err := db.db.Delete(db.woSync, key)
-	if err != nil {
+	if err := db.db.Delete(db.woSync, key); err != nil {
 		return err
 	}
 	return nil

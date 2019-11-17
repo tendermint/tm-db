@@ -77,12 +77,12 @@ func (bdb *BoltDB) Get(key []byte) (value []byte, err error) {
 	return
 }
 
-func (bdb *BoltDB) Has(key []byte) bool {
+func (bdb *BoltDB) Has(key []byte) (bool, error) {
 	bytes, err := bdb.Get(key)
 	if err != nil {
-		return false
+		return false, err
 	}
-	return bytes != nil
+	return bytes != nil, nil
 }
 
 func (bdb *BoltDB) Set(key, value []byte) error {

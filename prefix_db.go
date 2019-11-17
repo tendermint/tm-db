@@ -320,7 +320,7 @@ func (itr *prefixIterator) Valid() bool {
 
 func (itr *prefixIterator) Next() error {
 	if !itr.valid {
-		return errors.New("prefixIterator invalid, cannot call Next()")
+		return errors.New("prefixIterator invalid; cannot call Next()")
 	}
 	err := itr.source.Next()
 	if err != nil {
@@ -339,7 +339,7 @@ func (itr *prefixIterator) Next() error {
 
 func (itr *prefixIterator) Key() (key []byte, err error) {
 	if !itr.valid {
-		return nil, errors.New("prefixIterator invalid, cannot call Key()")
+		return nil, errors.New("prefixIterator invalid; cannot call Key()")
 	}
 	key, err = itr.source.Key()
 	if err != nil {
@@ -350,7 +350,7 @@ func (itr *prefixIterator) Key() (key []byte, err error) {
 
 func (itr *prefixIterator) Value() (value []byte, err error) {
 	if !itr.valid {
-		return nil, errors.New("prefixIterator invalid, cannot call Value()")
+		return nil, errors.New("prefixIterator invalid; cannot call Value()")
 	}
 	value, err = itr.source.Value()
 	if err != nil {
