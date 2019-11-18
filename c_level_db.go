@@ -62,11 +62,11 @@ func (db *CLevelDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *CLevelDB) Has(key []byte) (bool, error) {
-	_, err := db.Get(key)
+	bytes, err := db.Get(key)
 	if err != nil {
 		return false, err
 	}
-	return true, nil
+	return bytes != nil, nil
 }
 
 // Implements DB.
@@ -127,15 +127,15 @@ func (db *CLevelDB) Print() error {
 	var err error
 	for ; itr.Valid(); err = itr.Next() {
 		if err != nil {
-			return err
+			return errors.Wrap(err, "next")
 		}
 		key, err := itr.Key()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "key")
 		}
 		value, err := itr.Value()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "value")
 		}
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}

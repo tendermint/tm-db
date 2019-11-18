@@ -76,11 +76,11 @@ func (db *RocksDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *RocksDB) Has(key []byte) (bool, error) {
-		_, err := db.Get(key)
+		bytes, err := db.Get(key)
 		if err != nil {
 			return false, err
 		}
-		return true, nil
+		return bytes != nil, nil
 	}
 }
 

@@ -55,10 +55,11 @@ func (db *GoLevelDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *GoLevelDB) Has(key []byte) (bool, error) {
-	if _, err := db.Get(key); err != nil {
+	bytes, err := db.Get(key)
+	if err != nil {
 		return false, err
 	}
-	return true, nil
+	return bytes != nil, nil
 }
 
 // Implements DB.

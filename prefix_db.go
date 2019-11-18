@@ -208,15 +208,15 @@ func (pdb *PrefixDB) Print() error {
 	var err error
 	for ; itr.Valid(); err = itr.Next() {
 		if err != nil {
-			return err
+			return errors.Wrap(err, "next")
 		}
 		key, err := itr.Key()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "key")
 		}
 		value, err := itr.Value()
 		if err != nil {
-			return err
+			return errors.Wrap(err, "value")
 		}
 		fmt.Printf("[%X]:\t[%X]\n", key, value)
 	}
@@ -291,7 +291,10 @@ type prefixIterator struct {
 }
 
 func newPrefixIterator(prefix, start, end []byte, source Iterator) *prefixIterator {
+	// Ignoring the error here as the iterator is invalid
+	// but this is being conveyed in the below if statement
 	key, _ := source.Key() //nolint:errcheck
+
 	if !source.Valid() || !bytes.HasPrefix(key, prefix) {
 		return &prefixIterator{
 			prefix: prefix,

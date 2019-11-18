@@ -69,7 +69,7 @@ func (bdb *BoltDB) Get(key []byte) (value []byte, err error) {
 		if v := b.Get(key); v != nil {
 			value = append([]byte{}, v...)
 		}
-		return value, nil
+		return nil
 	})
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (bdb *BoltDB) Has(key []byte) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return true, nil
+	return bytes != nil, nil
 }
 
 func (bdb *BoltDB) Set(key, value []byte) error {
