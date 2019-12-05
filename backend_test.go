@@ -90,45 +90,80 @@ func TestBackendsNilKeys(t *testing.T) {
 	for dbType, creator := range backends {
 		withDB(t, creator, func(db DB) {
 			t.Run(fmt.Sprintf("Testing %s", dbType), func(t *testing.T) {
+				expect := func(key, value []byte) {
+					if len(key) == 0 { // nil or empty
+						nilValue, err := db.Get(nil)
+						assert.NoError(t, err)
+						byteValue, err := db.Get([]byte(""))
+						assert.NoError(t, err)
+						assert.Equal(t, nilValue, byteValue)
+						hasNil, err := db.Has(nil)
+						assert.NoError(t, err)
+						hasStr, err := db.Has([]byte(""))
+						assert.NoError(t, err)
+						assert.Equal(t, hasNil, hasStr)
+					}
+					value2, err := db.Get(key)
+					assert.Equal(t, value2, value)
+					assert.NoError(t, err)
+					hasKey, err := db.Has(key)
+					assert.NoError(t, err)
+					assert.Equal(t, hasKey, value != nil)
+				}
+
+				// Not set
+				expect(nil, nil)
 
 				// Set nil value
 				err := db.Set(nil, nil)
 				require.NoError(t, err)
+				expect(nil, []byte(""))
 
 				// Set empty value
 				err = db.Set(nil, []byte(""))
 				require.NoError(t, err)
+				expect(nil, []byte(""))
 
 				// Set nil, Delete nil
 				err = db.Set(nil, []byte("abc"))
+				expect(nil, []byte("abc"))
 				require.NoError(t, err)
 				err = db.Delete(nil)
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// Set nil, Delete empty
 				err = db.Set(nil, []byte("abc"))
+				expect(nil, []byte("abc"))
 				require.NoError(t, err)
 				err = db.Delete([]byte(""))
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// Set empty, Delete nil
 				err = db.Set([]byte(""), []byte("abc"))
+				expect(nil, []byte("abc"))
 				require.NoError(t, err)
 				err = db.Delete(nil)
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// Set empty, Delete empty
 				err = db.Set([]byte(""), []byte("abc"))
 				require.NoError(t, err)
+				expect(nil, []byte("abc"))
 
 				err = db.Delete([]byte(""))
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// SetSync nil, DeleteSync nil
 				err = db.SetSync(nil, []byte("abc"))
 				require.NoError(t, err)
+				expect(nil, []byte("abc"))
 				err = db.DeleteSync(nil)
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// SetSync nil, DeleteSync empty
 				err = db.SetSync(nil, []byte("abc"))
@@ -139,14 +174,18 @@ func TestBackendsNilKeys(t *testing.T) {
 				// SetSync empty, DeleteSync nil
 				err = db.SetSync([]byte(""), []byte("abc"))
 				require.NoError(t, err)
+				expect(nil, []byte("abc"))
 				err = db.DeleteSync(nil)
 				require.NoError(t, err)
+				expect(nil, nil)
 
 				// SetSync empty, DeleteSync empty
 				err = db.SetSync([]byte(""), []byte("abc"))
 				require.NoError(t, err)
+				expect(nil, []byte("abc"))
 				err = db.DeleteSync([]byte(""))
 				require.NoError(t, err)
+				expect(nil, nil)
 			})
 		})
 	}
