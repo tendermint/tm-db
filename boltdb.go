@@ -214,12 +214,12 @@ func (bdb *boltDBBatch) Close() {}
 
 // WARNING: Any concurrent writes or reads will block until the iterator is
 // closed.
-func (bdb *BoltDB) Iterator(start, end []byte) Iterator {
+func (bdb *BoltDB) Iterator(start, end []byte) (Iterator, error) {
 	tx, err := bdb.db.Begin(false)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return newBoltDBIterator(tx, start, end, false)
+	return newBoltDBIterator(tx, start, end, false), nil
 }
 
 // WARNING: Any concurrent writes or reads will block until the iterator is

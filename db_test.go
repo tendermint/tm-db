@@ -16,7 +16,8 @@ func TestDBIteratorSingleKey(t *testing.T) {
 
 			err := db.SetSync(bz("1"), bz("value_1"))
 			assert.NoError(t, err)
-			itr := db.Iterator(nil, nil)
+			itr, err := db.Iterator(nil, nil)
+			assert.NoError(t, err)
 
 			checkValid(t, itr, true)
 			checkNext(t, itr, false)
@@ -42,7 +43,8 @@ func TestDBIteratorTwoKeys(t *testing.T) {
 			assert.NoError(t, err)
 
 			{ // Fail by calling Next too much
-				itr := db.Iterator(nil, nil)
+				itr, err := db.Iterator(nil, nil)
+				assert.NoError(t, err)
 				checkValid(t, itr, true)
 
 				checkNext(t, itr, true)
@@ -77,9 +79,10 @@ func TestDBIteratorMany(t *testing.T) {
 				assert.NoError(t, err)
 			}
 
-			itr := db.Iterator(nil, nil)
+			itr, err := db.Iterator(nil, nil)
+			assert.NoError(t, err)
+
 			defer itr.Close()
-			var err error
 			for ; itr.Valid(); err = itr.Next() {
 				assert.NoError(t, err)
 				key, err := itr.Key()
@@ -100,7 +103,8 @@ func TestDBIteratorEmpty(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
 
-			itr := db.Iterator(nil, nil)
+			itr, err := db.Iterator(nil, nil)
+			assert.NoError(t, err)
 
 			checkInvalid(t, itr)
 		})
@@ -113,7 +117,8 @@ func TestDBIteratorEmptyBeginAfter(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
 
-			itr := db.Iterator(bz("1"), nil)
+			itr, err := db.Iterator(bz("1"), nil)
+			assert.NoError(t, err)
 
 			checkInvalid(t, itr)
 		})
@@ -128,7 +133,8 @@ func TestDBIteratorNonemptyBeginAfter(t *testing.T) {
 
 			err := db.SetSync(bz("1"), bz("value_1"))
 			assert.NoError(t, err)
-			itr := db.Iterator(bz("2"), nil)
+			itr, err := db.Iterator(bz("2"), nil)
+			assert.NoError(t, err)
 
 			checkInvalid(t, itr)
 		})

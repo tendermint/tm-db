@@ -10,7 +10,7 @@ import (
 
 // IteratePrefix is a convenience function for iterating over a key domain
 // restricted by prefix.
-func IteratePrefix(db DB, prefix []byte) Iterator {
+func IteratePrefix(db DB, prefix []byte) (Iterator, error) {
 	var start, end []byte
 	if len(prefix) == 0 {
 		start = nil
@@ -19,7 +19,11 @@ func IteratePrefix(db DB, prefix []byte) Iterator {
 		start = cp(prefix)
 		end = cpIncr(prefix)
 	}
-	return db.Iterator(start, end)
+	itr, err := db.Iterator(start, end)
+	if err != nil {
+		return nil, err
+	}
+	return itr, nil
 }
 
 /*
@@ -116,7 +120,7 @@ func (pdb *PrefixDB) DeleteSync(key []byte) error {
 }
 
 // Implements DB.
-func (pdb *PrefixDB) Iterator(start, end []byte) Iterator {
+func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
@@ -126,20 +130,21 @@ func (pdb *PrefixDB) Iterator(start, end []byte) Iterator {
 		pend = cpIncr(pdb.prefix)
 	} else {
 		pend = append(cp(pdb.prefix), end...)
+	}
+	itr, err := pdb.db.Iterator(pstart, pend)
+	if err != nil {
+		return nil, err
 	}
 	return newPrefixIterator(
 		pdb.prefix,
 		start,
 		end,
-		pdb.db.Iterator(
-			pstart,
-			pend,
-		),
-	)
+		itr,
+	), nil
 }
 
 // Implements DB.
-func (pdb *PrefixDB) ReverseIterator(start, end []byte) Iterator {
+func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
@@ -150,13 +155,16 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) Iterator {
 	} else {
 		pend = append(cp(pdb.prefix), end...)
 	}
-	ritr := pdb.db.ReverseIterator(pstart, pend)
+	ritr, err := pdb.db.ReverseIterator(pstart, pend)
+	if err != nil {
+		return nil, err
+	}
 	return newPrefixIterator(
 		pdb.prefix,
 		start,
 		end,
 		ritr,
-	)
+	), nil
 }
 
 // Implements DB.
@@ -203,9 +211,11 @@ func (pdb *PrefixDB) Close() error {
 func (pdb *PrefixDB) Print() error {
 	fmt.Printf("prefix: %X\n", pdb.prefix)
 
-	itr := pdb.Iterator(nil, nil)
+	itr, err := pdb.Iterator(nil, nil)
+	if err != nil {
+		return err
+	}
 	defer itr.Close()
-	var err error
 	for ; itr.Valid(); err = itr.Next() {
 		if err != nil {
 			return errors.Wrap(err, "next")

@@ -89,12 +89,12 @@ func (rd *RemoteDB) Has(key []byte) (bool, error) {
 	return res.Exists, nil
 }
 
-func (rd *RemoteDB) ReverseIterator(start, end []byte) db.Iterator {
+func (rd *RemoteDB) ReverseIterator(start, end []byte) (db.Iterator, error) {
 	dic, err := rd.dc.ReverseIterator(rd.ctx, &protodb.Entity{Start: start, End: end})
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Iterator error: %v", err))
+		return nil, fmt.Errorf("RemoteDB.Iterator error: %w", err)
 	}
-	return makeReverseIterator(dic)
+	return makeReverseIterator(dic), nil
 }
 
 func (rd *RemoteDB) NewBatch() db.Batch {
@@ -121,12 +121,12 @@ func (rd *RemoteDB) Stats() map[string]string {
 	return stats.Data
 }
 
-func (rd *RemoteDB) Iterator(start, end []byte) db.Iterator {
+func (rd *RemoteDB) Iterator(start, end []byte) (db.Iterator, error) {
 	dic, err := rd.dc.Iterator(rd.ctx, &protodb.Entity{Start: start, End: end})
 	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Iterator error: %v", err))
+		return nil, fmt.Errorf("RemoteDB.Iterator error: %w", err)
 	}
-	return makeIterator(dic)
+	return makeIterator(dic), nil
 }
 
 func makeIterator(dic protodb.DB_IteratorClient) db.Iterator {

@@ -164,8 +164,8 @@ func (db *FSDB) Mutex() *sync.Mutex {
 	return &(db.mtx)
 }
 
-func (db *FSDB) Iterator(start, end []byte) Iterator {
-	return db.MakeIterator(start, end, false)
+func (db *FSDB) Iterator(start, end []byte) (Iterator, error) {
+	return db.MakeIterator(start, end, false), nil
 }
 
 func (db *FSDB) MakeIterator(start, end []byte, isReversed bool) Iterator {
@@ -186,8 +186,8 @@ func (db *FSDB) MakeIterator(start, end []byte, isReversed bool) Iterator {
 	return newMemDBIterator(db, keys, start, end)
 }
 
-func (db *FSDB) ReverseIterator(start, end []byte) Iterator {
-	return db.MakeIterator(start, end, true)
+func (db *FSDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	return db.MakeIterator(start, end, true), nil
 }
 
 func (db *FSDB) nameToPath(name []byte) string {

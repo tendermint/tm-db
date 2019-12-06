@@ -142,14 +142,14 @@ func (mdb *mockDB) DeleteNoLockSync([]byte) {
 	mdb.calls["DeleteNoLockSync"]++
 }
 
-func (mdb *mockDB) Iterator(start, end []byte) Iterator {
+func (mdb *mockDB) Iterator(start, end []byte) (Iterator, error) {
 	mdb.calls["Iterator"]++
-	return &mockIterator{}
+	return &mockIterator{}, nil
 }
 
-func (mdb *mockDB) ReverseIterator(start, end []byte) Iterator {
+func (mdb *mockDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	mdb.calls["ReverseIterator"]++
-	return &mockIterator{}
+	return &mockIterator{}, nil
 }
 
 func (mdb *mockDB) Close() {

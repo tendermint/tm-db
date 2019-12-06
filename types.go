@@ -31,7 +31,7 @@ type DB interface {
 	// If end is nil, iterates up to the last item (inclusive).
 	// CONTRACT: No writes may happen within a domain while an iterator exists over it.
 	// CONTRACT: start, end readonly []byte
-	Iterator(start, end []byte) Iterator
+	Iterator(start, end []byte) (Iterator, error)
 
 	// Iterate over a domain of keys in descending order. End is exclusive.
 	// Start must be less than end, or the Iterator is invalid.
@@ -39,7 +39,7 @@ type DB interface {
 	// If end is nil, iterates from the last/greatest item (inclusive).
 	// CONTRACT: No writes may happen within a domain while an iterator exists over it.
 	// CONTRACT: start, end readonly []byte
-	ReverseIterator(start, end []byte) Iterator
+	ReverseIterator(start, end []byte) (Iterator, error)
 
 	// Closes the connection.
 	Close() error

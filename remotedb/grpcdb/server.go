@@ -155,7 +155,10 @@ func (s *server) SetSync(ctx context.Context, in *protodb.Entity) (*protodb.Noth
 }
 
 func (s *server) Iterator(query *protodb.Entity, dis protodb.DB_IteratorServer) error {
-	it := s.db.Iterator(query.Start, query.End)
+	it, err := s.db.Iterator(query.Start, query.End)
+	if err != nil {
+		return err
+	}
 	defer it.Close()
 	return s.handleIterator(it, dis.Send)
 }
@@ -191,7 +194,10 @@ func (s *server) handleIterator(it db.Iterator, sendFunc func(*protodb.Iterator)
 }
 
 func (s *server) ReverseIterator(query *protodb.Entity, dis protodb.DB_ReverseIteratorServer) error {
-	it := s.db.ReverseIterator(query.Start, query.End)
+	it, err := s.db.ReverseIterator(query.Start, query.End)
+	if err != nil {
+		return err
+	}
 	defer it.Close()
 	return s.handleIterator(it, dis.Send)
 }

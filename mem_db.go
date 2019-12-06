@@ -158,21 +158,21 @@ func (db *MemDB) NewBatch() Batch {
 // Iterator
 
 // Implements DB.
-func (db *MemDB) Iterator(start, end []byte) Iterator {
+func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	keys := db.getSortedKeys(start, end, false)
-	return newMemDBIterator(db, keys, start, end)
+	return newMemDBIterator(db, keys, start, end), nil
 }
 
 // Implements DB.
-func (db *MemDB) ReverseIterator(start, end []byte) Iterator {
+func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
 	keys := db.getSortedKeys(start, end, true)
-	return newMemDBIterator(db, keys, start, end)
+	return newMemDBIterator(db, keys, start, end), nil
 }
 
 // We need a copy of all of the keys.

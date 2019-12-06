@@ -211,14 +211,14 @@ func (mBatch *rocksDBBatch) Close() {
 // NOTE This is almost identical to db/go_level_db.Iterator
 // Before creating a third version, refactor.
 
-func (db *RocksDB) Iterator(start, end []byte) Iterator {
+func (db *RocksDB) Iterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(db.ro)
-	return newRocksDBIterator(itr, start, end, false)
+	return newRocksDBIterator(itr, start, end, false), nil
 }
 
-func (db *RocksDB) ReverseIterator(start, end []byte) Iterator {
+func (db *RocksDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(db.ro)
-	return newRocksDBIterator(itr, start, end, true)
+	return newRocksDBIterator(itr, start, end, true), nil
 }
 
 var _ Iterator = (*rocksDBIterator)(nil)

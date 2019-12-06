@@ -213,14 +213,14 @@ func (mBatch *cLevelDBBatch) Close() {
 // NOTE This is almost identical to db/go_level_db.Iterator
 // Before creating a third version, refactor.
 
-func (db *CLevelDB) Iterator(start, end []byte) Iterator {
+func (db *CLevelDB) Iterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(db.ro)
-	return newCLevelDBIterator(itr, start, end, false)
+	return newCLevelDBIterator(itr, start, end, false), nil
 }
 
-func (db *CLevelDB) ReverseIterator(start, end []byte) Iterator {
+func (db *CLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(db.ro)
-	return newCLevelDBIterator(itr, start, end, true)
+	return newCLevelDBIterator(itr, start, end, true), nil
 }
 
 var _ Iterator = (*cLevelDBIterator)(nil)

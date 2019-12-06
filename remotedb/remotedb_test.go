@@ -49,7 +49,9 @@ func TestRemoteDB(t *testing.T) {
 	require.Equal(t, gv1, vv1)
 
 	// Simple iteration
-	itr := client.Iterator(nil, nil)
+	itr, err := client.Iterator(nil, nil)
+	require.NoError(t, err)
+
 	err = itr.Next()
 	require.NoError(t, err)
 
@@ -77,7 +79,9 @@ func TestRemoteDB(t *testing.T) {
 	require.Equal(t, gv2, v2)
 
 	// More iteration
-	itr = client.Iterator(nil, nil)
+	itr, err = client.Iterator(nil, nil)
+	require.NoError(t, err)
+
 	err = itr.Next()
 	require.NoError(t, err)
 

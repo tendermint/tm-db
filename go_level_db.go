@@ -205,15 +205,15 @@ func (mBatch *goLevelDBBatch) Close() {}
 // Before creating a third version, refactor.
 
 // Implements DB.
-func (db *GoLevelDB) Iterator(start, end []byte) Iterator {
+func (db *GoLevelDB) Iterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(nil, nil)
-	return newGoLevelDBIterator(itr, start, end, false)
+	return newGoLevelDBIterator(itr, start, end, false), nil
 }
 
 // Implements DB.
-func (db *GoLevelDB) ReverseIterator(start, end []byte) Iterator {
+func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	itr := db.db.NewIterator(nil, nil)
-	return newGoLevelDBIterator(itr, start, end, true)
+	return newGoLevelDBIterator(itr, start, end, true), nil
 }
 
 type goLevelDBIterator struct {
