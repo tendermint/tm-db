@@ -18,7 +18,7 @@ func TestMemDB_Iterator(t *testing.T) {
 	db.Set([]byte("foo"), []byte("bar"))
 
 	// single iteration
-	itr := db.Iterator(nil, nil)
+	itr = db.Iterator(nil, nil)
 	defer itr.Close()
 	assert.True(t, itr.Valid())
 	assert.Equal(t, []byte("foo"), itr.Key())
