@@ -136,12 +136,7 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 		return nil, err
 	}
 
-	pitr, err := newPrefixIterator(pdb.prefix, start, end, itr)
-	if err != nil {
-		return nil, err
-	}
-
-	return pitr, nil
+	return newPrefixIterator(pdb.prefix, start, end, itr)
 }
 
 // Implements DB.
@@ -161,11 +156,7 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 		return nil, err
 	}
 
-	pitr, err := newPrefixIterator(pdb.prefix, start, end, ritr)
-	if err != nil {
-		return nil, err
-	}
-	return pitr, nil
+	return newPrefixIterator(pdb.prefix, start, end, ritr)
 }
 
 // Implements DB.

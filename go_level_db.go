@@ -350,10 +350,7 @@ func (itr *goLevelDBIterator) Close() {
 }
 
 func (itr *goLevelDBIterator) checkNoError() error {
-	if err := itr.source.Error(); err != nil {
-		return err
-	}
-	return nil
+	return itr.source.Error()
 }
 
 func (itr goLevelDBIterator) checkIsValid() error {

@@ -343,10 +343,7 @@ func (itr cLevelDBIterator) Close() {
 }
 
 func (itr cLevelDBIterator) checkNoError() error {
-	if err := itr.source.GetError(); err != nil {
-		return err
-	}
-	return nil
+	return itr.source.GetError()
 }
 
 func (itr cLevelDBIterator) checkIsValid() error {

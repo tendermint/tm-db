@@ -343,10 +343,7 @@ func (itr rocksDBIterator) Close() {
 }
 
 func (itr rocksDBIterator) checkNoError() error {
-	if err := itr.source.Err(); err != nil {
-		return err
-	}
-	return nil
+	return itr.source.Err()
 }
 
 func (itr rocksDBIterator) checkIsValid() error {
