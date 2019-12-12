@@ -22,10 +22,11 @@ func TestMemDB_Iterator(t *testing.T) {
 	itr, err = db.Iterator(nil, nil)
 	assert.NoError(t, err)
 	defer itr.Close()
-	assert.True(t, itr.Valid())
 	key, err := itr.Key()
 	assert.NoError(t, err)
+	assert.True(t, itr.Valid())
 	assert.Equal(t, []byte("foo"), key)
+
 	value, err := itr.Value()
 	assert.NoError(t, err)
 	assert.Equal(t, []byte("bar"), value)
