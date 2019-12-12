@@ -274,8 +274,8 @@ func (itr cLevelDBIterator) Valid() bool {
 		return false
 	}
 
-	// Panic on DB error.  No way to recover.
-	itr.assertNoError()
+	// checks no error is present
+	itr.checkNoError()
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
@@ -304,30 +304,30 @@ func (itr cLevelDBIterator) Valid() bool {
 }
 
 func (itr cLevelDBIterator) Key() ([]byte, error) {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err = itr.assertIsValid(); err != nil {
+	if err = itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return itr.source.Key(), nil
 }
 
 func (itr cLevelDBIterator) Value() ([]byte, error) {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err = itr.assertIsValid(); err != nil {
+	if err = itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return itr.source.Value(), nil
 }
 
 func (itr cLevelDBIterator) Next() error {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return err
 	}
-	if err = itr.assertIsValid(); err != nil {
+	if err = itr.checkIsValid(); err != nil {
 		return err
 	}
 	if itr.isReverse {
@@ -342,14 +342,14 @@ func (itr cLevelDBIterator) Close() {
 	itr.source.Close()
 }
 
-func (itr cLevelDBIterator) assertNoError() error {
+func (itr cLevelDBIterator) checkNoError() error {
 	if err := itr.source.GetError(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (itr cLevelDBIterator) assertIsValid() error {
+func (itr cLevelDBIterator) checkIsValid() error {
 	if !itr.Valid() {
 		return errors.New("cLevelDBIterator is invalid")
 	}

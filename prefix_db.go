@@ -135,12 +135,13 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newPrefixIterator(
-		pdb.prefix,
-		start,
-		end,
-		itr,
-	), nil
+
+	pitr, err := newPrefixIterator(pdb.prefix, start, end, itr)
+	if err != nil {
+		return nil, err
+	}
+
+	return pitr, nil
 }
 
 // Implements DB.
@@ -159,12 +160,12 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newPrefixIterator(
-		pdb.prefix,
-		start,
-		end,
-		ritr,
-	), nil
+
+	pitr, err := newPrefixIterator(pdb.prefix, start, end, ritr)
+	if err != nil {
+		return nil, err
+	}
+	return pitr, nil
 }
 
 // Implements DB.
@@ -300,19 +301,26 @@ type prefixIterator struct {
 	valid  bool
 }
 
-func newPrefixIterator(prefix, start, end []byte, source Iterator) *prefixIterator {
-	// Ignoring the error here as the iterator is invalid
-	// but this is being conveyed in the below if statement
-	key, _ := source.Key() //nolint:errcheck
+func newPrefixIterator(prefix, start, end []byte, source Iterator) (*prefixIterator, error) {
 
-	if !source.Valid() || !bytes.HasPrefix(key, prefix) {
-		return &prefixIterator{
-			prefix: prefix,
-			start:  start,
-			end:    end,
-			source: source,
-			valid:  false,
-		}
+	pitrInvalid := &prefixIterator{
+		prefix: prefix,
+		start:  start,
+		end:    end,
+		source: source,
+		valid:  false,
+	}
+
+	if !source.Valid() {
+		return pitrInvalid, nil
+	}
+	key, err := source.Key()
+	if err != nil {
+		return nil, err
+	}
+
+	if !bytes.HasPrefix(key, prefix) {
+		return pitrInvalid, nil
 	}
 	return &prefixIterator{
 		prefix: prefix,
@@ -320,7 +328,7 @@ func newPrefixIterator(prefix, start, end []byte, source Iterator) *prefixIterat
 		end:    end,
 		source: source,
 		valid:  true,
-	}
+	}, nil
 }
 
 func (itr *prefixIterator) Domain() (start []byte, end []byte) {
@@ -383,7 +391,7 @@ func stripPrefix(key []byte, prefix []byte) (stripped []byte) {
 		panic("should not happen")
 	}
 	if !bytes.Equal(key[:len(prefix)], prefix) {
-		panic("should not happn")
+		panic("should not happen")
 	}
 	return key[len(prefix):]
 }

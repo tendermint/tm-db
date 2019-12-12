@@ -273,7 +273,7 @@ func (itr rocksDBIterator) Valid() (bool, error) {
 	}
 
 	// Panic on DB error.  No way to recover.
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
 
@@ -304,30 +304,30 @@ func (itr rocksDBIterator) Valid() (bool, error) {
 }
 
 func (itr rocksDBIterator) Key() ([]byte, error) {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return moveSliceToBytes(itr.source.Key()), nil
 }
 
 func (itr rocksDBIterator) Value() []byte {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return moveSliceToBytes(itr.source.Value()), nil
 }
 
 func (itr rocksDBIterator) Next() error {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	if itr.isReverse {
@@ -342,14 +342,14 @@ func (itr rocksDBIterator) Close() {
 	itr.source.Close()
 }
 
-func (itr rocksDBIterator) assertNoError() error {
+func (itr rocksDBIterator) checkNoError() error {
 	if err := itr.source.Err(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (itr rocksDBIterator) assertIsValid() error {
+func (itr rocksDBIterator) checkIsValid() error {
 	if !itr.Valid() {
 		return errors.New("rocksDBIterator is invalid")
 	}

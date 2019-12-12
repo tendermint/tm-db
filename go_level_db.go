@@ -271,7 +271,7 @@ func (itr *goLevelDBIterator) Valid() bool {
 	}
 
 	// Panic on DB error.  No way to recover.
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		panic(err)
 	}
 
@@ -306,10 +306,10 @@ func (itr *goLevelDBIterator) Valid() bool {
 func (itr *goLevelDBIterator) Key() ([]byte, error) {
 	// Key returns a copy of the current key.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return cp(itr.source.Key()), nil
@@ -319,10 +319,10 @@ func (itr *goLevelDBIterator) Key() ([]byte, error) {
 func (itr *goLevelDBIterator) Value() ([]byte, error) {
 	// Value returns a copy of the current value.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return nil, err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return nil, err
 	}
 	return cp(itr.source.Value()), nil
@@ -330,10 +330,10 @@ func (itr *goLevelDBIterator) Value() ([]byte, error) {
 
 // Implements Iterator.
 func (itr *goLevelDBIterator) Next() error {
-	if err := itr.assertNoError(); err != nil {
+	if err := itr.checkNoError(); err != nil {
 		return err
 	}
-	if err := itr.assertIsValid(); err != nil {
+	if err := itr.checkIsValid(); err != nil {
 		return err
 	}
 	if itr.isReverse {
@@ -349,14 +349,14 @@ func (itr *goLevelDBIterator) Close() {
 	itr.source.Release()
 }
 
-func (itr *goLevelDBIterator) assertNoError() error {
+func (itr *goLevelDBIterator) checkNoError() error {
 	if err := itr.source.Error(); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (itr goLevelDBIterator) assertIsValid() error {
+func (itr goLevelDBIterator) checkIsValid() error {
 	if !itr.Valid() {
 		return errors.New("goLevelDBIterator is invalid")
 	}
