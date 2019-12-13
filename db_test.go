@@ -9,6 +9,7 @@ import (
 )
 
 func TestDBIteratorSingleKey(t *testing.T) {
+	fmt.Println(backends)
 	for backend := range backends {
 		t.Run(fmt.Sprintf("Backend %s", backend), func(t *testing.T) {
 			db, dir := newTempDB(t, backend)

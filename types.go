@@ -116,6 +116,8 @@ type Iterator interface {
 	// CONTRACT: value readonly []byte
 	Value() (value []byte)
 
+	Error() error
+
 	// Close releases the Iterator.
 	Close()
 }

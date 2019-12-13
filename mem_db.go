@@ -229,6 +229,10 @@ func (itr *memDBIterator) Value() []byte {
 	return bytes
 }
 
+func (itr *memDBIterator) Error() error {
+	return nil
+}
+
 // Implements Iterator.
 func (itr *memDBIterator) Close() {
 	itr.keys = nil

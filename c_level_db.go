@@ -318,6 +318,10 @@ func (itr cLevelDBIterator) Next() {
 	}
 }
 
+func (itr cLevelDBIterator) Error() error {
+	return itr.source.GetError()
+}
+
 func (itr cLevelDBIterator) Close() {
 	itr.source.Close()
 }

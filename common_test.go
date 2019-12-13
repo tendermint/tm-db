@@ -194,6 +194,10 @@ func (mockIterator) Value() []byte {
 	return nil
 }
 
+func (mockIterator) Error() error {
+	return nil
+}
+
 func (mockIterator) Close() {
 }
 

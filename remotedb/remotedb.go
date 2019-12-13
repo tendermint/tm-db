@@ -160,7 +160,7 @@ func (rItr *reverseIterator) Next() {
 	var err error
 	rItr.cur, err = rItr.dric.Recv()
 	if err != nil {
-		panic(errors.Errorf("RemoteDB.ReverseIterator.Next error: %v", err))
+		panic(fmt.Sprintf("RemoteDB.ReverseIterator.Next error: %v", err))
 	}
 }
 
@@ -178,8 +178,11 @@ func (rItr *reverseIterator) Value() []byte {
 	return rItr.cur.Value
 }
 
-func (rItr *reverseIterator) Close() {
+func (ritr *reverseIterator) Error() error {
+	return nil
 }
+
+func (rItr *reverseIterator) Close() {}
 
 // iterator implements the db.Iterator by retrieving
 // streamed iterators from the remote backend as
@@ -224,6 +227,10 @@ func (itr *iterator) Value() []byte {
 		panic("current poisition is not valid")
 	}
 	return itr.cur.Value
+}
+
+func (itr *iterator) Error() error {
+	return nil
 }
 
 func (itr *iterator) Close() {

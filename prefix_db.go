@@ -4,8 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 // IteratePrefix is a convenience function for iterating over a key domain
@@ -320,7 +318,7 @@ func (itr *prefixIterator) Valid() bool {
 
 func (itr *prefixIterator) Next() {
 	if !itr.valid {
-		panic(errors.New("prefixIterator invalid; cannot call Next()"))
+		panic("prefixIterator invalid; cannot call Next()")
 	}
 	itr.source.Next()
 
@@ -331,7 +329,7 @@ func (itr *prefixIterator) Next() {
 
 func (itr *prefixIterator) Key() (key []byte) {
 	if !itr.valid {
-		panic(errors.New("prefixIterator invalid; cannot call Key()"))
+		panic("prefixIterator invalid; cannot call Key()")
 	}
 	key = itr.source.Key()
 	return stripPrefix(key, itr.prefix)
@@ -339,10 +337,14 @@ func (itr *prefixIterator) Key() (key []byte) {
 
 func (itr *prefixIterator) Value() (value []byte) {
 	if !itr.valid {
-		panic(errors.New("prefixIterator invalid; cannot call Value()"))
+		panic("prefixIterator invalid; cannot call Value()")
 	}
 	value = itr.source.Value()
 	return value
+}
+
+func (itr *prefixIterator) Error() error {
+	return itr.source.Error()
 }
 
 func (itr *prefixIterator) Close() {
