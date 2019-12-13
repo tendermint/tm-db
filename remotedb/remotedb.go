@@ -156,27 +156,26 @@ func (rItr *reverseIterator) Domain() (start, end []byte) {
 }
 
 // Next advances the current reverseIterator
-func (rItr *reverseIterator) Next() error {
+func (rItr *reverseIterator) Next() {
 	var err error
 	rItr.cur, err = rItr.dric.Recv()
 	if err != nil {
-		return errors.Errorf("RemoteDB.ReverseIterator.Next error: %v", err)
+		panic(errors.Errorf("RemoteDB.ReverseIterator.Next error: %v", err))
 	}
-	return nil
 }
 
-func (rItr *reverseIterator) Key() ([]byte, error) {
+func (rItr *reverseIterator) Key() []byte {
 	if rItr.cur == nil {
-		return nil, errors.New("key does not exist")
+		panic(errors.New("key does not exist"))
 	}
-	return rItr.cur.Key, nil
+	return rItr.cur.Key
 }
 
-func (rItr *reverseIterator) Value() ([]byte, error) {
+func (rItr *reverseIterator) Value() []byte {
 	if rItr.cur == nil {
-		return nil, errors.New("key does not exist")
+		panic(errors.New("key does not exist"))
 	}
-	return rItr.cur.Value, nil
+	return rItr.cur.Value
 }
 
 func (rItr *reverseIterator) Close() {
@@ -205,27 +204,26 @@ func (itr *iterator) Domain() (start, end []byte) {
 }
 
 // Next advances the current iterator
-func (itr *iterator) Next() error {
+func (itr *iterator) Next() {
 	var err error
 	itr.cur, err = itr.dic.Recv()
 	if err != nil {
-		return errors.Errorf("remoteDB.Iterator.Next error: %v", err)
+		panic(fmt.Sprintf("remoteDB.Iterator.Next error: %v", err))
 	}
-	return nil
 }
 
-func (itr *iterator) Key() ([]byte, error) {
+func (itr *iterator) Key() []byte {
 	if itr.cur == nil {
-		return nil, errors.New("key does not exist")
+		return nil
 	}
-	return itr.cur.Key, nil
+	return itr.cur.Key
 }
 
-func (itr *iterator) Value() ([]byte, error) {
+func (itr *iterator) Value() []byte {
 	if itr.cur == nil {
-		return nil, errors.New("current poisition is not valid")
+		panic(errors.New("current poisition is not valid"))
 	}
-	return itr.cur.Value, nil
+	return itr.cur.Value
 }
 
 func (itr *iterator) Close() {

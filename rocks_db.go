@@ -265,7 +265,7 @@ func (itr rocksDBIterator) Domain() ([]byte, []byte) {
 	return itr.start, itr.end
 }
 
-func (itr rocksDBIterator) Valid() (bool, error) {
+func (itr rocksDBIterator) Valid() bool {
 
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
@@ -273,9 +273,7 @@ func (itr rocksDBIterator) Valid() (bool, error) {
 	}
 
 	// Panic on DB error.  No way to recover.
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
+	itr.assertNoError(); 
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
@@ -303,33 +301,21 @@ func (itr rocksDBIterator) Valid() (bool, error) {
 	return true
 }
 
-func (itr rocksDBIterator) Key() ([]byte, error) {
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return nil, err
-	}
+func (itr rocksDBIterator) Key() ([]byte) {
+	itr.assertNoError()
+	itr.assertIsValid()
 	return moveSliceToBytes(itr.source.Key()), nil
 }
 
 func (itr rocksDBIterator) Value() []byte {
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return nil, err
-	}
-	return moveSliceToBytes(itr.source.Value()), nil
+	itr.assertNoError()
+	itr.assertIsValid()
+	return moveSliceToBytes(itr.source.Value())
 }
 
-func (itr rocksDBIterator) Next() error {
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return nil, err
-	}
+func (itr rocksDBIterator) Next() {
+	itr.assertNoError()
+	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
@@ -342,15 +328,16 @@ func (itr rocksDBIterator) Close() {
 	itr.source.Close()
 }
 
-func (itr rocksDBIterator) checkNoError() error {
-	return itr.source.Err()
+func (itr rocksDBIterator) assertNoError()  {
+	if err :=  itr.source.Err(); err != nil {
+		panic(err)
+	}
 }
 
-func (itr rocksDBIterator) checkIsValid() error {
+func (itr rocksDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		return errors.New("rocksDBIterator is invalid")
+		panic(errors.New("rocksDBIterator is invalid"))
 	}
-	return nil
 }
 
 // moveSliceToBytes will free the slice and copy out a go []byte

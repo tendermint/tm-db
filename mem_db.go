@@ -209,34 +209,26 @@ func (itr *memDBIterator) Valid() bool {
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Next() error {
-	err := itr.assertIsValid()
-	if err != nil {
-		return err
-	}
+func (itr *memDBIterator) Next() {
+	itr.assertIsValid()
 	itr.cur++
-	return nil
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Key() ([]byte, error) {
-	if err := itr.assertIsValid(); err != nil {
-		return nil, err
-	}
-	return []byte(itr.keys[itr.cur]), nil
+func (itr *memDBIterator) Key() []byte {
+	itr.assertIsValid()
+	return []byte(itr.keys[itr.cur])
 }
 
 // Implements Iterator.
-func (itr *memDBIterator) Value() ([]byte, error) {
-	if err := itr.assertIsValid(); err != nil {
-		return nil, err
-	}
+func (itr *memDBIterator) Value() []byte {
+	itr.assertIsValid()
 	key := []byte(itr.keys[itr.cur])
 	bytes, err := itr.db.Get(key)
 	if err != nil {
-		return nil, err
+		return nil
 	}
-	return bytes, nil
+	return bytes
 }
 
 // Implements Iterator.
@@ -245,11 +237,10 @@ func (itr *memDBIterator) Close() {
 	itr.db = nil
 }
 
-func (itr *memDBIterator) assertIsValid() error {
+func (itr *memDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		return errors.New("memDBIterator is invalid")
+		panic(errors.New("memDBIterator is invalid"))
 	}
-	return nil
 }
 
 //----------------------------------------

@@ -271,9 +271,7 @@ func (itr *goLevelDBIterator) Valid() bool {
 	}
 
 	// Panic on DB error.  No way to recover.
-	if err := itr.checkNoError(); err != nil {
-		panic(err)
-	}
+	itr.assertNoError()
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
@@ -303,45 +301,32 @@ func (itr *goLevelDBIterator) Valid() bool {
 }
 
 // Implements Iterator.
-func (itr *goLevelDBIterator) Key() ([]byte, error) {
+func (itr *goLevelDBIterator) Key() []byte {
 	// Key returns a copy of the current key.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return nil, err
-	}
-	return cp(itr.source.Key()), nil
+	itr.assertNoError()
+	itr.assertIsValid()
+	return cp(itr.source.Key())
 }
 
 // Implements Iterator.
-func (itr *goLevelDBIterator) Value() ([]byte, error) {
+func (itr *goLevelDBIterator) Value() []byte {
 	// Value returns a copy of the current value.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	if err := itr.checkNoError(); err != nil {
-		return nil, err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return nil, err
-	}
-	return cp(itr.source.Value()), nil
+	itr.assertNoError()
+	itr.assertIsValid()
+	return cp(itr.source.Value())
 }
 
 // Implements Iterator.
-func (itr *goLevelDBIterator) Next() error {
-	if err := itr.checkNoError(); err != nil {
-		return err
-	}
-	if err := itr.checkIsValid(); err != nil {
-		return err
-	}
+func (itr *goLevelDBIterator) Next() {
+	itr.assertNoError()
+	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
 		itr.source.Next()
 	}
-	return nil
 }
 
 // Implements Iterator.
@@ -349,13 +334,15 @@ func (itr *goLevelDBIterator) Close() {
 	itr.source.Release()
 }
 
-func (itr *goLevelDBIterator) checkNoError() error {
-	return itr.source.Error()
+func (itr *goLevelDBIterator) assertNoError() {
+	err := itr.source.Error()
+	if err != nil {
+		panic(err)
+	}
 }
 
-func (itr goLevelDBIterator) checkIsValid() error {
+func (itr goLevelDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		return errors.New("goLevelDBIterator is invalid")
+		panic(errors.New("goLevelDBIterator is invalid"))
 	}
-	return nil
 }
