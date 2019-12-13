@@ -178,7 +178,7 @@ func (rItr *reverseIterator) Value() []byte {
 	return rItr.cur.Value
 }
 
-func (ritr *reverseIterator) Error() error {
+func (rItr *reverseIterator) Error() error {
 	return nil
 }
 
