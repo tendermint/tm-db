@@ -343,6 +343,6 @@ func (itr *goLevelDBIterator) assertNoError() {
 
 func (itr goLevelDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		panic(errors.New("goLevelDBIterator is invalid"))
+		panic("goLevelDBIterator is invalid")
 	}
 }

@@ -166,14 +166,14 @@ func (rItr *reverseIterator) Next() {
 
 func (rItr *reverseIterator) Key() []byte {
 	if rItr.cur == nil {
-		panic(errors.New("key does not exist"))
+		panic("key does not exist")
 	}
 	return rItr.cur.Key
 }
 
 func (rItr *reverseIterator) Value() []byte {
 	if rItr.cur == nil {
-		panic(errors.New("key does not exist"))
+		panic("key does not exist")
 	}
 	return rItr.cur.Value
 }
@@ -221,7 +221,7 @@ func (itr *iterator) Key() []byte {
 
 func (itr *iterator) Value() []byte {
 	if itr.cur == nil {
-		panic(errors.New("current poisition is not valid"))
+		panic("current poisition is not valid")
 	}
 	return itr.cur.Value
 }

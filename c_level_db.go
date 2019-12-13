@@ -331,6 +331,6 @@ func (itr cLevelDBIterator) assertNoError() {
 
 func (itr cLevelDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		panic(errors.New("cLevelDBIterator is invalid"))
+		panic("cLevelDBIterator is invalid")
 	}
 }

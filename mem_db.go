@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"sort"
 	"sync"
-
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -239,7 +237,7 @@ func (itr *memDBIterator) Close() {
 
 func (itr *memDBIterator) assertIsValid() {
 	if !itr.Valid() {
-		panic(errors.New("memDBIterator is invalid"))
+		panic("memDBIterator is invalid")
 	}
 }
 
