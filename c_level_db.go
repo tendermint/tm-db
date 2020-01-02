@@ -267,7 +267,7 @@ func (itr cLevelDBIterator) Valid() bool {
 		return false
 	}
 
-	// checks no error is present
+	// Panic on DB error.  No way to recover.
 	itr.assertNoError()
 
 	// If source is invalid, invalid.
