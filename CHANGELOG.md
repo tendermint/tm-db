@@ -25,9 +25,7 @@
       - `Write() error`
       - `WriteSync() error`
     - Iterator interface:
-      - `Next() error`
-      - `Key() (key []byte, err error)`
-      - `Value() (value []byte, err error)`
+      - `Error() error`
 
 
 ### IMPROVEMENTS
