@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.4
+
+**2020-1-7**
+
 ### BREAKING CHANGES
 
 - [\#30](https://github.com/tendermint/tm-db/pull/30) Interface Breaking, Interfaces return errors instead of panic:
