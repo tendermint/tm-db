@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: circleci/golang
+      - image: tendermintdev/docker-tm-db-testing
 
     steps:
       - checkout
@@ -12,7 +12,7 @@ jobs:
       - run:
           name: test
           command: |
-            make test
+            make test-all
       - save_cache:
           key: go-mod-v1-{{ checksum "go.sum" }}
           paths:
