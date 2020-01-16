@@ -33,8 +33,6 @@ lint:
 	@golangci-lint run
 	@go mod verify
 
-# TODO: install dbs
-
 tools:
 	go get -v $(GOTOOLS)
 
