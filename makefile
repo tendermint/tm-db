@@ -7,14 +7,33 @@ export GO111MODULE = on
 all: lint test
 
 ### go tests
+## By default this will only test memdb & goleveldb
 test:
 	@echo "--> Running go test"
 	@go test -p 1 $(PACKAGES)
+
+test-cleveldb:
+	@echo "--> Running go test"
+	@go test -p 1 $(PACKAGES) -tags cleveldb
+
+test-rocksdb:
+	@echo "--> Running go test"
+	@go test -p 1 $(PACKAGES) -tags rocksdb
+
+test-boltdb:
+	@echo "--> Running go test"
+	@go test -p 1 $(PACKAGES) -tags boltdb
+
+test-all:
+	@echo "--> Running go test"
+	@go test -p 1 $(PACKAGES) -tags cleveldb,rocksdb,boltdb
 
 lint:
 	@echo "--> Running linter"
 	@golangci-lint run
 	@go mod verify
+
+# TODO: install dbs
 
 tools:
 	go get -v $(GOTOOLS)
