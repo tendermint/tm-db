@@ -26,7 +26,7 @@ test-boltdb:
 
 test-all:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -tags cleveldb,rocksdb,boltdb
+	@go test -p 1 $(PACKAGES) -tags cleveldb,boltdb
 
 lint:
 	@echo "--> Running linter"
