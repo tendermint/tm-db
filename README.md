@@ -35,7 +35,7 @@ To use BoltDB, you must have it installed on your machine. You can install it by
  go get go.etcd.io/bbolt/...
 ```
 
-Once you have it installed then you can test it by running 'make test-boltdb`
+Once you have it installed then you can test it by running `make test-boltdb`
 
 ### RocksDB
 
