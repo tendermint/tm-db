@@ -29,13 +29,9 @@ To use cleveldb leveldb must be installed on your machine. Please use you local 
 
 ### BoltDB
 
-To use BoltDB, you must have it installed on your machine. You can install it by running:
+The BoltDB implementation uses bbolt from etcd.
 
-```bash
- go get go.etcd.io/bbolt/...
-```
-
-Once you have it installed then you can test it by running `make test-boltdb`
+You can test boltdb by running `make test-boltdb`
 
 ### RocksDB
 
