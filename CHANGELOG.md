@@ -8,11 +8,11 @@
 
 ### Breaking Changes
 
-- [fsdb][\#43](https://github.com/tendermint/tm-db/pull/43) Remove FSDB
+- [fsdb] [\#43](https://github.com/tendermint/tm-db/pull/43) Remove FSDB
 
 ### Bug Fixes
 
-- [boltdb][\#45](https://github.com/tendermint/tm-db/pull/45) Bring BoltDB to adhere to the db interfaces
+- [boltdb] [\#45](https://github.com/tendermint/tm-db/pull/45) Bring BoltDB to adhere to the db interfaces
 
 ## 0.4
 
@@ -41,7 +41,7 @@
 
 ### IMPROVEMENTS
 
-- [remotedb][\#34](https://github.com/tendermint/tm-db/pull/34) Add proto file tests and regenerate remotedb.pb.go
+- [remotedb] [\#34](https://github.com/tendermint/tm-db/pull/34) Add proto file tests and regenerate remotedb.pb.go
 
 ## 0.3
 
