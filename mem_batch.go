@@ -3,7 +3,7 @@ package db
 import "sync"
 
 type atomicSetDeleter interface {
-	Mutex() *sync.Mutex
+	Mutex() *sync.RWMutex
 	SetNoLock(key, value []byte)
 	SetNoLockSync(key, value []byte)
 	DeleteNoLock(key []byte)

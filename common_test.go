@@ -80,7 +80,7 @@ func newTempDB(t *testing.T, backend BackendType) (db DB, dbDir string) {
 // NOTE: not actually goroutine safe.
 // If you want something goroutine safe, maybe you just want a MemDB.
 type mockDB struct {
-	mtx   sync.Mutex
+	mtx   sync.RWMutex
 	calls map[string]int
 }
 
@@ -90,7 +90,7 @@ func newMockDB() *mockDB {
 	}
 }
 
-func (mdb *mockDB) Mutex() *sync.Mutex {
+func (mdb *mockDB) Mutex() *sync.RWMutex {
 	return &(mdb.mtx)
 }
 
