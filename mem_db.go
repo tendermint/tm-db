@@ -209,7 +209,7 @@ var _ Iterator = (*memDBIterator)(nil)
 
 func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *memDBIterator {
 	ctx, cancel := context.WithCancel(context.Background())
-	ch := make(chan *item)
+	ch := make(chan *item, 64)
 	iter := &memDBIterator{
 		ch:     ch,
 		cancel: cancel,
@@ -268,8 +268,6 @@ func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *
 	// prime the iterator with the first value, if any
 	if item, ok := <-ch; ok {
 		iter.item = item
-	} else {
-		iter.item = nil
 	}
 
 	return iter
@@ -280,6 +278,7 @@ func (i *memDBIterator) Close() {
 	i.cancel()
 	for range i.ch { // drain channel
 	}
+	i.item = nil
 }
 
 // Domain implements Iterator.
