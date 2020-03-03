@@ -226,7 +226,7 @@ func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *
 		)
 		visitor := func(i btree.Item) bool {
 			item := i.(*item)
-			if skipEqual != nil && bytes.Compare(item.key, skipEqual) == 0 {
+			if skipEqual != nil && bytes.Equal(item.key, skipEqual) {
 				skipEqual = nil
 				return true
 			}

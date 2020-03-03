@@ -204,7 +204,7 @@ func TestDBIterator(t *testing.T) {
 	for dbType := range backends {
 		t.Run(fmt.Sprintf("%v", dbType), func(t *testing.T) {
 			testDBIterator(t, dbType)
-			testDBIterator_blankKey(t, dbType)
+			testDBIteratorBlankKey(t, dbType)
 		})
 	}
 }
@@ -344,7 +344,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 		[]int64(nil), "reverse iterator from 2 (ex) to 4")
 }
 
-func testDBIterator_blankKey(t *testing.T, backend BackendType) {
+func testDBIteratorBlankKey(t *testing.T, backend BackendType) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
 	db := NewDB(name, backend, dir)
