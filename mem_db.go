@@ -51,7 +51,7 @@ func newPair(key, value []byte) *item {
 
 // MemDB is an in-memory database backend using a B-tree for storage.
 type MemDB struct {
-	mtx   sync.Mutex
+	mtx   sync.RWMutex
 	btree *btree.BTree
 }
 
@@ -67,8 +67,8 @@ func NewMemDB() *MemDB {
 
 // Implements DB.
 func (db *MemDB) Get(key []byte) ([]byte, error) {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 	key = nonNilBytes(key)
 
 	i := db.btree.Get(newKey(key))
@@ -80,8 +80,8 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *MemDB) Has(key []byte) (bool, error) {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 	key = nonNilBytes(key)
 
 	return db.btree.Has(newKey(key)), nil
@@ -133,8 +133,8 @@ func (db *MemDB) Close() error {
 
 // Implements DB.
 func (db *MemDB) Print() error {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 
 	db.btree.Ascend(func(i btree.Item) bool {
 		item := i.(*item)
@@ -146,8 +146,8 @@ func (db *MemDB) Print() error {
 
 // Implements DB.
 func (db *MemDB) Stats() map[string]string {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 
 	stats := make(map[string]string)
 	stats["database.type"] = "memDB"
@@ -162,15 +162,15 @@ func (db *MemDB) NewBatch() Batch {
 
 // Implements DB.
 func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 	return newMemDBIterator(db.btree, start, end, false), nil
 }
 
 // Implements DB.
 func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
+	db.mtx.RLock()
+	defer db.mtx.RUnlock()
 	return newMemDBIterator(db.btree, start, end, true), nil
 }
 
