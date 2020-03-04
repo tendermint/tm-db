@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"github.com/google/btree"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -18,6 +19,12 @@ const (
 	// context switch. Tuned with benchmarks.
 	chBufferSize = 64
 )
+
+func init() {
+	registerDBCreator(MemDBBackend, func(name, dir string) (DB, error) {
+		return NewMemDB(), nil
+	}, false)
+}
 
 // item is a btree.Item with byte slices as keys and values
 type item struct {
@@ -42,29 +49,20 @@ func newPair(key, value []byte) *item {
 	return &item{key: key, value: value}
 }
 
-func init() {
-	registerDBCreator(MemDBBackend, func(name, dir string) (DB, error) {
-		return NewMemDB(), nil
-	}, false)
-}
-
-var _ DB = (*MemDB)(nil)
-
+// MemDB is an in-memory database backend using a B-tree for storage.
 type MemDB struct {
 	mtx   sync.Mutex
 	btree *btree.BTree
 }
 
+var _ DB = (*MemDB)(nil)
+
+// NewMemDB creates a new in-memory database.
 func NewMemDB() *MemDB {
 	database := &MemDB{
 		btree: btree.New(bTreeDegree),
 	}
 	return database
-}
-
-// Implements atomicSetDeleter.
-func (db *MemDB) Mutex() *sync.Mutex {
-	return &(db.mtx)
 }
 
 // Implements DB.
@@ -94,30 +92,17 @@ func (db *MemDB) Set(key []byte, value []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
-	db.SetNoLock(key, value)
+	db.set(key, value)
 	return nil
+}
+
+func (db *MemDB) set(key []byte, value []byte) {
+	db.btree.ReplaceOrInsert(newPair(nonNilBytes(key), nonNilBytes(value)))
 }
 
 // Implements DB.
 func (db *MemDB) SetSync(key []byte, value []byte) error {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
-
-	db.SetNoLock(key, value)
-	return nil
-}
-
-// Implements atomicSetDeleter.
-func (db *MemDB) SetNoLock(key []byte, value []byte) {
-	db.SetNoLockSync(key, value)
-}
-
-// Implements atomicSetDeleter.
-func (db *MemDB) SetNoLockSync(key []byte, value []byte) {
-	key = nonNilBytes(key)
-	value = nonNilBytes(value)
-
-	db.btree.ReplaceOrInsert(newPair(key, value))
+	return db.Set(key, value)
 }
 
 // Implements DB.
@@ -125,37 +110,23 @@ func (db *MemDB) Delete(key []byte) error {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
-	db.DeleteNoLock(key)
+	db.delete(key)
 	return nil
+}
+
+func (db *MemDB) delete(key []byte) {
+	db.btree.Delete(newKey(nonNilBytes(key)))
 }
 
 // Implements DB.
 func (db *MemDB) DeleteSync(key []byte) error {
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
-
-	db.DeleteNoLock(key)
-	return nil
-}
-
-// Implements atomicSetDeleter.
-func (db *MemDB) DeleteNoLock(key []byte) {
-	db.DeleteNoLockSync(key)
-}
-
-// Implements atomicSetDeleter.
-func (db *MemDB) DeleteNoLockSync(key []byte) {
-	key = nonNilBytes(key)
-
-	db.btree.Delete(newKey(key))
+	return db.Delete(key)
 }
 
 // Implements DB.
 func (db *MemDB) Close() error {
-	// Close is a noop since for an in-memory
-	// database, we don't have a destination
-	// to flush contents to nor do we want
-	// any data loss on invoking Close()
+	// Close is a noop since for an in-memory database, we don't have a destination to flush
+	// contents to nor do we want any data loss on invoking Close().
 	// See the discussion in https://github.com/tendermint/tendermint/libs/pull/56
 	return nil
 }
@@ -189,14 +160,10 @@ func (db *MemDB) NewBatch() Batch {
 	return &memBatch{db, nil}
 }
 
-//----------------------------------------
-// Iterator
-
 // Implements DB.
 func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
-
 	return newMemDBIterator(db.btree, start, end, false), nil
 }
 
@@ -204,10 +171,13 @@ func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
 func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
-
 	return newMemDBIterator(db.btree, start, end, true), nil
 }
 
+//----------------------------------------
+// Iterator
+
+// memDBIterator is an in-memory iterator
 type memDBIterator struct {
 	ch     <-chan *item
 	cancel context.CancelFunc
@@ -218,6 +188,7 @@ type memDBIterator struct {
 
 var _ Iterator = (*memDBIterator)(nil)
 
+// newMemDBIterator creates a new memDBIterator
 func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *memDBIterator {
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan *item, chBufferSize)
@@ -334,4 +305,62 @@ func (i *memDBIterator) Value() []byte {
 		panic("called Value() on invalid iterator")
 	}
 	return i.item.value
+}
+
+// memBatch operations
+type opType int
+
+const (
+	opTypeSet opType = iota
+	opTypeDelete
+)
+
+type operation struct {
+	opType
+	key   []byte
+	value []byte
+}
+
+// memBatch handles in-memory batching
+type memBatch struct {
+	db  *MemDB
+	ops []operation
+}
+
+// Set implements Batch.
+func (mBatch *memBatch) Set(key, value []byte) {
+	mBatch.ops = append(mBatch.ops, operation{opTypeSet, key, value})
+}
+
+// Delete implements Batch.
+func (mBatch *memBatch) Delete(key []byte) {
+	mBatch.ops = append(mBatch.ops, operation{opTypeDelete, key, nil})
+}
+
+// Write implements Batch.
+func (mBatch *memBatch) Write() error {
+	mBatch.db.mtx.Lock()
+	defer mBatch.db.mtx.Unlock()
+
+	for _, op := range mBatch.ops {
+		switch op.opType {
+		case opTypeSet:
+			mBatch.db.set(op.key, op.value)
+		case opTypeDelete:
+			mBatch.db.delete(op.key)
+		default:
+			return errors.Errorf("unknown operation %T", op)
+		}
+	}
+	return nil
+}
+
+// WriteSync implements Batch.
+func (mBatch *memBatch) WriteSync() error {
+	return mBatch.Write()
+}
+
+// Close implements Batch.
+func (mBatch *memBatch) Close() {
+	mBatch.ops = nil
 }
