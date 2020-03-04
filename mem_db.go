@@ -345,7 +345,7 @@ func (mBatch *memBatch) Write() error {
 		case opTypeDelete:
 			mBatch.db.delete(op.key)
 		default:
-			return errors.Errorf("unknown operation type %T (%v)", opType, op)
+			return errors.Errorf("unknown operation type %T (%v)", op.opType, op)
 		}
 	}
 	return nil
