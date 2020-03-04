@@ -41,12 +41,12 @@ func (i *item) Less(other btree.Item) bool {
 
 // newKey creates a new key item
 func newKey(key []byte) *item {
-	return &item{key: key}
+	return &item{key: nonNilBytes(key)}
 }
 
 // newPair creates a new pair item
 func newPair(key, value []byte) *item {
-	return &item{key: key, value: value}
+	return &item{key: nonNilBytes(key), value: nonNilBytes(value)}
 }
 
 // MemDB is an in-memory database backend using a B-tree for storage.
@@ -69,7 +69,6 @@ func NewMemDB() *MemDB {
 func (db *MemDB) Get(key []byte) ([]byte, error) {
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
-	key = nonNilBytes(key)
 
 	i := db.btree.Get(newKey(key))
 	if i != nil {
@@ -82,7 +81,6 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 func (db *MemDB) Has(key []byte) (bool, error) {
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
-	key = nonNilBytes(key)
 
 	return db.btree.Has(newKey(key)), nil
 }
@@ -97,7 +95,7 @@ func (db *MemDB) Set(key []byte, value []byte) error {
 }
 
 func (db *MemDB) set(key []byte, value []byte) {
-	db.btree.ReplaceOrInsert(newPair(nonNilBytes(key), nonNilBytes(value)))
+	db.btree.ReplaceOrInsert(newPair(key, value))
 }
 
 // Implements DB.
@@ -115,7 +113,7 @@ func (db *MemDB) Delete(key []byte) error {
 }
 
 func (db *MemDB) delete(key []byte) {
-	db.btree.Delete(newKey(nonNilBytes(key)))
+	db.btree.Delete(newKey(key))
 }
 
 // Implements DB.
@@ -222,8 +220,6 @@ func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *
 				return true
 			}
 		}
-		s := newKey(start)
-		e := newKey(end)
 		switch {
 		case start == nil && end == nil && !reverse:
 			bt.Ascend(visitor)
@@ -231,18 +227,18 @@ func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *
 			bt.Descend(visitor)
 		case end == nil && !reverse:
 			// must handle this specially, since nil is considered less than anything else
-			bt.AscendGreaterOrEqual(s, visitor)
+			bt.AscendGreaterOrEqual(newKey(start), visitor)
 		case !reverse:
-			bt.AscendRange(s, e, visitor)
+			bt.AscendRange(newKey(start), newKey(end), visitor)
 		case end == nil:
 			// abort after start, since we use [start, end) while btree uses (start, end]
-			abortLessThan = s.key
+			abortLessThan = start
 			bt.Descend(visitor)
 		default:
 			// skip end and abort after start, since we use [start, end) while btree uses (start, end]
-			skipEqual = e.key
-			abortLessThan = s.key
-			bt.DescendLessOrEqual(e, visitor)
+			skipEqual = end
+			abortLessThan = start
+			bt.DescendLessOrEqual(newKey(end), visitor)
 		}
 		close(ch)
 	}()
