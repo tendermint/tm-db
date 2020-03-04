@@ -51,7 +51,7 @@ func init() {
 var _ DB = (*MemDB)(nil)
 
 type MemDB struct {
-	mtx   sync.RWMutex
+	mtx   sync.Mutex
 	btree *btree.BTree
 }
 
@@ -63,14 +63,14 @@ func NewMemDB() *MemDB {
 }
 
 // Implements atomicSetDeleter.
-func (db *MemDB) Mutex() *sync.RWMutex {
+func (db *MemDB) Mutex() *sync.Mutex {
 	return &(db.mtx)
 }
 
 // Implements DB.
 func (db *MemDB) Get(key []byte) ([]byte, error) {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	key = nonNilBytes(key)
 
 	i := db.btree.Get(newKey(key))
@@ -82,8 +82,8 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 
 // Implements DB.
 func (db *MemDB) Has(key []byte) (bool, error) {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 	key = nonNilBytes(key)
 
 	return db.btree.Has(newKey(key)), nil
@@ -175,8 +175,8 @@ func (db *MemDB) Print() error {
 
 // Implements DB.
 func (db *MemDB) Stats() map[string]string {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 
 	stats := make(map[string]string)
 	stats["database.type"] = "memDB"
@@ -194,16 +194,16 @@ func (db *MemDB) NewBatch() Batch {
 
 // Implements DB.
 func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 
 	return newMemDBIterator(db.btree, start, end, false), nil
 }
 
 // Implements DB.
 func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	db.mtx.Lock()
+	defer db.mtx.Unlock()
 
 	return newMemDBIterator(db.btree, start, end, true), nil
 }
