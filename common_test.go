@@ -213,9 +213,8 @@ func benchmarkRangeScans(b *testing.B, db DB, dbSize int64) {
 		bytes := int642Bytes(i)
 		err := db.Set(bytes, bytes)
 		if err != nil {
-			// require.NoError() is very expensive (according to profiler), so we do a cheap if as
-			// well since this is a tight loop.
-			require.NoError(b, err)
+			// require.NoError() is very expensive (according to profiler), so check manually
+			b.Fatal(b, err)
 		}
 	}
 	b.StartTimer()
@@ -258,9 +257,8 @@ func benchmarkRandomReadsWrites(b *testing.B, db DB) {
 			//fmt.Printf("Set %X -> %X\n", idxBytes, valBytes)
 			err := db.Set(idxBytes, valBytes)
 			if err != nil {
-				// require.NoError() is very expensive (according to profiler), so we do a cheap if
-				// as well since this is a tight loop.
-				require.NoError(b, err)
+				// require.NoError() is very expensive (according to profiler), so check manually
+				b.Fatal(b, err)
 			}
 		}
 
@@ -271,9 +269,8 @@ func benchmarkRandomReadsWrites(b *testing.B, db DB) {
 			idxBytes := int642Bytes(idx)
 			valBytes, err := db.Get(idxBytes)
 			if err != nil {
-				// require.NoError() is very expensive (according to profiler), so we do a cheap if
-				// as well since this is a tight loop.
-				require.NoError(b, err)
+				// require.NoError() is very expensive (according to profiler), so check manually
+				b.Fatal(b, err)
 			}
 			//fmt.Printf("Get %X -> %X\n", idxBytes, valBytes)
 			if valExp == 0 {
