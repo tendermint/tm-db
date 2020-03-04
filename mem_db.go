@@ -307,7 +307,7 @@ func (i *memDBIterator) Value() []byte {
 type opType int
 
 const (
-	opTypeSet opType = iota
+	opTypeSet opType = iota + 1
 	opTypeDelete
 )
 
