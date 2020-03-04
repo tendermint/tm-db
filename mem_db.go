@@ -9,6 +9,17 @@ import (
 	"github.com/google/btree"
 )
 
+const (
+	// The approximate number of items and children per B-tree node. Tuned with benchmarks.
+	bTreeDegree = 32
+
+	// Size of the channel buffer between traversal goroutine and iterator. Using an unbuffered
+	// channel causes two context switches per item sent, while buffering allows more work per
+	// context switch. Tuned with benchmarks.
+	chBufferSize = 64
+)
+
+// item is a btree.Item with byte slices as keys and values
 type item struct {
 	key   []byte
 	value []byte
@@ -46,7 +57,7 @@ type MemDB struct {
 
 func NewMemDB() *MemDB {
 	database := &MemDB{
-		btree: btree.New(32),
+		btree: btree.New(bTreeDegree),
 	}
 	return database
 }
@@ -209,7 +220,7 @@ var _ Iterator = (*memDBIterator)(nil)
 
 func newMemDBIterator(bt *btree.BTree, start []byte, end []byte, reverse bool) *memDBIterator {
 	ctx, cancel := context.WithCancel(context.Background())
-	ch := make(chan *item, 64)
+	ch := make(chan *item, chBufferSize)
 	iter := &memDBIterator{
 		ch:     ch,
 		cancel: cancel,
