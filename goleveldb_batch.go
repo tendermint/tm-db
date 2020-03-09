@@ -10,7 +10,7 @@ type goLevelDBBatch struct {
 	batch *leveldb.Batch
 }
 
-var _ Batch = (goLevelDBBatch)(nil)
+var _ Batch = (*goLevelDBBatch)(nil)
 
 // Set implements Batch.
 func (b *goLevelDBBatch) Set(key, value []byte) {
