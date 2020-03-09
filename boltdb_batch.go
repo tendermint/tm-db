@@ -49,4 +49,6 @@ func (b *boltDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *boltDBBatch) Close() {}
+func (b *boltDBBatch) Close() {
+	b.ops = nil
+}
