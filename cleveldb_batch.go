@@ -2,6 +2,8 @@
 
 package db
 
+import "github.com/jmhodges/levigo"
+
 // cLevelDBBatch is a LevelDB batch.
 type cLevelDBBatch struct {
 	db    *CLevelDB
