@@ -3,7 +3,6 @@
 package db
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"

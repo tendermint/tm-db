@@ -25,16 +25,16 @@ func (b *boltDBBatch) Delete(key []byte) {
 // Write implements Batch.
 func (b *boltDBBatch) Write() error {
 	return b.db.db.Batch(func(tx *bbolt.Tx) error {
-		b := tx.Bucket(bucket)
+		bkt := tx.Bucket(bucket)
 		for _, op := range b.ops {
 			key := nonEmptyKey(nonNilBytes(op.key))
 			switch op.opType {
 			case opTypeSet:
-				if err := b.Put(key, op.value); err != nil {
+				if err := bkt.Put(key, op.value); err != nil {
 					return err
 				}
 			case opTypeDelete:
-				if err := b.Delete(key); err != nil {
+				if err := bkt.Delete(key); err != nil {
 					return err
 				}
 			}
