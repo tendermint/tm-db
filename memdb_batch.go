@@ -46,7 +46,7 @@ func (b *memDBBatch) Write() error {
 		case opTypeDelete:
 			b.db.delete(op.key)
 		default:
-			return errors.Errorf("unknown operation type %T (%v)", op.opType, op)
+			return errors.Errorf("unknown operation type %v (%v)", op.opType, op)
 		}
 	}
 	return nil
