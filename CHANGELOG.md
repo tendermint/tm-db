@@ -16,6 +16,8 @@
 
 - [goleveldb] [\#58](https://github.com/tendermint/tm-db/pull/58) Make `Batch.Close()` actually remove the batch contents
 
+- [rocksdb] Handle reuse of closed batches
+
 ## 0.4.1
 
 **2020-2-26**
