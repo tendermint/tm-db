@@ -24,6 +24,8 @@ type boltDBIterator struct {
 	isReverse bool
 }
 
+var _ Iterator = (*boltDBIterator)(nil)
+
 // newBoltDBIterator creates a new boltDBIterator.
 func newBoltDBIterator(tx *bbolt.Tx, start, end []byte, isReverse bool) *boltDBIterator {
 	itr := tx.Bucket(bucket).Cursor()

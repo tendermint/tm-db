@@ -10,6 +10,8 @@ type boltDBBatch struct {
 	ops []operation
 }
 
+var _ Batch = (*boltDBBatch)(nil)
+
 // Set implements Batch.
 func (b *boltDBBatch) Set(key, value []byte) {
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
