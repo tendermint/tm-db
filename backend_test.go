@@ -11,6 +11,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// Register a test backend for PrefixDB as well
+func init() {
+	registerDBCreator("prefixdb", func(name, dir string) (DB, error) {
+		return NewPrefixDB(NewMemDB(), []byte("test/")), nil
+	}, false)
+}
+
 func cleanupDBDir(dir, name string) {
 	err := os.RemoveAll(filepath.Join(dir, name) + ".db")
 	if err != nil {
