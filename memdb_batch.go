@@ -24,20 +24,37 @@ type memDBBatch struct {
 
 var _ Batch = (*memDBBatch)(nil)
 
+// newMemDBBatch creates a new memDBBatch
+func newMemDBBatch(db *MemDB) *memDBBatch {
+	return &memDBBatch{
+		db:  db,
+		ops: make([]operation, 0, 1),
+	}
+}
+
 // Set implements Batch.
 func (b *memDBBatch) Set(key, value []byte) error {
+	if b.ops == nil {
+		return errBatchClosed
+	}
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
 	return nil
 }
 
 // Delete implements Batch.
 func (b *memDBBatch) Delete(key []byte) error {
+	if b.ops == nil {
+		return errBatchClosed
+	}
 	b.ops = append(b.ops, operation{opTypeDelete, key, nil})
 	return nil
 }
 
 // Write implements Batch.
 func (b *memDBBatch) Write() error {
+	if b.ops == nil {
+		return errBatchClosed
+	}
 	b.db.mtx.Lock()
 	defer b.db.mtx.Unlock()
 
@@ -51,7 +68,7 @@ func (b *memDBBatch) Write() error {
 			return errors.Errorf("unknown operation type %v (%v)", op.opType, op)
 		}
 	}
-	return nil
+	return b.Close()
 }
 
 // WriteSync implements Batch.
