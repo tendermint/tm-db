@@ -1,12 +1,5 @@
 package db
 
-import "github.com/pkg/errors"
-
-var (
-	// ErrBatchClosed is returned for closed batches
-	ErrBatchClosed = errors.New("batch is closed")
-)
-
 // DBs are goroutine safe.
 type DB interface {
 
@@ -63,22 +56,28 @@ type DB interface {
 
 // Batch Close must be called when the program no longer needs the object.
 type Batch interface {
-	// Set sets a key/value pair.
-	// CONTRACT: key, value readonly []byte
-	Set(key, value []byte) error
+	SetDeleter
 
-	// Delete deles a key.
-	// CONTRACT: key readonly []byte
-	Delete(key []byte) error
-
-	// Write writes the batch, possibly without flushing to disk. It implicitly closes the batch.
+	// Write writes the batch, possibly without flushing to disk. Only Close() can be called after,
+	// other methods will panic.
 	Write() error
 
-	// WriteSync writes the batch and flushes it to disk. It implicitly closes the batch.
+	// WriteSync writes the batch and flushes it to disk. Only Close() can be called after, other
+	// methods will panic.
 	WriteSync() error
 
-	// Close closes the batch. It is idempotent, but the batch cannot be used afterwards.
-	Close() error
+	// Close closes the batch. It is idempotent, but any other calls afterwards will panic.
+	Close()
+}
+
+type SetDeleter interface {
+	// Set sets a key/value pair.
+	// CONTRACT: key, value readonly []byte
+	Set(key, value []byte)
+
+	// Delete deletes a key/value pair.
+	// CONTRACT: key readonly []byte
+	Delete(key []byte)
 }
 
 /*

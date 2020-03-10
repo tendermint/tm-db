@@ -18,53 +18,52 @@ func newRocksDBBatch(db *RocksDB) *rocksDBBatch {
 	}
 }
 
-// Set implements Batch.
-func (b *rocksDBBatch) Set(key, value []byte) error {
+func (b *rocksDBBatch) assertOpen() {
 	if b.batch == nil {
-		return ErrBatchClosed
+		panic("batch has been written or closed")
 	}
+}
+
+// Set implements Batch.
+func (b *rocksDBBatch) Set(key, value []byte) {
+	b.assertOpen()
 	b.batch.Put(key, value)
-	return nil
 }
 
 // Delete implements Batch.
-func (b *rocksDBBatch) Delete(key []byte) error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+func (b *rocksDBBatch) Delete(key []byte) {
+	b.assertOpen()
 	b.batch.Delete(key)
-	return nil
 }
 
 // Write implements Batch.
 func (b *rocksDBBatch) Write() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+	b.assertOpen()
 	err := b.db.db.Write(b.db.wo, b.batch)
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
-// WriteSync mplements Batch.
+// WriteSync implements Batch.
 func (b *rocksDBBatch) WriteSync() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+	b.assertOpen()
 	err := b.db.db.Write(b.db.woSync, b.batch)
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // Close implements Batch.
-func (b *rocksDBBatch) Close() error {
+func (b *rocksDBBatch) Close() {
 	if b.batch != nil {
 		b.batch.Destroy()
 		b.batch = nil
 	}
-	return nil
 }

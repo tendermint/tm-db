@@ -19,53 +19,49 @@ func newGoLevelDBBatch(db *GoLevelDB) *goLevelDBBatch {
 	}
 }
 
-// Set implements Batch.
-func (b *goLevelDBBatch) Set(key, value []byte) error {
+func (b *goLevelDBBatch) assertOpen() {
 	if b.batch == nil {
-		return ErrBatchClosed
+		panic("batch has been written or closed")
 	}
+}
+
+// Set implements Batch.
+func (b *goLevelDBBatch) Set(key, value []byte) {
+	b.assertOpen()
 	b.batch.Put(key, value)
-	return nil
 }
 
 // Delete implements Batch.
-func (b *goLevelDBBatch) Delete(key []byte) error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+func (b *goLevelDBBatch) Delete(key []byte) {
+	b.assertOpen()
 	b.batch.Delete(key)
-	return nil
 }
 
 // Write implements Batch.
 func (b *goLevelDBBatch) Write() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
-	err := b.db.db.Write(b.batch, &opt.WriteOptions{Sync: false})
-	if err != nil {
-		return err
-	}
-	return b.Close()
+	return b.write(false)
 }
 
 // WriteSync implements Batch.
 func (b *goLevelDBBatch) WriteSync() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
-	err := b.db.db.Write(b.batch, &opt.WriteOptions{Sync: true})
+	return b.write(true)
+}
+
+func (b *goLevelDBBatch) write(sync bool) error {
+	b.assertOpen()
+	err := b.db.db.Write(b.batch, &opt.WriteOptions{Sync: sync})
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // Close implements Batch.
-func (b *goLevelDBBatch) Close() error {
+func (b *goLevelDBBatch) Close() {
 	if b.batch != nil {
 		b.batch.Reset()
 		b.batch = nil
 	}
-	return nil
 }

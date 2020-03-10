@@ -19,29 +19,27 @@ func newBoltDBBatch(db *BoltDB) *boltDBBatch {
 	}
 }
 
-// Set implements Batch.
-func (b *boltDBBatch) Set(key, value []byte) error {
+func (b *boltDBBatch) assertOpen() {
 	if b.ops == nil {
-		return ErrBatchClosed
+		panic("batch has been written or closed")
 	}
+}
+
+// Set implements Batch.
+func (b *boltDBBatch) Set(key, value []byte) {
+	b.assertOpen()
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
-	return nil
 }
 
 // Delete implements Batch.
-func (b *boltDBBatch) Delete(key []byte) error {
-	if b.ops == nil {
-		return ErrBatchClosed
-	}
+func (b *boltDBBatch) Delete(key []byte) {
+	b.assertOpen()
 	b.ops = append(b.ops, operation{opTypeDelete, key, nil})
-	return nil
 }
 
 // Write implements Batch.
 func (b *boltDBBatch) Write() error {
-	if b.ops == nil {
-		return ErrBatchClosed
-	}
+	b.assertOpen()
 	err := b.db.db.Batch(func(tx *bbolt.Tx) error {
 		bkt := tx.Bucket(bucket)
 		for _, op := range b.ops {
@@ -62,7 +60,9 @@ func (b *boltDBBatch) Write() error {
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // WriteSync implements Batch.
@@ -71,7 +71,6 @@ func (b *boltDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *boltDBBatch) Close() error {
+func (b *boltDBBatch) Close() {
 	b.ops = nil
-	return nil
 }

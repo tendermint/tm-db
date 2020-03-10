@@ -17,53 +17,52 @@ func newCLevelDBBatch(db *CLevelDB) *cLevelDBBatch {
 	}
 }
 
-// Set implements Batch.
-func (b *cLevelDBBatch) Set(key, value []byte) error {
+func (b *cLevelDBBatch) assertOpen() {
 	if b.batch == nil {
-		return ErrBatchClosed
+		panic("batch has been written or closed")
 	}
+}
+
+// Set implements Batch.
+func (b *cLevelDBBatch) Set(key, value []byte) {
+	b.assertOpen()
 	b.batch.Put(nonNilBytes(key), nonNilBytes(value))
-	return nil
 }
 
 // Delete implements Batch.
-func (b *cLevelDBBatch) Delete(key []byte) error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+func (b *cLevelDBBatch) Delete(key []byte) {
+	b.assertOpen()
 	b.batch.Delete(nonNilBytes(key))
-	return nil
 }
 
 // Write implements Batch.
 func (b *cLevelDBBatch) Write() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+	b.assertOpen()
 	err := b.db.db.Write(b.db.wo, b.batch)
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // WriteSync implements Batch.
 func (b *cLevelDBBatch) WriteSync() error {
-	if b.batch == nil {
-		return ErrBatchClosed
-	}
+	b.assertOpen()
 	err := b.db.db.Write(b.db.woSync, b.batch)
 	if err != nil {
 		return err
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // Close implements Batch.
-func (b *cLevelDBBatch) Close() error {
+func (b *cLevelDBBatch) Close() {
 	if b.batch != nil {
 		b.batch.Close()
 		b.batch = nil
 	}
-	return nil
 }

@@ -4,13 +4,7 @@
 
 ### Breaking Changes
 
-- `Batch` interface methods now return errors
-
-- Closed batches can no longer be reused, all non-`Close()` calls return `ErrBatchClosed`
-
-- Calling `Write()` or `WriteSync()` on a `Batch` will implicitly close it
-
-- Removed the `SetDeleter` interface
+- [\#71](https://github.com/tendermint/tm-db/pull/71) Closed or written batches can no longer be reused, all non-`Close()` calls will panic
 
 - [memdb] [\#56](https://github.com/tendermint/tm-db/pull/56) Removed some exported methods that were mainly meant for internal use: `Mutex()`, `SetNoLock()`, `SetNoLockSync()`, `DeleteNoLock()`, and `DeleteNoLockSync()`
 
@@ -22,9 +16,9 @@
 
 ### Bug Fixes
 
-- [boltdb] Properly handle blank keys in iterators
+- [boltdb] [\#69](https://github.com/tendermint/tm-db/pull/69) Properly handle blank keys in iterators
 
-- [cleveldb] Fix handling of empty keys as iterator endpoints
+- [cleveldb] [\#65](https://github.com/tendermint/tm-db/pull/65) Fix handling of empty keys as iterator endpoints
 
 ## 0.4.1
 

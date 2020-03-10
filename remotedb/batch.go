@@ -21,56 +21,57 @@ func newBatch(rdb *RemoteDB) *batch {
 	}
 }
 
-// Set implements Batch.
-func (b *batch) Set(key, value []byte) error {
+func (b *batch) assertOpen() {
 	if b.ops == nil {
-		return db.ErrBatchClosed
+		panic("batch has been written or closed")
 	}
+}
+
+// Set implements Batch.
+func (b *batch) Set(key, value []byte) {
+	b.assertOpen()
 	op := &protodb.Operation{
 		Entity: &protodb.Entity{Key: key, Value: value},
 		Type:   protodb.Operation_SET,
 	}
 	b.ops = append(b.ops, op)
-	return nil
 }
 
 // Delete implements Batch.
-func (b *batch) Delete(key []byte) error {
-	if b.ops == nil {
-		return db.ErrBatchClosed
-	}
+func (b *batch) Delete(key []byte) {
+	b.assertOpen()
 	op := &protodb.Operation{
 		Entity: &protodb.Entity{Key: key},
 		Type:   protodb.Operation_DELETE,
 	}
 	b.ops = append(b.ops, op)
-	return nil
 }
 
 // Write implements Batch.
 func (b *batch) Write() error {
-	if b.ops == nil {
-		return db.ErrBatchClosed
-	}
-	if _, err := b.db.dc.BatchWrite(b.db.ctx, &protodb.Batch{Ops: b.ops}); err != nil {
+	b.assertOpen()
+	_, err := b.db.dc.BatchWrite(b.db.ctx, &protodb.Batch{Ops: b.ops})
+	if err != nil {
 		return errors.Errorf("remoteDB.BatchWrite: %v", err)
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // WriteSync implements Batch.
 func (b *batch) WriteSync() error {
-	if b.ops == nil {
-		return db.ErrBatchClosed
-	}
-	if _, err := b.db.dc.BatchWriteSync(b.db.ctx, &protodb.Batch{Ops: b.ops}); err != nil {
+	b.assertOpen()
+	_, err := b.db.dc.BatchWriteSync(b.db.ctx, &protodb.Batch{Ops: b.ops})
+	if err != nil {
 		return errors.Errorf("RemoteDB.BatchWriteSync: %v", err)
 	}
-	return b.Close()
+	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
+	b.Close()
+	return nil
 }
 
 // Close implements Batch.
-func (b *batch) Close() error {
+func (b *batch) Close() {
 	b.ops = nil
-	return nil
 }

@@ -430,44 +430,46 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// create a new batch, and some items - they should not be visible until we write
 	batch := db.NewBatch()
-	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
-	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
-	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
+	batch.Set([]byte("a"), []byte{1})
+	batch.Set([]byte("b"), []byte{2})
+	batch.Set([]byte("c"), []byte{3})
 	assertKeyValues(t, db, map[string][]byte{})
 
 	err := batch.Write()
 	require.NoError(t, err)
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}, "c": {3}})
 
-	// writing a batch should implicitly close it, so writing it again should error
-	err = batch.WriteSync()
-	require.Equal(t, ErrBatchClosed, err)
+	// trying to modify or rewrite a written batch should panic, but closing it should work
+	require.Panics(t, func() { batch.Set([]byte("a"), []byte{9}) })
+	require.Panics(t, func() { batch.Delete([]byte("a")) })
+	require.Panics(t, func() { batch.Write() })
+	require.Panics(t, func() { batch.WriteSync() })
+	batch.Close()
 
 	// batches should write changes in order
 	batch = db.NewBatch()
-	require.NoError(t, batch.Delete([]byte("a")))
-	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
-	require.NoError(t, batch.Set([]byte("b"), []byte{1}))
-	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
-	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
-	require.NoError(t, batch.Delete([]byte("c")))
-	require.NoError(t, batch.Write())
-	require.NoError(t, batch.Close())
+	batch.Delete([]byte("a"))
+	batch.Set([]byte("a"), []byte{1})
+	batch.Set([]byte("b"), []byte{1})
+	batch.Set([]byte("b"), []byte{2})
+	batch.Set([]byte("c"), []byte{3})
+	batch.Delete([]byte("c"))
+	err = batch.Write()
+	require.NoError(t, err)
+	batch.Close()
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
 	// writing nil keys and values should be the same as empty keys and values
 	// FIXME CLevelDB panics here: https://github.com/jmhodges/levigo/issues/55
 	if backend != CLevelDBBackend {
 		batch = db.NewBatch()
-		err = batch.Set(nil, nil)
-		require.NoError(t, err)
+		batch.Set(nil, nil)
 		err = batch.WriteSync()
 		require.NoError(t, err)
 		assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
 
 		batch = db.NewBatch()
-		err = batch.Delete(nil)
-		require.NoError(t, err)
+		batch.Delete(nil)
 		err = batch.Write()
 		require.NoError(t, err)
 		assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
@@ -481,16 +483,14 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// it should be possible to close an empty batch, and to re-close a closed batch
 	batch = db.NewBatch()
-	err = batch.Close()
-	require.NoError(t, err)
-	err = batch.Close()
-	require.NoError(t, err)
+	batch.Close()
+	batch.Close()
 
-	// all other operations on a closed batch should error
-	require.Equal(t, ErrBatchClosed, batch.Set([]byte("a"), []byte{9}))
-	require.Equal(t, ErrBatchClosed, batch.Delete([]byte("a")))
-	require.Equal(t, ErrBatchClosed, batch.Write())
-	require.Equal(t, ErrBatchClosed, batch.WriteSync())
+	// all other operations on a closed batch should panic
+	require.Panics(t, func() { batch.Set([]byte("a"), []byte{9}) })
+	require.Panics(t, func() { batch.Delete([]byte("a")) })
+	require.Panics(t, func() { batch.Write() })
+	require.Panics(t, func() { batch.WriteSync() })
 }
 
 func assertKeyValues(t *testing.T, db DB, expect map[string][]byte) {
