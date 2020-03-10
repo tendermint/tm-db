@@ -6,7 +6,7 @@
 
 - `Batch` interface methods now return errors
 
-- Closed batches can no longer be reused
+- Closed batches can no longer be reused, all non-`Close()` calls return `ErrBatchClosed`
 
 - Removed the `SetDeleter` interface
 
