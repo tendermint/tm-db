@@ -8,6 +8,8 @@
 
 - Closed batches can no longer be reused, all non-`Close()` calls return `ErrBatchClosed`
 
+- Calling `Write()` or `WriteSync()` on a `Batch` will implicitly close it
+
 - Removed the `SetDeleter` interface
 
 - [memdb] [\#56](https://github.com/tendermint/tm-db/pull/56) Removed some exported methods that were mainly meant for internal use: `Mutex()`, `SetNoLock()`, `SetNoLockSync()`, `DeleteNoLock()`, and `DeleteNoLockSync()`
