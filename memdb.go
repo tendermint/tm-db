@@ -154,11 +154,13 @@ func (db *MemDB) NewBatch() Batch {
 }
 
 // Iterator implements DB.
+// Takes out a read-lock on the database until the iterator is closed.
 func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
 	return newMemDBIterator(db, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
+// Takes out a read-lock on the database until the iterator is closed.
 func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	return newMemDBIterator(db, start, end, true), nil
 }
