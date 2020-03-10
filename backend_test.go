@@ -430,69 +430,64 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// create a new batch, and some items - they should not be visible until we write
 	batch := db.NewBatch()
-	batch.Set([]byte("a"), []byte{1})
-	batch.Set([]byte("b"), []byte{2})
-	batch.Set([]byte("c"), []byte{3})
+	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
+	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
 	assertKeyValues(t, db, map[string][]byte{})
 
 	err := batch.Write()
 	require.NoError(t, err)
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}, "c": {3}})
 
-	// the batch still keeps these values internally, so changing values and rewriting batch
-	// should set the values again
-	err = db.Set([]byte("a"), []byte{9})
-	require.NoError(t, err)
-	err = db.Delete([]byte("c"))
-	require.NoError(t, err)
+	// writing a batch should implicitly close it, so writing it again should error
 	err = batch.WriteSync()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}, "c": {3}})
+	require.Equal(t, errBatchClosed, err)
 
-	// but when we close, it should no longer set the values
-	batch.Close()
-	err = db.Delete([]byte("c"))
-	require.NoError(t, err)
-	err = batch.Write()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
-
-	// it should be possible to re-close the batch
-	batch.Close()
-
-	// it should also be possible to reuse a closed batch as if it were a new one
-	batch.Set([]byte("c"), []byte{3})
-	err = batch.Write()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}, "c": {3}})
-	batch.Close()
-
-	batch.Delete([]byte("c"))
-	err = batch.WriteSync()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
-	batch.Close()
-
-	// batches should also write changes in order
+	// batches should write changes in order
 	batch = db.NewBatch()
-	batch.Delete([]byte("a"))
-	batch.Set([]byte("a"), []byte{1})
-	batch.Set([]byte("b"), []byte{1})
-	batch.Set([]byte("b"), []byte{2})
-	batch.Set([]byte("c"), []byte{3})
-	batch.Delete([]byte("c"))
-	err = batch.Write()
-	require.NoError(t, err)
-	batch.Close()
+	require.NoError(t, batch.Delete([]byte("a")))
+	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
+	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
+	require.NoError(t, batch.Delete([]byte("c")))
+	require.NoError(t, batch.Write())
+	require.NoError(t, batch.Close())
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
-	// and writing an empty batch should not fail
+	// writing nil keys and values should be the same as empty keys and values
+	batch = db.NewBatch()
+	err = batch.Set(nil, nil)
+	require.NoError(t, err)
+	err = batch.WriteSync()
+	require.NoError(t, err)
+	assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
+
+	batch = db.NewBatch()
+	err = batch.Delete(nil)
+	require.NoError(t, err)
+	err = batch.Write()
+	require.NoError(t, err)
+	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
+
+	// it should be possible to write an empty batch
 	batch = db.NewBatch()
 	err = batch.Write()
 	require.NoError(t, err)
-	err = batch.WriteSync()
-	require.NoError(t, err)
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
+
+	// it should be possible to close an empty batch, and to re-close a closed batch
+	batch = db.NewBatch()
+	err = batch.Close()
+	require.NoError(t, err)
+	err = batch.Close()
+	require.NoError(t, err)
+
+	// all other operations on a closed batch should error
+	require.Equal(t, errBatchClosed, batch.Set([]byte("a"), []byte{9}))
+	require.Equal(t, errBatchClosed, batch.Delete([]byte("a")))
+	require.Equal(t, errBatchClosed, batch.Write())
+	require.Equal(t, errBatchClosed, batch.WriteSync())
 }
 
 func assertKeyValues(t *testing.T, db DB, expect map[string][]byte) {
