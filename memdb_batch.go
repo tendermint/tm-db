@@ -28,7 +28,7 @@ var _ Batch = (*memDBBatch)(nil)
 func newMemDBBatch(db *MemDB) *memDBBatch {
 	return &memDBBatch{
 		db:  db,
-		ops: make([]operation, 0, 1),
+		ops: []operation{},
 	}
 }
 

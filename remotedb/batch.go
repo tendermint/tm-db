@@ -17,7 +17,7 @@ var _ db.Batch = (*batch)(nil)
 func newBatch(rdb *RemoteDB) *batch {
 	return &batch{
 		db:  rdb,
-		ops: make([]*protodb.Operation, 0, 1),
+		ops: []*protodb.Operation{},
 	}
 }
 

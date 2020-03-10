@@ -15,7 +15,7 @@ var _ Batch = (*boltDBBatch)(nil)
 func newBoltDBBatch(db *BoltDB) *boltDBBatch {
 	return &boltDBBatch{
 		db:  db,
-		ops: make([]operation, 0, 1),
+		ops: []operation{},
 	}
 }
 
