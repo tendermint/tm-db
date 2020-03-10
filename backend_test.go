@@ -11,10 +11,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// Register a test backend for PrefixDB as well
+// Register a test backend for PrefixDB as well, with some unrelated junk data
 func init() {
+	// nolint: errcheck
 	registerDBCreator("prefixdb", func(name, dir string) (DB, error) {
-		return NewPrefixDB(NewMemDB(), []byte("test/")), nil
+		mdb := NewMemDB()
+		mdb.Set([]byte("a"), []byte{1})
+		mdb.Set([]byte("b"), []byte{2})
+		mdb.Set([]byte("t"), []byte{20})
+		mdb.Set([]byte("test"), []byte{0})
+		mdb.Set([]byte("u"), []byte{21})
+		mdb.Set([]byte("z"), []byte{26})
+		return NewPrefixDB(mdb, []byte("test/")), nil
 	}, false)
 }
 
