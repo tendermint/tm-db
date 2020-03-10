@@ -22,7 +22,7 @@ func (b *cLevelDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
 		return ErrBatchClosed
 	}
-	b.batch.Put(key, value)
+	b.batch.Put(nonNilBytes(key), nonNilBytes(value))
 	return nil
 }
 
@@ -31,7 +31,7 @@ func (b *cLevelDBBatch) Delete(key []byte) error {
 	if b.batch == nil {
 		return ErrBatchClosed
 	}
-	b.batch.Delete(key)
+	b.batch.Delete(nonNilBytes(key))
 	return nil
 }
 

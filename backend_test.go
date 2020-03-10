@@ -456,19 +456,22 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
 	// writing nil keys and values should be the same as empty keys and values
-	batch = db.NewBatch()
-	err = batch.Set(nil, nil)
-	require.NoError(t, err)
-	err = batch.WriteSync()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
+	// FIXME CLevelDB panics here: https://github.com/jmhodges/levigo/issues/55
+	if backend != CLevelDBBackend {
+		batch = db.NewBatch()
+		err = batch.Set(nil, nil)
+		require.NoError(t, err)
+		err = batch.WriteSync()
+		require.NoError(t, err)
+		assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
 
-	batch = db.NewBatch()
-	err = batch.Delete(nil)
-	require.NoError(t, err)
-	err = batch.Write()
-	require.NoError(t, err)
-	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
+		batch = db.NewBatch()
+		err = batch.Delete(nil)
+		require.NoError(t, err)
+		err = batch.Write()
+		require.NoError(t, err)
+		assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
+	}
 
 	// it should be possible to write an empty batch
 	batch = db.NewBatch()
