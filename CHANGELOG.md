@@ -6,6 +6,8 @@
 
 - `Batch` interface methods now return errors
 
+- Closed batches can no longer be reused
+
 - Removed the `SetDeleter` interface
 
 - [memdb] [\#56](https://github.com/tendermint/tm-db/pull/56) Removed some exported methods that were mainly meant for internal use: `Mutex()`, `SetNoLock()`, `SetNoLockSync()`, `DeleteNoLock()`, and `DeleteNoLockSync()`
@@ -21,8 +23,6 @@
 - [boltdb] Properly handle blank keys in iterators
 
 - [cleveldb] Fix handling of empty keys as iterator endpoints
-
-- [goleveldb] [\#58](https://github.com/tendermint/tm-db/pull/58) Make `Batch.Close()` actually remove the batch contents
 
 ## 0.4.1
 
