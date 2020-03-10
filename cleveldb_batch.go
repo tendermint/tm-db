@@ -20,7 +20,7 @@ func newCLevelDBBatch(db *CLevelDB) *cLevelDBBatch {
 // Set implements Batch.
 func (b *cLevelDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Put(key, value)
 	return nil
@@ -29,7 +29,7 @@ func (b *cLevelDBBatch) Set(key, value []byte) error {
 // Delete implements Batch.
 func (b *cLevelDBBatch) Delete(key []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Delete(key)
 	return nil
@@ -38,7 +38,7 @@ func (b *cLevelDBBatch) Delete(key []byte) error {
 // Write implements Batch.
 func (b *cLevelDBBatch) Write() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.db.wo, b.batch)
 	if err != nil {
@@ -50,7 +50,7 @@ func (b *cLevelDBBatch) Write() error {
 // WriteSync implements Batch.
 func (b *cLevelDBBatch) WriteSync() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.db.woSync, b.batch)
 	if err != nil {

@@ -22,7 +22,7 @@ func newGoLevelDBBatch(db *GoLevelDB) *goLevelDBBatch {
 // Set implements Batch.
 func (b *goLevelDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Put(key, value)
 	return nil
@@ -31,7 +31,7 @@ func (b *goLevelDBBatch) Set(key, value []byte) error {
 // Delete implements Batch.
 func (b *goLevelDBBatch) Delete(key []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Delete(key)
 	return nil
@@ -40,7 +40,7 @@ func (b *goLevelDBBatch) Delete(key []byte) error {
 // Write implements Batch.
 func (b *goLevelDBBatch) Write() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.batch, &opt.WriteOptions{Sync: false})
 	if err != nil {
@@ -52,7 +52,7 @@ func (b *goLevelDBBatch) Write() error {
 // WriteSync implements Batch.
 func (b *goLevelDBBatch) WriteSync() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.batch, &opt.WriteOptions{Sync: true})
 	if err != nil {

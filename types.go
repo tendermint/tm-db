@@ -3,7 +3,8 @@ package db
 import "github.com/pkg/errors"
 
 var (
-	errBatchClosed = errors.New("batch is closed")
+	// ErrBatchClosed is returned for closed batches
+	ErrBatchClosed = errors.New("batch is closed")
 )
 
 // DBs are goroutine safe.

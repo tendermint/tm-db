@@ -441,7 +441,7 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// writing a batch should implicitly close it, so writing it again should error
 	err = batch.WriteSync()
-	require.Equal(t, errBatchClosed, err)
+	require.Equal(t, ErrBatchClosed, err)
 
 	// batches should write changes in order
 	batch = db.NewBatch()
@@ -484,10 +484,10 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	require.NoError(t, err)
 
 	// all other operations on a closed batch should error
-	require.Equal(t, errBatchClosed, batch.Set([]byte("a"), []byte{9}))
-	require.Equal(t, errBatchClosed, batch.Delete([]byte("a")))
-	require.Equal(t, errBatchClosed, batch.Write())
-	require.Equal(t, errBatchClosed, batch.WriteSync())
+	require.Equal(t, ErrBatchClosed, batch.Set([]byte("a"), []byte{9}))
+	require.Equal(t, ErrBatchClosed, batch.Delete([]byte("a")))
+	require.Equal(t, ErrBatchClosed, batch.Write())
+	require.Equal(t, ErrBatchClosed, batch.WriteSync())
 }
 
 func assertKeyValues(t *testing.T, db DB, expect map[string][]byte) {

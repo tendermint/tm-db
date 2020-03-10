@@ -21,7 +21,7 @@ func newRocksDBBatch(db *RocksDB) *rocksDBBatch {
 // Set implements Batch.
 func (b *rocksDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Put(key, value)
 	return nil
@@ -30,7 +30,7 @@ func (b *rocksDBBatch) Set(key, value []byte) error {
 // Delete implements Batch.
 func (b *rocksDBBatch) Delete(key []byte) error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.batch.Delete(key)
 	return nil
@@ -39,7 +39,7 @@ func (b *rocksDBBatch) Delete(key []byte) error {
 // Write implements Batch.
 func (b *rocksDBBatch) Write() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.db.wo, b.batch)
 	if err != nil {
@@ -51,7 +51,7 @@ func (b *rocksDBBatch) Write() error {
 // WriteSync mplements Batch.
 func (b *rocksDBBatch) WriteSync() error {
 	if b.batch == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	err := b.db.db.Write(b.db.woSync, b.batch)
 	if err != nil {

@@ -35,7 +35,7 @@ func newMemDBBatch(db *MemDB) *memDBBatch {
 // Set implements Batch.
 func (b *memDBBatch) Set(key, value []byte) error {
 	if b.ops == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
 	return nil
@@ -44,7 +44,7 @@ func (b *memDBBatch) Set(key, value []byte) error {
 // Delete implements Batch.
 func (b *memDBBatch) Delete(key []byte) error {
 	if b.ops == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.ops = append(b.ops, operation{opTypeDelete, key, nil})
 	return nil
@@ -53,7 +53,7 @@ func (b *memDBBatch) Delete(key []byte) error {
 // Write implements Batch.
 func (b *memDBBatch) Write() error {
 	if b.ops == nil {
-		return errBatchClosed
+		return ErrBatchClosed
 	}
 	b.db.mtx.Lock()
 	defer b.db.mtx.Unlock()
