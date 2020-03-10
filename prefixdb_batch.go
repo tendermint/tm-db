@@ -15,15 +15,17 @@ func newPrefixBatch(prefix []byte, source Batch) prefixDBBatch {
 }
 
 // Set implements Batch.
-func (pb prefixDBBatch) Set(key, value []byte) {
+func (pb prefixDBBatch) Set(key, value []byte) error {
 	pkey := append(cp(pb.prefix), key...)
 	pb.source.Set(pkey, value)
+	return nil
 }
 
 // Delete implements Batch.
-func (pb prefixDBBatch) Delete(key []byte) {
+func (pb prefixDBBatch) Delete(key []byte) error {
 	pkey := append(cp(pb.prefix), key...)
 	pb.source.Delete(pkey)
+	return nil
 }
 
 // Write implements Batch.
@@ -37,6 +39,7 @@ func (pb prefixDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (pb prefixDBBatch) Close() {
+func (pb prefixDBBatch) Close() error {
 	pb.source.Close()
+	return nil
 }

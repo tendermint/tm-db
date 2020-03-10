@@ -11,13 +11,15 @@ type cLevelDBBatch struct {
 }
 
 // Set implements Batch.
-func (b *cLevelDBBatch) Set(key, value []byte) {
+func (b *cLevelDBBatch) Set(key, value []byte) error {
 	b.batch.Put(key, value)
+	return nil
 }
 
 // Delete implements Batch.
-func (b *cLevelDBBatch) Delete(key []byte) {
+func (b *cLevelDBBatch) Delete(key []byte) error {
 	b.batch.Delete(key)
+	return nil
 }
 
 // Write implements Batch.
@@ -37,6 +39,7 @@ func (b *cLevelDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *cLevelDBBatch) Close() {
+func (b *cLevelDBBatch) Close() error {
 	b.batch.Close()
+	return nil
 }

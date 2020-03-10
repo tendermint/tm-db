@@ -12,34 +12,29 @@ type rocksDBBatch struct {
 var _ Batch = (*rocksDBBatch)(nil)
 
 // Set implements Batch.
-func (mBatch *rocksDBBatch) Set(key, value []byte) {
+func (mBatch *rocksDBBatch) Set(key, value []byte) error {
 	mBatch.batch.Put(key, value)
+	return nil
 }
 
 // Delete implements Batch.
-func (mBatch *rocksDBBatch) Delete(key []byte) {
+func (mBatch *rocksDBBatch) Delete(key []byte) error {
 	mBatch.batch.Delete(key)
+	return nil
 }
 
 // Write implements Batch.
 func (mBatch *rocksDBBatch) Write() error {
-	err := mBatch.db.db.Write(mBatch.db.wo, mBatch.batch)
-	if err != nil {
-		return err
-	}
-	return nil
+	return mBatch.db.db.Write(mBatch.db.wo, mBatch.batch)
 }
 
 // WriteSync mplements Batch.
 func (mBatch *rocksDBBatch) WriteSync() error {
-	err := mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch)
-	if err != nil {
-		return err
-	}
-	return nil
+	return mBatch.db.db.Write(mBatch.db.woSync, mBatch.batch)
 }
 
 // Close implements Batch.
-func (mBatch *rocksDBBatch) Close() {
+func (mBatch *rocksDBBatch) Close() error {
 	mBatch.batch.Destroy()
+	return nil
 }

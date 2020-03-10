@@ -13,13 +13,15 @@ type goLevelDBBatch struct {
 var _ Batch = (*goLevelDBBatch)(nil)
 
 // Set implements Batch.
-func (b *goLevelDBBatch) Set(key, value []byte) {
+func (b *goLevelDBBatch) Set(key, value []byte) error {
 	b.batch.Put(key, value)
+	return nil
 }
 
 // Delete implements Batch.
-func (b *goLevelDBBatch) Delete(key []byte) {
+func (b *goLevelDBBatch) Delete(key []byte) error {
 	b.batch.Delete(key)
+	return nil
 }
 
 // Write implements Batch.
@@ -41,6 +43,7 @@ func (b *goLevelDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *goLevelDBBatch) Close() {
+func (b *goLevelDBBatch) Close() error {
 	b.batch.Reset()
+	return nil
 }

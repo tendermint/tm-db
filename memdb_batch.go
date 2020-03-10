@@ -25,13 +25,15 @@ type memDBBatch struct {
 var _ Batch = (*memDBBatch)(nil)
 
 // Set implements Batch.
-func (b *memDBBatch) Set(key, value []byte) {
+func (b *memDBBatch) Set(key, value []byte) error {
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
+	return nil
 }
 
 // Delete implements Batch.
-func (b *memDBBatch) Delete(key []byte) {
+func (b *memDBBatch) Delete(key []byte) error {
 	b.ops = append(b.ops, operation{opTypeDelete, key, nil})
+	return nil
 }
 
 // Write implements Batch.
@@ -58,6 +60,7 @@ func (b *memDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *memDBBatch) Close() {
+func (b *memDBBatch) Close() error {
 	b.ops = nil
+	return nil
 }

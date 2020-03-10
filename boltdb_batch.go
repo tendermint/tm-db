@@ -13,13 +13,15 @@ type boltDBBatch struct {
 var _ Batch = (*boltDBBatch)(nil)
 
 // Set implements Batch.
-func (b *boltDBBatch) Set(key, value []byte) {
+func (b *boltDBBatch) Set(key, value []byte) error {
 	b.ops = append(b.ops, operation{opTypeSet, key, value})
+	return nil
 }
 
 // Delete implements Batch.
-func (b *boltDBBatch) Delete(key []byte) {
+func (b *boltDBBatch) Delete(key []byte) error {
 	b.ops = append(b.ops, operation{opTypeDelete, key, nil})
+	return nil
 }
 
 // Write implements Batch.
@@ -49,4 +51,6 @@ func (b *boltDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *boltDBBatch) Close() {}
+func (b *boltDBBatch) Close() error {
+	return nil
+}
