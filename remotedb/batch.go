@@ -14,8 +14,18 @@ type batch struct {
 
 var _ db.Batch = (*batch)(nil)
 
+func newBatch(rdb *RemoteDB) *batch {
+	return &batch{
+		db:  rdb,
+		ops: make([]*protodb.Operation, 0, 1),
+	}
+}
+
 // Set implements Batch.
 func (b *batch) Set(key, value []byte) error {
+	if b.ops == nil {
+		return db.ErrBatchClosed
+	}
 	op := &protodb.Operation{
 		Entity: &protodb.Entity{Key: key, Value: value},
 		Type:   protodb.Operation_SET,
@@ -26,6 +36,9 @@ func (b *batch) Set(key, value []byte) error {
 
 // Delete implements Batch.
 func (b *batch) Delete(key []byte) error {
+	if b.ops == nil {
+		return db.ErrBatchClosed
+	}
 	op := &protodb.Operation{
 		Entity: &protodb.Entity{Key: key},
 		Type:   protodb.Operation_DELETE,
@@ -36,18 +49,24 @@ func (b *batch) Delete(key []byte) error {
 
 // Write implements Batch.
 func (b *batch) Write() error {
+	if b.ops == nil {
+		return db.ErrBatchClosed
+	}
 	if _, err := b.db.dc.BatchWrite(b.db.ctx, &protodb.Batch{Ops: b.ops}); err != nil {
 		return errors.Errorf("remoteDB.BatchWrite: %v", err)
 	}
-	return nil
+	return b.Close()
 }
 
 // WriteSync implements Batch.
 func (b *batch) WriteSync() error {
+	if b.ops == nil {
+		return db.ErrBatchClosed
+	}
 	if _, err := b.db.dc.BatchWriteSync(b.db.ctx, &protodb.Batch{Ops: b.ops}); err != nil {
 		return errors.Errorf("RemoteDB.BatchWriteSync: %v", err)
 	}
-	return nil
+	return b.Close()
 }
 
 // Close implements Batch.
