@@ -15,6 +15,6 @@ jobs:
         #     echo "::add-path::$(go env GOPATH)/bin"
         #     echo "::set-env name=GO111MODULE::"on""
         # shell: bash
-        - uses: actions/checkout@v2
-        - name: Run golangci-lint
+      - uses: actions/checkout@v2
+      - name: Run golangci-lint
           uses: actions-contrib/golangci-lint@v1
