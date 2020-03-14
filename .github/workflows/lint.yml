@@ -17,4 +17,4 @@ jobs:
         # shell: bash
       - uses: actions/checkout@v2
       - name: Run golangci-lint
-          uses: actions-contrib/golangci-lint@v1
+        uses: actions-contrib/golangci-lint@v1
