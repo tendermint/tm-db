@@ -1,20 +1,13 @@
 name: Lint
 on: [pull_request]
 jobs:
-  lint:
+  golangci-lint:
+    name: runner / golangci-lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@master
-        id: go
-        with:
-          go-version: 1.14
-      - name: Setup env for GO
-        #  this is only used until the setup-go action is updated
-        run: |
-          echo "::set-env name=GOPATH::$(go env GOPATH)"
-          echo "::add-path::$(go env GOPATH)/bin"
-          echo "::set-env name=GO111MODULE::"on""
-        shell: bash
       - uses: actions/checkout@v2
-      - name: Run golangci-lint
-        uses: actions-contrib/golangci-lint@v1
+      - name: golangci-lint
+        uses: reviewdog/action-golangci-lint@v1
+        # uses: docker://reviewdog/action-golangci-lint:v1 # pre-build docker image
+        with:
+          github_token: ${{ secrets.github_token }}
