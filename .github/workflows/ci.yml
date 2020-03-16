@@ -1,0 +1,11 @@
+name: Lint
+on: [pull_request]
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    container: tendermint-dev/docker-tm-db-testing
+    steps:
+      - uses: uses: actions/checkout@v2
+      - name: test all dbs
+        run: |
+        make test-all
