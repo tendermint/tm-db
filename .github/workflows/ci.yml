@@ -6,6 +6,8 @@ jobs:
     container: tendermintdev/docker-tm-db-testing
     steps:
       - uses: actions/checkout@v2
+        with:
+          clean: false
       - name: test all dbs
         run: |
           make test-all
