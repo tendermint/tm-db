@@ -8,4 +8,5 @@ jobs:
       - uses: actions/checkout@v2
       - name: test all dbs
         run: |
-        make test-all
+          make test-all
+        shell: bash
