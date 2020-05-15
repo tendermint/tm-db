@@ -130,5 +130,5 @@ type Iterator interface {
 	Error() error
 
 	// Close closes the iterator, relasing any allocated resources.
-	Close()
+	Close() error
 }

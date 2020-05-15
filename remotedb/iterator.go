@@ -66,7 +66,9 @@ func (rItr *reverseIterator) Error() error {
 }
 
 // Close implements Iterator.
-func (rItr *reverseIterator) Close() {}
+func (rItr *reverseIterator) Close() error {
+	return nil
+}
 
 // iterator implements the db.Iterator by retrieving
 // streamed iterators from the remote backend as
@@ -123,9 +125,6 @@ func (itr *iterator) Error() error {
 }
 
 // Close implements Iterator.
-func (itr *iterator) Close() {
-	err := itr.dic.CloseSend()
-	if err != nil {
-		panic(fmt.Sprintf("Error closing iterator: %v", err))
-	}
+func (itr *iterator) Close() error {
+	return itr.dic.CloseSend()
 }

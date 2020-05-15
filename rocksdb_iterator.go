@@ -121,8 +121,9 @@ func (itr rocksDBIterator) Error() error {
 }
 
 // Close implements Iterator.
-func (itr rocksDBIterator) Close() {
+func (itr rocksDBIterator) Close() error {
 	itr.source.Close()
+	return nil
 }
 
 func (itr rocksDBIterator) assertNoError() {

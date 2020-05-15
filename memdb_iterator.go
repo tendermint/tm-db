@@ -93,11 +93,12 @@ func newMemDBIterator(db *MemDB, start []byte, end []byte, reverse bool) *memDBI
 }
 
 // Close implements Iterator.
-func (i *memDBIterator) Close() {
+func (i *memDBIterator) Close() error {
 	i.cancel()
 	for range i.ch { // drain channel
 	}
 	i.item = nil
+	return nil
 }
 
 // Domain implements Iterator.

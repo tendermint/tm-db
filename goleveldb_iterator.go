@@ -125,8 +125,9 @@ func (itr *goLevelDBIterator) Error() error {
 }
 
 // Close implements Iterator.
-func (itr *goLevelDBIterator) Close() {
+func (itr *goLevelDBIterator) Close() error {
 	itr.source.Release()
+	return nil
 }
 
 func (itr *goLevelDBIterator) assertNoError() {

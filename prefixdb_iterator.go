@@ -112,8 +112,8 @@ func (itr *prefixDBIterator) Error() error {
 }
 
 // Close implements Iterator.
-func (itr *prefixDBIterator) Close() {
-	itr.source.Close()
+func (itr *prefixDBIterator) Close() error {
+	return itr.source.Close()
 }
 
 func stripPrefix(key []byte, prefix []byte) (stripped []byte) {

@@ -165,11 +165,8 @@ func (itr *boltDBIterator) Error() error {
 }
 
 // Close implements Iterator.
-func (itr *boltDBIterator) Close() {
-	err := itr.tx.Rollback()
-	if err != nil {
-		panic(err)
-	}
+func (itr *boltDBIterator) Close() error {
+	return itr.tx.Rollback()
 }
 
 func (itr *boltDBIterator) assertIsValid() {
