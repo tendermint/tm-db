@@ -458,12 +458,12 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	require.NoError(t, err)
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}, "c": {3}})
 
-	// trying to modify or rewrite a written batch should panic, but closing it should work
-	require.Panics(t, func() { batch.Set([]byte("a"), []byte{9}) })
-	require.Panics(t, func() { batch.Delete([]byte("a")) })
-	require.Panics(t, func() { batch.Write() })     // nolint: errcheck
-	require.Panics(t, func() { batch.WriteSync() }) // nolint: errcheck
-	batch.Close()
+	// trying to modify or rewrite a written batch should error, but closing it should work
+	require.Error(t, batch.Set([]byte("a"), []byte{9}))
+	require.Error(t, batch.Delete([]byte("a")))
+	require.Error(t, batch.Write())
+	require.Error(t, batch.WriteSync())
+	require.NoError(t, batch.Close())
 
 	// batches should write changes in order
 	batch = db.NewBatch()
@@ -505,11 +505,11 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	batch.Close()
 	batch.Close()
 
-	// all other operations on a closed batch should panic
-	require.Panics(t, func() { batch.Set([]byte("a"), []byte{9}) })
-	require.Panics(t, func() { batch.Delete([]byte("a")) })
-	require.Panics(t, func() { batch.Write() })     // nolint: errcheck
-	require.Panics(t, func() { batch.WriteSync() }) // nolint: errcheck
+	// all other operations on a closed batch should error
+	require.Error(t, batch.Set([]byte("a"), []byte{9}))
+	require.Error(t, batch.Delete([]byte("a")))
+	require.Error(t, batch.Write())
+	require.Error(t, batch.WriteSync())
 }
 
 func assertKeyValues(t *testing.T, db DB, expect map[string][]byte) {
