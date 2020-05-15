@@ -8,6 +8,8 @@
 
 - `Iterator.Close()` may now error (@erikgrinaker)
 
+- Many iterator panics are now exposed via `Error()` instead (@erikgrinaker)
+
 - `RemoteDB` iterators are now correctly primed with the first item when created, without calling
   `Next()` (@erikgrinaker)
 
