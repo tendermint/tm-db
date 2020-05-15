@@ -449,9 +449,9 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// create a new batch, and some items - they should not be visible until we write
 	batch := db.NewBatch()
-	batch.Set([]byte("a"), []byte{1})
-	batch.Set([]byte("b"), []byte{2})
-	batch.Set([]byte("c"), []byte{3})
+	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
+	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
 	assertKeyValues(t, db, map[string][]byte{})
 
 	err := batch.Write()
@@ -467,28 +467,29 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// batches should write changes in order
 	batch = db.NewBatch()
-	batch.Delete([]byte("a"))
-	batch.Set([]byte("a"), []byte{1})
-	batch.Set([]byte("b"), []byte{1})
-	batch.Set([]byte("b"), []byte{2})
-	batch.Set([]byte("c"), []byte{3})
-	batch.Delete([]byte("c"))
-	err = batch.Write()
-	require.NoError(t, err)
-	batch.Close()
+	require.NoError(t, batch.Delete([]byte("a")))
+	require.NoError(t, batch.Set([]byte("a"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{1}))
+	require.NoError(t, batch.Set([]byte("b"), []byte{2}))
+	require.NoError(t, batch.Set([]byte("c"), []byte{3}))
+	require.NoError(t, batch.Delete([]byte("c")))
+	require.NoError(t, batch.Write())
+	require.NoError(t, batch.Close())
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
 	// writing nil keys and values should be the same as empty keys and values
 	// FIXME CLevelDB panics here: https://github.com/jmhodges/levigo/issues/55
 	if backend != CLevelDBBackend {
 		batch = db.NewBatch()
-		batch.Set(nil, nil)
+		err = batch.Set(nil, nil)
+		require.NoError(t, err)
 		err = batch.WriteSync()
 		require.NoError(t, err)
 		assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
 
 		batch = db.NewBatch()
-		batch.Delete(nil)
+		err = batch.Delete(nil)
+		require.NoError(t, err)
 		err = batch.Write()
 		require.NoError(t, err)
 		assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
