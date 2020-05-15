@@ -4,9 +4,9 @@
 
 ### Breaking Changes
 
-- Batch `Set()`, `Delete()`, and `Close()` may now error (@erikgrinaker)
+- `NewDB` now returns error instead of panicing (@erikgrinaker)
 
-- `Iterator.Close()` may now error (@erikgrinaker)
+- Batch `Set()`, `Delete()`, and `Close()` and `Iterator.Close()` may now error (@erikgrinaker)
 
 - Many iterator panics are now exposed via `Error()` instead (@erikgrinaker)
 
