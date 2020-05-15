@@ -108,10 +108,7 @@ func (rd *RemoteDB) Print() error {
 
 func (rd *RemoteDB) Stats() map[string]string {
 	stats, err := rd.dc.Stats(rd.ctx, &protodb.Nothing{})
-	if err != nil {
-		panic(fmt.Sprintf("RemoteDB.Stats error: %v", err))
-	}
-	if stats == nil {
+	if err != nil || stats == nil {
 		return nil
 	}
 	return stats.Data
