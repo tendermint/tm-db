@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	bucket         = []byte("tm")
-	boltDBEmptyKey = []byte("nil")
+	bucket = []byte("tm")
 )
 
 func init() {
