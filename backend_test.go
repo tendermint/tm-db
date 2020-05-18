@@ -288,16 +288,6 @@ func verifyIterator(t *testing.T, itr Iterator, expected []int64, msg string) {
 	assert.Equal(t, expected, list, msg)
 }
 
-func verifyIteratorStrings(t *testing.T, itr Iterator, expected []string, msg string) {
-	var list []string
-	for itr.Valid() {
-		key := itr.Key()
-		list = append(list, string(key))
-		itr.Next()
-	}
-	assert.Equal(t, expected, list, msg)
-}
-
 func TestDBBatch(t *testing.T) {
 	for dbType := range backends {
 		t.Run(fmt.Sprintf("%v", dbType), func(t *testing.T) {
@@ -343,23 +333,20 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	require.NoError(t, batch.Close())
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
-	// writing nil keys and values should be the same as empty keys and values
-	// FIXME CLevelDB panics here: https://github.com/jmhodges/levigo/issues/55
-	if backend != CLevelDBBackend {
-		batch = db.NewBatch()
-		err = batch.Set(nil, nil)
-		require.NoError(t, err)
-		err = batch.WriteSync()
-		require.NoError(t, err)
-		assertKeyValues(t, db, map[string][]byte{"": {}, "a": {1}, "b": {2}})
+	// empty and nil keys should be disallowed
+	batch = db.NewBatch()
+	err = batch.Set([]byte{}, []byte{0x01})
+	require.Equal(t, errKeyEmpty, err)
+	err = batch.Set(nil, []byte{0x01})
+	require.Equal(t, errKeyEmpty, err)
 
-		batch = db.NewBatch()
-		err = batch.Delete(nil)
-		require.NoError(t, err)
-		err = batch.Write()
-		require.NoError(t, err)
-		assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
-	}
+	err = batch.Delete([]byte{})
+	require.Equal(t, errKeyEmpty, err)
+	err = batch.Delete(nil)
+	require.Equal(t, errKeyEmpty, err)
+
+	err = batch.Close()
+	require.NoError(t, err)
 
 	// it should be possible to write an empty batch
 	batch = db.NewBatch()

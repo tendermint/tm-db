@@ -21,6 +21,9 @@ func newBoltDBBatch(db *BoltDB) *boltDBBatch {
 
 // Set implements Batch.
 func (b *boltDBBatch) Set(key, value []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	if b.ops == nil {
 		return errBatchClosed
 	}
@@ -30,6 +33,9 @@ func (b *boltDBBatch) Set(key, value []byte) error {
 
 // Delete implements Batch.
 func (b *boltDBBatch) Delete(key []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	if b.ops == nil {
 		return errBatchClosed
 	}
