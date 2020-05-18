@@ -34,12 +34,12 @@ func (i *item) Less(other btree.Item) bool {
 
 // newKey creates a new key item.
 func newKey(key []byte) *item {
-	return &item{key: nonNilBytes(key)}
+	return &item{key: key}
 }
 
 // newPair creates a new pair item.
 func newPair(key, value []byte) *item {
-	return &item{key: nonNilBytes(key), value: nonNilBytes(value)}
+	return &item{key: key, value: value}
 }
 
 // MemDB is an in-memory database backend using a B-tree for storage.
