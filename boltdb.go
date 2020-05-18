@@ -67,7 +67,9 @@ func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error)
 
 // Get implements DB.
 func (bdb *BoltDB) Get(key []byte) (value []byte, err error) {
-	key = nonEmptyKey(nonNilBytes(key))
+	if len(key) == 0 {
+		return nil, errKeyEmpty
+	}
 	err = bdb.db.View(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucket)
 		if v := b.Get(key); v != nil {
@@ -92,7 +94,9 @@ func (bdb *BoltDB) Has(key []byte) (bool, error) {
 
 // Set implements DB.
 func (bdb *BoltDB) Set(key, value []byte) error {
-	key = nonEmptyKey(nonNilBytes(key))
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	value = nonNilBytes(value)
 	err := bdb.db.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucket)
@@ -111,7 +115,9 @@ func (bdb *BoltDB) SetSync(key, value []byte) error {
 
 // Delete implements DB.
 func (bdb *BoltDB) Delete(key []byte) error {
-	key = nonEmptyKey(nonNilBytes(key))
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	err := bdb.db.Update(func(tx *bbolt.Tx) error {
 		return tx.Bucket(bucket).Delete(key)
 	})

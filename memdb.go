@@ -65,6 +65,9 @@ func NewMemDB() *MemDB {
 
 // Get implements DB.
 func (db *MemDB) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, errKeyEmpty
+	}
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
 
@@ -77,6 +80,9 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 
 // Has implements DB.
 func (db *MemDB) Has(key []byte) (bool, error) {
+	if len(key) == 0 {
+		return false, errKeyEmpty
+	}
 	db.mtx.RLock()
 	defer db.mtx.RUnlock()
 
@@ -85,6 +91,9 @@ func (db *MemDB) Has(key []byte) (bool, error) {
 
 // Set implements DB.
 func (db *MemDB) Set(key []byte, value []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
@@ -104,6 +113,9 @@ func (db *MemDB) SetSync(key []byte, value []byte) error {
 
 // Delete implements DB.
 func (db *MemDB) Delete(key []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 
