@@ -169,12 +169,18 @@ func (db *GoLevelDB) NewBatch() Batch {
 
 // Iterator implements DB.
 func (db *GoLevelDB) Iterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	itr := db.db.NewIterator(nil, nil)
 	return newGoLevelDBIterator(itr, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
 func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	itr := db.db.NewIterator(nil, nil)
 	return newGoLevelDBIterator(itr, start, end, true), nil
 }

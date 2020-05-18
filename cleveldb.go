@@ -174,12 +174,18 @@ func (db *CLevelDB) NewBatch() Batch {
 
 // Iterator implements DB.
 func (db *CLevelDB) Iterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	itr := db.db.NewIterator(db.ro)
 	return newCLevelDBIterator(itr, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
 func (db *CLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	itr := db.db.NewIterator(db.ro)
 	return newCLevelDBIterator(itr, start, end, true), nil
 }

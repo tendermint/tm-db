@@ -51,14 +51,13 @@ func (b *boltDBBatch) Write() error {
 	err := b.db.db.Batch(func(tx *bbolt.Tx) error {
 		bkt := tx.Bucket(bucket)
 		for _, op := range b.ops {
-			key := nonEmptyKey(nonNilBytes(op.key))
 			switch op.opType {
 			case opTypeSet:
-				if err := bkt.Put(key, op.value); err != nil {
+				if err := bkt.Put(op.key, op.value); err != nil {
 					return err
 				}
 			case opTypeDelete:
-				if err := bkt.Delete(key); err != nil {
+				if err := bkt.Delete(op.key); err != nil {
 					return err
 				}
 			}

@@ -181,6 +181,9 @@ func (bdb *BoltDB) NewBatch() Batch {
 // WARNING: Any concurrent writes or reads will block until the iterator is
 // closed.
 func (bdb *BoltDB) Iterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	tx, err := bdb.db.Begin(false)
 	if err != nil {
 		return nil, err
@@ -191,18 +194,12 @@ func (bdb *BoltDB) Iterator(start, end []byte) (Iterator, error) {
 // WARNING: Any concurrent writes or reads will block until the iterator is
 // closed.
 func (bdb *BoltDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	tx, err := bdb.db.Begin(false)
 	if err != nil {
 		return nil, err
 	}
 	return newBoltDBIterator(tx, start, end, true), nil
-}
-
-// nonEmptyKey returns a []byte("nil") if key is empty.
-// WARNING: this may collude with "nil" user key!
-func nonEmptyKey(key []byte) []byte {
-	if len(key) == 0 {
-		return boltDBEmptyKey
-	}
-	return key
 }

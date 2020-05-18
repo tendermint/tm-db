@@ -161,6 +161,16 @@ func testDBIterator(t *testing.T, backend BackendType) {
 		}
 	}
 
+	// Blank iterator keys should error
+	_, err = db.Iterator([]byte{}, nil)
+	require.Equal(t, errKeyEmpty, err)
+	_, err = db.Iterator(nil, []byte{})
+	require.Equal(t, errKeyEmpty, err)
+	_, err = db.ReverseIterator([]byte{}, nil)
+	require.Equal(t, errKeyEmpty, err)
+	_, err = db.ReverseIterator(nil, []byte{})
+	require.Equal(t, errKeyEmpty, err)
+
 	itr, err := db.Iterator(nil, nil)
 	require.NoError(t, err)
 	verifyIterator(t, itr, []int64{0, 1, 2, 3, 4, 5, 7, 8, 9}, "forward iterator")

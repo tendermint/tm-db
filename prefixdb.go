@@ -104,6 +104,9 @@ func (pdb *PrefixDB) DeleteSync(key []byte) error {
 
 // Iterator implements DB.
 func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
@@ -124,6 +127,9 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 
 // ReverseIterator implements DB.
 func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
