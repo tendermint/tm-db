@@ -89,7 +89,9 @@ func (db *RocksDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	err := db.db.Put(db.wo, key, value)
 	if err != nil {
 		return err
@@ -102,7 +104,9 @@ func (db *RocksDB) SetSync(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	err := db.db.Put(db.woSync, key, value)
 	if err != nil {
 		return err

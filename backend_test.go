@@ -119,6 +119,20 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	require.Equal(t, errKeyEmpty, err)
 	err = db.DeleteSync(nil)
 	require.Equal(t, errKeyEmpty, err)
+
+	// Setting a nil value should error, but an empty value is fine.
+	err = db.Set([]byte("x"), nil)
+	require.Equal(t, errValueNil, err)
+	err = db.SetSync([]byte("x"), nil)
+	require.Equal(t, errValueNil, err)
+
+	err = db.Set([]byte("x"), []byte{})
+	require.NoError(t, err)
+	err = db.SetSync([]byte("x"), []byte{})
+	require.NoError(t, err)
+	value, err = db.Get([]byte("x"))
+	require.NoError(t, err)
+	require.Equal(t, []byte{}, value)
 }
 
 func TestBackendsGetSetDelete(t *testing.T) {
@@ -156,7 +170,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 
 	for i := 0; i < 10; i++ {
 		if i != 6 { // but skip 6.
-			err := db.Set(int642Bytes(int64(i)), nil)
+			err := db.Set(int642Bytes(int64(i)), []byte{})
 			require.NoError(t, err)
 		}
 	}
@@ -343,12 +357,14 @@ func testDBBatch(t *testing.T, backend BackendType) {
 	require.NoError(t, batch.Close())
 	assertKeyValues(t, db, map[string][]byte{"a": {1}, "b": {2}})
 
-	// empty and nil keys should be disallowed
+	// empty and nil keys, as well as nil values, should be disallowed
 	batch = db.NewBatch()
 	err = batch.Set([]byte{}, []byte{0x01})
 	require.Equal(t, errKeyEmpty, err)
 	err = batch.Set(nil, []byte{0x01})
 	require.Equal(t, errKeyEmpty, err)
+	err = batch.Set([]byte("a"), nil)
+	require.Equal(t, errValueNil, err)
 
 	err = batch.Delete([]byte{})
 	require.Equal(t, errKeyEmpty, err)

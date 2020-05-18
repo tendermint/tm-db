@@ -59,6 +59,9 @@ func (pdb *PrefixDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if value == nil {
+		return errValueNil
+	}
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()
 
@@ -73,6 +76,9 @@ func (pdb *PrefixDB) Set(key []byte, value []byte) error {
 func (pdb *PrefixDB) SetSync(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
 	}
 	pdb.mtx.Lock()
 	defer pdb.mtx.Unlock()

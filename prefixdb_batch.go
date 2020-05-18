@@ -19,6 +19,9 @@ func (pb prefixDBBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if value == nil {
+		return errValueNil
+	}
 	pkey := append(cp(pb.prefix), key...)
 	return pb.source.Set(pkey, value)
 }

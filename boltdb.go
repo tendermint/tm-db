@@ -97,7 +97,9 @@ func (bdb *BoltDB) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	err := bdb.db.Update(func(tx *bbolt.Tx) error {
 		b := tx.Bucket(bucket)
 		return b.Put(key, value)

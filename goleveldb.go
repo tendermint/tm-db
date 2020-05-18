@@ -68,7 +68,9 @@ func (db *GoLevelDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(key, value, nil); err != nil {
 		return err
 	}
@@ -80,7 +82,9 @@ func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(key, value, &opt.WriteOptions{Sync: true}); err != nil {
 		return err
 	}

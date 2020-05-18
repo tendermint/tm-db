@@ -76,7 +76,9 @@ func (db *CLevelDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(db.wo, key, value); err != nil {
 		return err
 	}
@@ -88,7 +90,9 @@ func (db *CLevelDB) SetSync(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	value = nonNilBytes(value)
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(db.woSync, key, value); err != nil {
 		return err
 	}

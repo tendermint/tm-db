@@ -24,6 +24,9 @@ func (b *goLevelDBBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if value == nil {
+		return errValueNil
+	}
 	if b.batch == nil {
 		return errBatchClosed
 	}

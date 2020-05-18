@@ -94,6 +94,9 @@ func (db *MemDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if value == nil {
+		return errValueNil
+	}
 	db.mtx.Lock()
 	defer db.mtx.Unlock()
 

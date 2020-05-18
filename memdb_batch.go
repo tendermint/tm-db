@@ -37,6 +37,9 @@ func (b *memDBBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if value == nil {
+		return errValueNil
+	}
 	if b.ops == nil {
 		return errBatchClosed
 	}
