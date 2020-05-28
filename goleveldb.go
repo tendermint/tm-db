@@ -14,6 +14,11 @@ func init() {
 		return NewGoLevelDB(name, dir)
 	}
 	registerDBCreator(GoLevelDBBackend, dbCreator, false)
+
+	dbCreatorReadOnly := func(name string, dir string) (DB, error) {
+		return NewGoLevelDBReadOnly(name, dir)
+	}
+	registerDBCreator(GoLevelDBBackendReadOnly, dbCreatorReadOnly, false)
 }
 
 type GoLevelDB struct {
@@ -24,6 +29,12 @@ var _ DB = (*GoLevelDB)(nil)
 
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	return NewGoLevelDBWithOpts(name, dir, nil)
+}
+
+func NewGoLevelDBReadOnly(name string, dir string) (*GoLevelDB, error) {
+	var o opt.Options
+	o.ReadOnly = true
+	return NewGoLevelDBWithOpts(name, dir, &o)
 }
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {

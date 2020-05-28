@@ -14,6 +14,8 @@ const (
 	//   - pure go
 	//   - stable
 	GoLevelDBBackend BackendType = "goleveldb"
+	// same to GoLevelDBBackend but readonly
+	GoLevelDBBackendReadOnly BackendType = "goleveldb_readonly"
 	// CLevelDBBackend represents cleveldb (uses levigo wrapper)
 	//   - fast
 	//   - requires gcc
