@@ -10,7 +10,10 @@ jobs:
     container: tendermintdev/docker-tm-db-testing
     steps:
       - uses: actions/checkout@v2
-      - name: test all dbs
+      - name: test & coverage report creation
         run: |
-          make test-all
-        shell: bash
+          go test ./... -mod=readonly -timeout 8m -race -coverprofile=coverage.txt -covermode=atomic -tags cleveldb,boltdb,rocksdb
+      - uses: codecov/codecov-action@v1
+        with:
+          file: ./coverage.txt
+          fail_ci_if_error: true  
