@@ -1,8 +1,31 @@
-# Tendermint DB
 
-![Test](https://github.com/tendermint/tm-db/workflows/Test/badge.svg?branch=master)
-![Lint](https://github.com/tendermint/tm-db/workflows/Lint/badge.svg?branch=master)
-[![](https://godoc.org/github.com/tendermint/tm-db?status.svg)](http://godoc.org/github.com/tendermint/tm-db)
+<div align="center">
+  <h1> Tendermint DB </h1>
+</div>
+
+<div align="center">
+  <a href="https://github.com/tendermint/tm-db/releases/latest">
+    <img alt="Version" src="https://img.shields.io/github/tag/tendermint/tm-db.svg" />
+  </a>
+  <a href="https://github.com/tendermint/tm-db/blob/master/LICENSE">
+    <img alt="License: Apache-2.0" src="https://img.shields.io/github/license/cosmos/cosmos-sdk.svg" />
+  </a>
+  <a href="https://pkg.go.dev/github.com/tendermint/tm-db?tab=doc">
+    <img alt="go doc" src="https://godoc.org/github.com/tendermint/tm-db?status.svg" />
+  </a>
+  <a href="https://goreportcard.com/report/github.com/tendermint/tm-db">
+    <img alt="go report card" src="https://goreportcard.com/badge/github.com/tendermint/tm-db" />
+  </a>
+  <a href="https://codecov.io/gh/tendermint/tm-db">
+    <img alt="Code Coverage" src="https://codecov.io/gh/tendermint/tm-db/branch/master/graph/badge.svg" />
+  </a>
+  <a href="https://github.com/tendermint/tm-db/workflows/Lint/badge.svg?branch=master">
+    <img alt="Lint" src="https://github.com/tendermint/tm-db/workflows/Lint/badge.svg?branch=master" />
+  </a>
+  <a href="https://github.com/tendermint/tm-db/workflows/Test/badge.svg?branch=master">
+    <img alt="Lint" src="https://github.com/tendermint/tm-db/workflows/Test/badge.svg?branch=master" />
+  </a>
+</div>
 
 Common database interface for various database backends. Primarily meant for applications built on [Tendermint](https://github.com/tendermint/tendermint), such as the [Cosmos SDK](https://github.com/cosmos/cosmos-sdk), but can be used independently of these as well.
 
