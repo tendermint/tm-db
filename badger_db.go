@@ -1,46 +1,30 @@
 package db
 
 import (
-	"bufio"
-	"io"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/dgraph-io/badger/v2"
 )
 
-func init() {
-	registerDBCreator(BadgerDBBackend, badgerDBCreator, true)
-}
-
-type Options badger.Options
+func init() { registerDBCreator(BadgerDBBackend, badgerDBCreator, true) }
 
 func badgerDBCreator(dbName, dir string) (DB, error) {
 	return NewBadgerDB(dbName, dir)
 }
 
-var (
-	_KB = int64(1024)
-	_MB = 1024 * _KB
-	_GB = 1024 * _MB
-)
-
 // NewBadgerDB creates a Badger key-value store backed to the
 // directory dir supplied. If dir does not exist, we create it.
 func NewBadgerDB(dbName, dir string) (*BadgerDB, error) {
-	// BadgerDB doesn't expose a way for us to
-	// create  a DB with the user's supplied name.
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	// Since Badger doesn't support database names, we join both to obtain
+	// the final directory to use for the database.
+	path := filepath.Join(dir, dbName)
+
+	if err := os.MkdirAll(path, 0755); err != nil {
 		return nil, err
 	}
-	opts := badger.DefaultOptions
-	// // Arbitrary size given that at Tendermint
-	// // we'll need huge KeyValue stores.
-	opts.ValueLogFileSize = 1 * _GB
-	// opts.SyncWrites = false
-	opts.Dir = dir
-	opts.ValueDir = dir
-
+	opts := badger.DefaultOptions(path)
 	return NewBadgerDBWithOptions(opts)
 }
 
@@ -115,54 +99,16 @@ func (b *BadgerDB) Close() error {
 	return b.db.Close()
 }
 
-func (b *BadgerDB) Fprint(w io.Writer) {
-	// bIter := b.Iterator()
-	// defer bIter.Release()
-
-	// var bw *bufio.Writer
-	// if bbw, ok := w.(*bufio.Writer); ok {
-	// 	bw = bbw
-	// } else {
-	// 	bw = bufio.NewWriter(w)
-	// }
-	// defer bw.Flush()
-
-	// i := uint64(0)
-	// for bIter.rewind(); bIter.valid(); bIter.Next() {
-	// 	k, v := bIter.kv()
-	// 	fmt.Fprintf(bw, "[%X]:\t[%X]\n", k, v)
-	// 	i += 1
-	// 	if i%1024 == 0 {
-	// 		bw.Flush()
-	// 		i = 0
-	// 	}
-	// }
-}
-
 func (b *BadgerDB) Print() error {
-	bw := bufio.NewWriter(os.Stdout)
-	b.Fprint(bw)
 	return nil
 }
 
 func (b *BadgerDB) Iterator(start, end []byte) (Iterator, error) {
-	// dbIter := b.db.NewIterator(badger.IteratorOptions{
-	// 	PrefetchValues: true,
-
-	// 	// Arbitrary PrefetchSize
-	// 	PrefetchSize: 10,
-	// })
-	// // Ensure that we are always at the zeroth item
-	// dbIter.Rewind()
 	return nil, nil
 }
 
 func (b *BadgerDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	return nil, nil
-}
-
-func (b *BadgerDB) IteratorPrefix(prefix []byte) (Iterator, error) {
-	return b.Iterator(prefix, nil)
 }
 
 func (b *BadgerDB) Stats() map[string]string {
@@ -220,18 +166,6 @@ func (bb *badgerDBBatch) Write() error {
 		}
 		return nil
 	})
-	// var buf *bytes.Buffer // It'll be lazily allocated when needed
-	// for i, entry := range entries {
-	// 	if err := entry.Error; err != nil {
-	// 		if buf == nil {
-	// 			buf = new(bytes.Buffer)
-	// 		}
-	// 		fmt.Fprintf(buf, "#%d: entry err: %v\n", i, err)
-	// 	}
-	// }
-	// if buf != nil {
-	// 	panic(string(buf.Bytes()))
-	// }
 }
 
 func (bb *badgerDBBatch) WriteSync() error {
@@ -252,19 +186,6 @@ func (bb *badgerDBBatch) WriteSync() error {
 		}
 		return nil
 	})
-
-	// var buf *bytes.Buffer // It'll be lazily allocated when needed
-	// for i, entry := range entries {
-	// 	if err := entry.Error; err != nil {
-	// 		if buf == nil {
-	// 			buf = new(bytes.Buffer)
-	// 		}
-	// 		fmt.Fprintf(buf, "#%d: entry err: %v\n", i, err)
-	// 	}
-	// }
-	// if buf != nil {
-	// 	panic(string(buf.Bytes()))
-	// }
 }
 
 func (bb *badgerDBBatch) Close() error {
