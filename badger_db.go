@@ -61,40 +61,20 @@ type BadgerDB struct {
 
 var _ DB = (*BadgerDB)(nil)
 
-func (b *BadgerDB) Get(key []byte) []byte {
+func (b *BadgerDB) Get(key []byte) ([]byte, error) {
 	var val []byte
 	err := b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
 		if err != nil {
 			return err
 		}
-		val, err = item.Value()
-		if err != nil {
-			return err
-		}
-		return nil
+		val, err = item.ValueCopy(nil)
+		return err
 	})
-	if err != nil {
-		// Unfortunate that Get can't return errors
-		// TODO: Propose allowing DB's Get to return errors too.
-		panic(err)
-	}
-	// var valueSave []byte
-	// err := valueItem.Value(func(origValue []byte) error {
-	// 	// TODO: Decide if we should just assign valueSave to origValue
-	// 	// since here we aren't dealing with iterators directly.
-	// 	valueSave = make([]byte, len(origValue))
-	// 	copy(valueSave, origValue)
-	// 	return nil
-	// })
-	// if err != nil {
-	// 	// TODO: ditto:: Propose allowing DB's Get to return errors too.
-	// 	panic(err)
-	// }
-	return val
+	return val, err
 }
 
-func (b *BadgerDB) Has(key []byte) bool {
+func (b *BadgerDB) Has(key []byte) (bool, error) {
 	var found bool
 	err := b.db.View(func(txn *badger.Txn) error {
 		_, err := txn.Get(key)
@@ -104,54 +84,35 @@ func (b *BadgerDB) Has(key []byte) bool {
 		found = (err != badger.ErrKeyNotFound)
 		return nil
 	})
-	if err != nil {
-		// Unfortunate that Get can't return errors
-		// TODO: Propose allowing DB's Get to return errors too.
-		panic(err)
-	}
-	return found
+	return found, err
 }
 
-func (b *BadgerDB) Set(key, value []byte) {
-	err := b.db.Update(func(txn *badger.Txn) error {
+func (b *BadgerDB) Set(key, value []byte) error {
+	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, value)
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (b *BadgerDB) SetSync(key, value []byte) {
-	err := b.db.Update(func(txn *badger.Txn) error {
+func (b *BadgerDB) SetSync(key, value []byte) error {
+	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, value)
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (b *BadgerDB) Delete(key []byte) {
-	err := b.db.Update(func(txn *badger.Txn) error {
+func (b *BadgerDB) Delete(key []byte) error {
+	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (b *BadgerDB) DeleteSync(key []byte) {
-	err := b.db.Update(func(txn *badger.Txn) error {
+func (b *BadgerDB) DeleteSync(key []byte) error {
+	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func (b *BadgerDB) Close() {
-	if err := b.db.Close(); err != nil {
-		panic(err)
-	}
+func (b *BadgerDB) Close() error {
+	return b.db.Close()
 }
 
 func (b *BadgerDB) Fprint(w io.Writer) {
@@ -178,12 +139,13 @@ func (b *BadgerDB) Fprint(w io.Writer) {
 	// }
 }
 
-func (b *BadgerDB) Print() {
+func (b *BadgerDB) Print() error {
 	bw := bufio.NewWriter(os.Stdout)
 	b.Fprint(bw)
+	return nil
 }
 
-func (b *BadgerDB) Iterator(start, end []byte) Iterator {
+func (b *BadgerDB) Iterator(start, end []byte) (Iterator, error) {
 	// dbIter := b.db.NewIterator(badger.IteratorOptions{
 	// 	PrefetchValues: true,
 
@@ -192,14 +154,14 @@ func (b *BadgerDB) Iterator(start, end []byte) Iterator {
 	// })
 	// // Ensure that we are always at the zeroth item
 	// dbIter.Rewind()
-	return nil
+	return nil, nil
 }
 
-func (b *BadgerDB) ReverseIterator(start, end []byte) Iterator {
-	return nil
+func (b *BadgerDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	return nil, nil
 }
 
-func (b *BadgerDB) IteratorPrefix(prefix []byte) Iterator {
+func (b *BadgerDB) IteratorPrefix(prefix []byte) (Iterator, error) {
 	return b.Iterator(prefix, nil)
 }
 
@@ -220,35 +182,37 @@ type badgerDBBatch struct {
 	db *BadgerDB
 }
 
-func (bb *badgerDBBatch) Set(key, value []byte) {
+func (bb *badgerDBBatch) Set(key, value []byte) error {
 	bb.entriesMu.Lock()
 	bb.entries = append(bb.entries, &badger.Entry{
 		Key:   key,
 		Value: value,
 	})
 	bb.entriesMu.Unlock()
+	return nil
 }
 
 // Unfortunately Badger doesn't have a batch delete
 // The closest that we can do is do a delete from the DB.
 // Hesitant to do DeleteAsync because that changes the
 // expected ordering
-func (bb *badgerDBBatch) Delete(key []byte) {
+func (bb *badgerDBBatch) Delete(key []byte) error {
 	// bb.db.Delete(key)
+	return nil
 }
 
 // Write commits all batch sets to the DB
-func (bb *badgerDBBatch) Write() {
+func (bb *badgerDBBatch) Write() error {
 	bb.entriesMu.Lock()
 	entries := bb.entries
 	bb.entries = nil
 	bb.entriesMu.Unlock()
 
 	if len(entries) == 0 {
-		return
+		return nil
 	}
 
-	err := bb.db.db.Update(func(txn *badger.Txn) error {
+	return bb.db.db.Update(func(txn *badger.Txn) error {
 		for _, e := range entries {
 			if err := txn.SetEntry(e); err != nil {
 				return err
@@ -256,9 +220,6 @@ func (bb *badgerDBBatch) Write() {
 		}
 		return nil
 	})
-	if err != nil {
-		panic(err)
-	}
 	// var buf *bytes.Buffer // It'll be lazily allocated when needed
 	// for i, entry := range entries {
 	// 	if err := entry.Error; err != nil {
@@ -273,17 +234,17 @@ func (bb *badgerDBBatch) Write() {
 	// }
 }
 
-func (bb *badgerDBBatch) WriteSync() {
+func (bb *badgerDBBatch) WriteSync() error {
 	bb.entriesMu.Lock()
 	entries := bb.entries
 	bb.entries = nil
 	bb.entriesMu.Unlock()
 
 	if len(entries) == 0 {
-		return
+		return nil
 	}
 
-	err := bb.db.db.Update(func(txn *badger.Txn) error {
+	return bb.db.db.Update(func(txn *badger.Txn) error {
 		for _, e := range entries {
 			if err := txn.SetEntry(e); err != nil {
 				return err
@@ -291,9 +252,6 @@ func (bb *badgerDBBatch) WriteSync() {
 		}
 		return nil
 	})
-	if err != nil {
-		panic(err)
-	}
 
 	// var buf *bytes.Buffer // It'll be lazily allocated when needed
 	// for i, entry := range entries {
@@ -307,6 +265,10 @@ func (bb *badgerDBBatch) WriteSync() {
 	// if buf != nil {
 	// 	panic(string(buf.Bytes()))
 	// }
+}
+
+func (bb *badgerDBBatch) Close() error {
+	return nil // TODO
 }
 
 type badgerDBIterator struct {
