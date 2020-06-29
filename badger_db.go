@@ -1,6 +1,7 @@
 package db
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"sync"
@@ -46,19 +47,30 @@ type BadgerDB struct {
 var _ DB = (*BadgerDB)(nil)
 
 func (b *BadgerDB) Get(key []byte) ([]byte, error) {
+	if len(key) == 0 {
+		return nil, errKeyEmpty
+	}
 	var val []byte
 	err := b.db.View(func(txn *badger.Txn) error {
 		item, err := txn.Get(key)
-		if err != nil {
+		if err == badger.ErrKeyNotFound {
+			return nil
+		} else if err != nil {
 			return err
 		}
 		val, err = item.ValueCopy(nil)
+		if err == nil && val == nil {
+			val = []byte{}
+		}
 		return err
 	})
 	return val, err
 }
 
 func (b *BadgerDB) Has(key []byte) (bool, error) {
+	if len(key) == 0 {
+		return false, errKeyEmpty
+	}
 	var found bool
 	err := b.db.View(func(txn *badger.Txn) error {
 		_, err := txn.Get(key)
@@ -72,24 +84,42 @@ func (b *BadgerDB) Has(key []byte) (bool, error) {
 }
 
 func (b *BadgerDB) Set(key, value []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
+	}
 	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, value)
 	})
 }
 
 func (b *BadgerDB) SetSync(key, value []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
+	}
 	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Set(key, value)
 	})
 }
 
 func (b *BadgerDB) Delete(key []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
 }
 
 func (b *BadgerDB) DeleteSync(key []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	return b.db.Update(func(txn *badger.Txn) error {
 		return txn.Delete(key)
 	})
@@ -103,12 +133,38 @@ func (b *BadgerDB) Print() error {
 	return nil
 }
 
+func (b *BadgerDB) iteratorOpts(start, end []byte, opts badger.IteratorOptions) (*badgerDBIterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
+	txn := b.db.NewTransaction(false)
+	iter := txn.NewIterator(opts)
+	iter.Rewind()
+	iter.Seek(start)
+	if opts.Reverse && iter.Valid() && bytes.Equal(iter.Item().Key(), start) {
+		// If we're going in reverse, our starting point was "end",
+		// which is exclusive.
+		iter.Next()
+	}
+	return &badgerDBIterator{
+		reverse: opts.Reverse,
+		start:   start,
+		end:     end,
+
+		txn:  txn,
+		iter: iter,
+	}, nil
+}
+
 func (b *BadgerDB) Iterator(start, end []byte) (Iterator, error) {
-	return nil, nil
+	opts := badger.DefaultIteratorOptions
+	return b.iteratorOpts(start, end, opts)
 }
 
 func (b *BadgerDB) ReverseIterator(start, end []byte) (Iterator, error) {
-	return nil, nil
+	opts := badger.DefaultIteratorOptions
+	opts.Reverse = true
+	return b.iteratorOpts(end, start, opts)
 }
 
 func (b *BadgerDB) Stats() map[string]string {
@@ -129,6 +185,12 @@ type badgerDBBatch struct {
 }
 
 func (bb *badgerDBBatch) Set(key, value []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
+	}
 	bb.entriesMu.Lock()
 	bb.entries = append(bb.entries, &badger.Entry{
 		Key:   key,
@@ -143,6 +205,9 @@ func (bb *badgerDBBatch) Set(key, value []byte) error {
 // Hesitant to do DeleteAsync because that changes the
 // expected ordering
 func (bb *badgerDBBatch) Delete(key []byte) error {
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	// bb.db.Delete(key)
 	return nil
 }
@@ -193,7 +258,61 @@ func (bb *badgerDBBatch) Close() error {
 }
 
 type badgerDBIterator struct {
-	mu sync.RWMutex
+	reverse    bool
+	start, end []byte
 
+	txn  *badger.Txn
 	iter *badger.Iterator
+
+	lastErr error
+}
+
+func (i *badgerDBIterator) Close() error {
+	i.iter.Close()
+	i.txn.Discard()
+	return nil
+}
+
+func (i *badgerDBIterator) Domain() (start, end []byte) { return i.start, i.end }
+func (i *badgerDBIterator) Error() error                { return i.lastErr }
+
+func (i *badgerDBIterator) Next() {
+	if !i.Valid() {
+		panic("iterator is invalid")
+	}
+	i.iter.Next()
+}
+
+func (i *badgerDBIterator) Valid() bool {
+	if !i.iter.Valid() {
+		return false
+	}
+	if len(i.end) > 0 {
+		key := i.iter.Item().Key()
+		if c := bytes.Compare(key, i.end); (!i.reverse && c >= 0) || (i.reverse && c < 0) {
+			// We're at the end key, or past the end.
+			return false
+		}
+	}
+	return true
+}
+
+func (i *badgerDBIterator) Key() []byte {
+	if !i.Valid() {
+		panic("iterator is invalid")
+	}
+	// Note that we don't use KeyCopy, so this is only valid until the next
+	// call to Next.
+	return i.iter.Item().KeyCopy(nil)
+}
+
+func (i *badgerDBIterator) Value() []byte {
+	if !i.Valid() {
+		panic("iterator is invalid")
+	}
+	val, err := i.iter.Item().ValueCopy(nil)
+	if err != nil {
+		i.lastErr = err
+	}
+	return val
 }
