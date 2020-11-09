@@ -7,6 +7,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 func init() {
@@ -158,12 +159,12 @@ func (db *GoLevelDB) NewBatch() Batch {
 
 // Iterator implements DB.
 func (db *GoLevelDB) Iterator(start, end []byte) (Iterator, error) {
-	itr := db.db.NewIterator(nil, nil)
+	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
 func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
-	itr := db.db.NewIterator(nil, nil)
+	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, true), nil
 }
