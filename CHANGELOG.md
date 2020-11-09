@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- [\#134](https://github.com/tendermint/tm-db/pull/134) Add the `util.Range` to `NewIterator` (@klim0v)
+
 ## 0.6.2
 
 **2020-08-27**
