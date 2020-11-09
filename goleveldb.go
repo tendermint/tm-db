@@ -176,7 +176,7 @@ func (db *GoLevelDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-  itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
+	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, false), nil
 }
 
