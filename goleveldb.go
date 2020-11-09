@@ -2,12 +2,12 @@ package db
 
 import (
 	"fmt"
-	"github.com/syndtr/goleveldb/leveldb/util"
 	"path/filepath"
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 func init() {
