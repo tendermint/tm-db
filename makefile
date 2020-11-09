@@ -10,23 +10,27 @@ all: lint test
 ## By default this will only test memdb & goleveldb
 test:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -v
+	@go test $(PACKAGES) -v
 
 test-cleveldb:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -tags cleveldb -v
+	@go test $(PACKAGES) -tags cleveldb -v
 
 test-rocksdb:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -tags rocksdb -v
+	@go test $(PACKAGES) -tags rocksdb -v
 
 test-boltdb:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -tags boltdb -v
+	@go test $(PACKAGES) -tags boltdb -v
+
+test-badgerdb:
+	@echo "--> Running go test"
+	@go test $(PACKAGES) -tags badgerdb -v
 
 test-all:
 	@echo "--> Running go test"
-	@go test -p 1 $(PACKAGES) -tags cleveldb,boltdb,rocksdb -v
+	@go test $(PACKAGES) -tags cleveldb,boltdb,rocksdb,badgerdb -v
 
 lint:
 	@echo "--> Running linter"

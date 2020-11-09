@@ -63,7 +63,11 @@ func (s *server) Init(ctx context.Context, in *protodb.Init) (*protodb.Entity, e
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.db = db.NewDB(in.Name, db.BackendType(in.Type), in.Dir)
+	var err error
+	s.db, err = db.NewDB(in.Name, db.BackendType(in.Type), in.Dir)
+	if err != nil {
+		return nil, err
+	}
 	return &protodb.Entity{CreatedAt: time.Now().Unix()}, nil
 }
 
@@ -214,9 +218,15 @@ func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*pr
 	for _, op := range b.Ops {
 		switch op.Type {
 		case protodb.Operation_SET:
-			bat.Set(op.Entity.Key, op.Entity.Value)
+			err := bat.Set(op.Entity.Key, op.Entity.Value)
+			if err != nil {
+				return nil, err
+			}
 		case protodb.Operation_DELETE:
-			bat.Delete(op.Entity.Key)
+			err := bat.Delete(op.Entity.Key)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	if sync {

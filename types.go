@@ -1,11 +1,23 @@
 package db
 
+import "errors"
+
+var (
+	// errBatchClosed is returned when a closed or written batch is used.
+	errBatchClosed = errors.New("batch has been written or closed")
+
+	// errKeyEmpty is returned when attempting to use an empty or nil key.
+	errKeyEmpty = errors.New("key cannot be empty")
+
+	// errValueNil is returned when attempting to set a nil value.
+	errValueNil = errors.New("value cannot be nil")
+)
+
 // DB is the main interface for all database backends. DBs are concurrency-safe. Callers must call
 // Close on the database when done.
 //
-// Keys and values can be empty, or nil which is interpreted as an empty byte slice. Keys and values
-// should be considered read-only, both when returned and when given, and must be copied before they
-// are modified.
+// Keys cannot be nil or empty, while values cannot be nil. Keys and values should be considered
+// read-only, both when returned and when given, and must be copied before they are modified.
 type DB interface {
 	// Get fetches the value of the given key, or nil if it does not exist.
 	// CONTRACT: key, value readonly []byte
@@ -31,7 +43,8 @@ type DB interface {
 
 	// Iterator returns an iterator over a domain of keys, in ascending order. The caller must call
 	// Close when done. End is exclusive, and start must be less than end. A nil start iterates
-	// from the first key, and a nil end iterates to the last key (inclusive).
+	// from the first key, and a nil end iterates to the last key (inclusive). Empty keys are not
+	// valid.
 	// CONTRACT: No writes may happen within a domain while an iterator exists over it.
 	// CONTRACT: start, end readonly []byte
 	Iterator(start, end []byte) (Iterator, error)
@@ -39,6 +52,7 @@ type DB interface {
 	// ReverseIterator returns an iterator over a domain of keys, in descending order. The caller
 	// must call Close when done. End is exclusive, and start must be less than end. A nil end
 	// iterates from the last key (inclusive), and a nil start iterates to the first key (inclusive).
+	// Empty keys are not valid.
 	// CONTRACT: No writes may happen within a domain while an iterator exists over it.
 	// CONTRACT: start, end readonly []byte
 	ReverseIterator(start, end []byte) (Iterator, error)
@@ -62,33 +76,32 @@ type DB interface {
 // As with DB, given keys and values should be considered read-only, and must not be modified after
 // passing them to the batch.
 type Batch interface {
-	SetDeleter
-
-	// Write writes the batch, possibly without flushing to disk. Only Close() can be called after,
-	// other methods will panic.
-	Write() error
-
-	// WriteSync writes the batch and flushes it to disk. Only Close() can be called after, other
-	// methods will panic.
-	WriteSync() error
-
-	// Close closes the batch. It is idempotent, but any other calls afterwards will panic.
-	Close()
-}
-
-type SetDeleter interface {
 	// Set sets a key/value pair.
 	// CONTRACT: key, value readonly []byte
-	Set(key, value []byte)
+	Set(key, value []byte) error
 
 	// Delete deletes a key/value pair.
 	// CONTRACT: key readonly []byte
-	Delete(key []byte)
+	Delete(key []byte) error
+
+	// Write writes the batch, possibly without flushing to disk. Only Close() can be called after,
+	// other methods will error.
+	Write() error
+
+	// WriteSync writes the batch and flushes it to disk. Only Close() can be called after, other
+	// methods will error.
+	WriteSync() error
+
+	// Close closes the batch. It is idempotent, but calls to other methods afterwards will error.
+	Close() error
 }
 
 // Iterator represents an iterator over a domain of keys. Callers must call Close when done.
 // No writes can happen to a domain while there exists an iterator over it, some backends may take
 // out database locks to ensure this will not happen.
+//
+// Callers must make sure the iterator is valid before calling any methods on it, otherwise
+// these methods will panic. This is in part caused by most backend databases using this convention.
 //
 // As with DB, keys and values should be considered read-only, and must be copied before they are
 // modified.
@@ -100,6 +113,9 @@ type SetDeleter interface {
 //
 // for ; itr.Valid(); itr.Next() {
 //   k, v := itr.Key(); itr.Value()
+//   ...
+// }
+// if err := itr.Error(); err != nil {
 //   ...
 // }
 type Iterator interface {
@@ -127,5 +143,5 @@ type Iterator interface {
 	Error() error
 
 	// Close closes the iterator, relasing any allocated resources.
-	Close()
+	Close() error
 }

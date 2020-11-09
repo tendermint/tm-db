@@ -1,6 +1,9 @@
 package db
 
-import "bytes"
+import (
+	"bytes"
+	"fmt"
+)
 
 // IteratePrefix is a convenience function for iterating over a key domain
 // restricted by prefix.
@@ -20,15 +23,6 @@ func IteratePrefix(db DB, prefix []byte) (Iterator, error) {
 	return itr, nil
 }
 
-/*
-TODO: Make test, maybe rename.
-// Like IteratePrefix but the iterator strips the prefix from the keys.
-func IteratePrefixStripped(db DB, prefix []byte) Iterator {
-	start, end := ...
-	return newPrefixIterator(prefix, start, end, IteratePrefix(db, prefix))
-}
-*/
-
 // Strips prefix while iterating from Iterator.
 type prefixDBIterator struct {
 	prefix []byte
@@ -36,6 +30,7 @@ type prefixDBIterator struct {
 	end    []byte
 	source Iterator
 	valid  bool
+	err    error
 }
 
 var _ Iterator = (*prefixDBIterator)(nil)
@@ -49,14 +44,16 @@ func newPrefixIterator(prefix, start, end []byte, source Iterator) (*prefixDBIte
 		valid:  false,
 	}
 
-	if !source.Valid() {
-		return pitrInvalid, nil
+	// Empty keys are not allowed, so if a key exists in the database that exactly matches the
+	// prefix we need to skip it.
+	if source.Valid() && bytes.Equal(source.Key(), prefix) {
+		source.Next()
 	}
-	key := source.Key()
 
-	if !bytes.HasPrefix(key, prefix) {
+	if !source.Valid() || !bytes.HasPrefix(source.Key(), prefix) {
 		return pitrInvalid, nil
 	}
+
 	return &prefixDBIterator{
 		prefix: prefix,
 		start:  start,
@@ -73,55 +70,63 @@ func (itr *prefixDBIterator) Domain() (start []byte, end []byte) {
 
 // Valid implements Iterator.
 func (itr *prefixDBIterator) Valid() bool {
-	return itr.valid && itr.source.Valid()
+	if !itr.valid || itr.err != nil || !itr.source.Valid() {
+		return false
+	}
+
+	key := itr.source.Key()
+	if len(key) < len(itr.prefix) || !bytes.Equal(key[:len(itr.prefix)], itr.prefix) {
+		itr.err = fmt.Errorf("received invalid key from backend: %x (expected prefix %x)",
+			key, itr.prefix)
+		return false
+	}
+
+	return true
 }
 
 // Next implements Iterator.
 func (itr *prefixDBIterator) Next() {
-	if !itr.valid {
-		panic("prefixIterator invalid; cannot call Next()")
-	}
+	itr.assertIsValid()
 	itr.source.Next()
 
 	if !itr.source.Valid() || !bytes.HasPrefix(itr.source.Key(), itr.prefix) {
 		itr.valid = false
+
+	} else if bytes.Equal(itr.source.Key(), itr.prefix) {
+		// Empty keys are not allowed, so if a key exists in the database that exactly matches the
+		// prefix we need to skip it.
+		itr.Next()
 	}
 }
 
 // Next implements Iterator.
-func (itr *prefixDBIterator) Key() (key []byte) {
-	if !itr.valid {
-		panic("prefixIterator invalid; cannot call Key()")
-	}
-	key = itr.source.Key()
-	return stripPrefix(key, itr.prefix)
+func (itr *prefixDBIterator) Key() []byte {
+	itr.assertIsValid()
+	key := itr.source.Key()
+	return key[len(itr.prefix):] // we have checked the key in Valid()
 }
 
 // Value implements Iterator.
-func (itr *prefixDBIterator) Value() (value []byte) {
-	if !itr.valid {
-		panic("prefixIterator invalid; cannot call Value()")
-	}
-	value = itr.source.Value()
-	return value
+func (itr *prefixDBIterator) Value() []byte {
+	itr.assertIsValid()
+	return itr.source.Value()
 }
 
 // Error implements Iterator.
 func (itr *prefixDBIterator) Error() error {
-	return itr.source.Error()
+	if err := itr.source.Error(); err != nil {
+		return err
+	}
+	return itr.err
 }
 
 // Close implements Iterator.
-func (itr *prefixDBIterator) Close() {
-	itr.source.Close()
+func (itr *prefixDBIterator) Close() error {
+	return itr.source.Close()
 }
 
-func stripPrefix(key []byte, prefix []byte) (stripped []byte) {
-	if len(key) < len(prefix) {
-		panic("should not happen")
+func (itr *prefixDBIterator) assertIsValid() {
+	if !itr.Valid() {
+		panic("iterator is invalid")
 	}
-	if !bytes.Equal(key[:len(prefix)], prefix) {
-		panic("should not happen")
-	}
-	return key[len(prefix):]
 }

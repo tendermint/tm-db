@@ -41,7 +41,9 @@ func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, 
 
 // Get implements DB.
 func (db *GoLevelDB) Get(key []byte) ([]byte, error) {
-	key = nonNilBytes(key)
+	if len(key) == 0 {
+		return nil, errKeyEmpty
+	}
 	res, err := db.db.Get(key, nil)
 	if err != nil {
 		if err == errors.ErrNotFound {
@@ -63,8 +65,12 @@ func (db *GoLevelDB) Has(key []byte) (bool, error) {
 
 // Set implements DB.
 func (db *GoLevelDB) Set(key []byte, value []byte) error {
-	key = nonNilBytes(key)
-	value = nonNilBytes(value)
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(key, value, nil); err != nil {
 		return err
 	}
@@ -73,8 +79,12 @@ func (db *GoLevelDB) Set(key []byte, value []byte) error {
 
 // SetSync implements DB.
 func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
-	key = nonNilBytes(key)
-	value = nonNilBytes(value)
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
+	if value == nil {
+		return errValueNil
+	}
 	if err := db.db.Put(key, value, &opt.WriteOptions{Sync: true}); err != nil {
 		return err
 	}
@@ -83,7 +93,9 @@ func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 
 // Delete implements DB.
 func (db *GoLevelDB) Delete(key []byte) error {
-	key = nonNilBytes(key)
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	if err := db.db.Delete(key, nil); err != nil {
 		return err
 	}
@@ -92,7 +104,9 @@ func (db *GoLevelDB) Delete(key []byte) error {
 
 // DeleteSync implements DB.
 func (db *GoLevelDB) DeleteSync(key []byte) error {
-	key = nonNilBytes(key)
+	if len(key) == 0 {
+		return errKeyEmpty
+	}
 	err := db.db.Delete(key, &opt.WriteOptions{Sync: true})
 	if err != nil {
 		return err
@@ -159,12 +173,18 @@ func (db *GoLevelDB) NewBatch() Batch {
 
 // Iterator implements DB.
 func (db *GoLevelDB) Iterator(start, end []byte) (Iterator, error) {
-	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
+  itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
 func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
 	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, true), nil
 }

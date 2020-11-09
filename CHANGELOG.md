@@ -2,6 +2,42 @@
 
 ## Unreleased
 
+## 0.6.2
+
+**2020-08-27**
+
+Bump grpc, badger and goleveldb (see versions in go.mod file)
+
+## 0.6.1
+
+**2020-08-12**
+
+### Improvements
+
+- [\#115](https://github.com/tendermint/tm-db/pull/115) Add a `BadgerDB` backend with build tag `badgerdb` (@mvdan)
+
+## 0.6.0
+
+**2020-06-24**
+
+### Breaking Changes
+
+- [\#99](https://github.com/tendermint/tm-db/pull/99) Keys can no longer be `nil` or empty, and values can no longer be `nil` (@erikgrinaker)
+
+- [\#98](https://github.com/tendermint/tm-db/pull/98) `NewDB` now returns an error instead of panicing (@erikgrinaker)
+
+- [\#96](https://github.com/tendermint/tm-db/pull/96) `Batch.Set()`, `Delete()`, and `Close()` may now error (@erikgrinaker)
+
+- [\#97](https://github.com/tendermint/tm-db/pull/97) `Iterator.Close()` may now error (@erikgrinaker)
+
+- [\#97](https://github.com/tendermint/tm-db/pull/97) Many iterator panics are now exposed via `Error()` instead (@erikgrinaker)
+
+- [\#96](https://github.com/tendermint/tm-db/pull/96) The `SetDeleter` interface has been removed (@erikgrinaker)
+
+### Bug Fixes
+
+- [\#97](https://github.com/tendermint/tm-db/pull/97) `RemoteDB` iterators are now correctly primed with the first item when created, without calling `Next()` (@erikgrinaker)
+
 ## 0.5.1
 
 **2020-03-30**
