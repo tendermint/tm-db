@@ -1,4 +1,4 @@
-name: Build & Push TM-Build
+name: Build & Push TM-DB-Testing
 on:
   pull_request:
     paths:
@@ -17,7 +17,7 @@ jobs:
       - name: Prepare
         id: prep
         run: |
-          DOCKER_IMAGE=tendermintdev/docker-tendermint-build
+          DOCKER_IMAGE=tendermintdev/docker-tm-db-testing
           VERSION=noop
           if [[ $GITHUB_REF == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
