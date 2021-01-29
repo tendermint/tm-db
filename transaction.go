@@ -29,13 +29,6 @@ func NewTransaction(db DB) *Transaction {
 	return &Transaction{state: 0, txs: make([]func() error, 0), keys: make([][]byte, 0), atomic: needsAtomic(db)}
 }
 
-// reset resets the transaction so it can make room for the next transaction
-func (t *Transaction) reset() {
-	t.state = 0
-	t.atomic = false
-	t.txs = t.txs[:0]
-}
-
 func (t *Transaction) Append(tx func() error, k []byte) {
 	t.m.Unlock()
 	defer t.m.Lock() // TODO: what defer hits first?
@@ -72,8 +65,6 @@ func (t *Transaction) transact(db DB) error {
 
 // transactAtomic transacts atomically
 func (t *Transaction) transactAtomic(db DB) error {
-	defer t.reset()
-
 	for i := range t.txs {
 		if err := t.txs[i](); err != nil {
 			t.rollBack(db)
