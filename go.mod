@@ -3,6 +3,7 @@ module github.com/tendermint/tm-db
 go 1.12
 
 require (
+	github.com/coreos/etcd v3.3.10+incompatible
 	github.com/dgraph-io/badger/v2 v2.2007.2
 	github.com/facebookgo/ensure v0.0.0-20160127193407-b4ab57deab51 // indirect
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
