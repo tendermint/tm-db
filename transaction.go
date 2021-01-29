@@ -18,18 +18,18 @@ type T interface {
 type Transaction struct {
 	m sync.RWMutex
 
-	state int              // the amount of transactions that have been completed
-	txs   []func(DB) error // txs is a list of all txs to execute for this transaction
-	keys  [][]byte         // is a list of the keys for this transaction
+	state int            // the amount of transactions that have been completed
+	txs   []func() error // txs is a list of all txs to execute for this transaction
+	keys  [][]byte       // is a list of the keys for this transaction
 
 	atomic bool
 }
 
 func NewTransaction(db DB) *Transaction {
-	return &Transaction{state: 0, txs: make([]func(DB) error, 0), keys: make([][]byte, 0), atomic: needsAtomic(db)}
+	return &Transaction{state: 0, txs: make([]func() error, 0), keys: make([][]byte, 0), atomic: needsAtomic(db)}
 }
 
-func (t *Transaction) Append(tx func(DB) error, k []byte) {
+func (t *Transaction) Append(tx func() error, k []byte) {
 	t.m.Unlock()
 	defer t.m.Lock() // TODO: what defer hits first?
 	t.txs = append(t.txs, tx)
@@ -52,7 +52,7 @@ func (t *Transaction) Transact(db DB) error {
 // transact transacts
 func (t *Transaction) transact(db DB) error {
 	for i := range t.txs {
-		if err := t.txs[i](db); err != nil {
+		if err := t.txs[i](); err != nil {
 			return errFailedToTransact
 		}
 
@@ -66,7 +66,7 @@ func (t *Transaction) transact(db DB) error {
 // transactAtomic transacts atomically
 func (t *Transaction) transactAtomic(db DB) error {
 	for i := range t.txs {
-		if err := t.txs[i](db); err != nil {
+		if err := t.txs[i](); err != nil {
 			t.rollBack(db)
 			return errFailedAtomicCheck
 		}
