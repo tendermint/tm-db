@@ -25,11 +25,11 @@ type Transaction struct {
 	atomic bool
 }
 
-func NewTransaction(db DB) *Transaction {
-	return &Transaction{state: 0, txs: make([]func() error, 0), keys: make([][]byte, 0), atomic: needsAtomic(db)}
+func NewTransaction(db DB) Transaction {
+	return Transaction{state: 0, txs: make([]func() error, 0), keys: make([][]byte, 0), atomic: needsAtomic(db)}
 }
 
-func (t *Transaction) Append(tx func() error, k []byte) {
+func (t Transaction) Append(tx func() error, k []byte) {
 	t.m.Unlock()
 	defer t.m.Lock() // TODO: what defer hits first?
 	t.txs = append(t.txs, tx)
@@ -37,11 +37,11 @@ func (t *Transaction) Append(tx func() error, k []byte) {
 }
 
 // saveKey saves a key incase deletion needs to occur
-func (t *Transaction) saveKey(k []byte) {
+func (t Transaction) saveKey(k []byte) {
 	t.keys = append(t.keys, k)
 }
 
-func (t *Transaction) Transact(db DB) error {
+func (t Transaction) Transact(db DB) error {
 	if !t.atomic {
 		return t.transact(db)
 	}
@@ -50,7 +50,7 @@ func (t *Transaction) Transact(db DB) error {
 }
 
 // transact transacts
-func (t *Transaction) transact(db DB) error {
+func (t Transaction) transact(db DB) error {
 	for i := range t.txs {
 		if err := t.txs[i](); err != nil {
 			return errFailedToTransact
@@ -64,7 +64,7 @@ func (t *Transaction) transact(db DB) error {
 }
 
 // transactAtomic transacts atomically
-func (t *Transaction) transactAtomic(db DB) error {
+func (t Transaction) transactAtomic(db DB) error {
 	for i := range t.txs {
 		if err := t.txs[i](); err != nil {
 			t.rollBack(db)
@@ -79,7 +79,7 @@ func (t *Transaction) transactAtomic(db DB) error {
 }
 
 // rollBack rolls the database back to what the database was before this transaction
-func (t *Transaction) rollBack(db DB) {
+func (t Transaction) rollBack(db DB) {
 	// do use atomic Transaction features if the database is already atomic
 	if !t.atomic {
 		return
