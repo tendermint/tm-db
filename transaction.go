@@ -2,7 +2,6 @@ package db
 
 import (
 	"errors"
-	"sync"
 )
 
 var errFailedAtomicCheck = errors.New("Failed to atomically write to the database rollback completed")
@@ -16,11 +15,9 @@ type T interface {
 
 // Transaction represents one transaction that abides by ACID properties
 type Transaction struct {
-	m sync.RWMutex
-
 	state int            // the amount of transactions that have been completed
 	txs   []func() error // txs is a list of all txs to execute for this transaction
-	keys  [][]byte       // is a list of the keys for this transaction
+	keys  [][]byte       // is a list of the keys that have been used during this transaction
 
 	atomic bool
 }
@@ -30,8 +27,6 @@ func NewTransaction(db DB) Transaction {
 }
 
 func (t Transaction) Append(tx func() error, k []byte) {
-	t.m.Unlock()
-	defer t.m.Lock() // TODO: what defer hits first?
 	t.txs = append(t.txs, tx)
 	t.saveKey(k)
 }
@@ -71,7 +66,7 @@ func (t Transaction) transactAtomic(db DB) error {
 			return errFailedAtomicCheck
 		}
 
-		// increment the state so if a rollback occurs it knows how many roll backs
+		// increment the state so if a rollback occurs the transaction knows how many times to roll back
 		t.state++
 	}
 
@@ -85,17 +80,13 @@ func (t Transaction) rollBack(db DB) {
 		return
 	}
 
-	// delete up to state zero
-	for i := t.state; t.state > 0; t.state-- {
+	for i := t.state; t.state > 0 || t.state == 0; t.state-- {
 		if err := db.Delete(t.keys[i]); err != nil {
 			panic(err)
 		}
-	}
 
-	// delete state zero, the first tx that was set in this atomic transaction
-	if t.state == 0 {
-		if err := db.Delete(t.keys[0]); err != nil {
-			panic(err)
+		if t.state == 0 {
+			return
 		}
 	}
 }
