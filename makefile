@@ -12,6 +12,14 @@ test:
 	@echo "--> Running go test"
 	@go test $(PACKAGES) -v
 
+test-memdb:
+	@echo "--> Running go test"
+	@go test $(PACKAGES) -tags memdb -v
+
+test-goleveldb:
+	@echo "--> Running go test"
+	@go test $(PACKAGES) -tags goleveldb -v
+
 test-cleveldb:
 	@echo "--> Running go test"
 	@go test $(PACKAGES) -tags cleveldb -v
@@ -30,7 +38,7 @@ test-badgerdb:
 
 test-all:
 	@echo "--> Running go test"
-	@go test $(PACKAGES) -tags cleveldb,boltdb,rocksdb,badgerdb -v
+	@go test $(PACKAGES) -tags memdb,goleveldb,cleveldb,boltdb,rocksdb,badgerdb -v
 
 lint:
 	@echo "--> Running linter"
