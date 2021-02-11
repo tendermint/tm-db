@@ -19,7 +19,7 @@ var _ tmdb.Iterator = (*cLevelDBIterator)(nil)
 
 func newCLevelDBIterator(source *levigo.Iterator, start, end []byte, isReverse bool) *cLevelDBIterator {
 	if isReverse {
-		if end == nil || len(end) == 0 {
+		if len(end) == 0 {
 			source.SeekToLast()
 		} else {
 			source.Seek(end)
@@ -33,7 +33,7 @@ func newCLevelDBIterator(source *levigo.Iterator, start, end []byte, isReverse b
 			}
 		}
 	} else {
-		if start == nil || len(start) == 0 {
+		if len(start) == 0 {
 			source.SeekToFirst()
 		} else {
 			source.Seek(start)

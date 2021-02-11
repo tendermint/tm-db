@@ -130,7 +130,8 @@ func BenchmarkRangeScans(b *testing.B, db tmdb.DB, dbSize int64) {
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {
-		start := rand.Int63n(dbSize - rangeSize)
+
+		start := rand.Int63n(dbSize - rangeSize) // nolint: gosec
 		end := start + rangeSize
 		iter, err := db.Iterator(Int642Bytes(start), Int642Bytes(end))
 		require.NoError(b, err)
@@ -159,12 +160,12 @@ func BenchmarkRandomReadsWrites(b *testing.B, db tmdb.DB) {
 	for i := 0; i < b.N; i++ {
 		// Write something
 		{
-			idx := rand.Int63n(numItems)
+			idx := rand.Int63n(numItems) // nolint: gosec
 			internal[idx]++
 			val := internal[idx]
 			idxBytes := Int642Bytes(idx)
 			valBytes := Int642Bytes(val)
-			//fmt.Printf("Set %X -> %X\n", idxBytes, valBytes)
+			// fmt.Printf("Set %X -> %X\n", idxBytes, valBytes)
 			err := db.Set(idxBytes, valBytes)
 			if err != nil {
 				// require.NoError() is very expensive (according to profiler), so check manually
@@ -174,7 +175,7 @@ func BenchmarkRandomReadsWrites(b *testing.B, db tmdb.DB) {
 
 		// Read something
 		{
-			idx := rand.Int63n(numItems)
+			idx := rand.Int63n(numItems) // nolint: gosec
 			valExp := internal[idx]
 			idxBytes := Int642Bytes(idx)
 			valBytes, err := db.Get(idxBytes)
@@ -182,7 +183,7 @@ func BenchmarkRandomReadsWrites(b *testing.B, db tmdb.DB) {
 				// require.NoError() is very expensive (according to profiler), so check manually
 				b.Fatal(b, err)
 			}
-			//fmt.Printf("Get %X -> %X\n", idxBytes, valBytes)
+			// fmt.Printf("Get %X -> %X\n", idxBytes, valBytes)
 			if valExp == 0 {
 				if !bytes.Equal(valBytes, nil) {
 					b.Errorf("Expected %v for %v, got %X", nil, idx, valBytes)

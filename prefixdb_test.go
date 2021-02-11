@@ -3,7 +3,6 @@ package db_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	tmdb "github.com/tendermint/tm-db"
 	"github.com/tendermint/tm-db/internal/dbtest"
@@ -22,12 +21,6 @@ func mockDBWithStuff(t *testing.T) tmdb.DB {
 	require.NoError(t, db.Set([]byte("ke"), []byte("valu")))
 	require.NoError(t, db.Set([]byte("kee"), []byte("valuu")))
 	return db
-}
-
-func checkValue(t *testing.T, db tmdb.DB, key []byte, valueWanted []byte) {
-	valueGot, err := db.Get(key)
-	assert.NoError(t, err)
-	assert.Equal(t, valueWanted, valueGot)
 }
 
 func TestPrefixDBSimple(t *testing.T) {

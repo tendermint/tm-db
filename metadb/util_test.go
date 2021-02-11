@@ -117,7 +117,7 @@ func TestPrefixIteratorMatches1N(t *testing.T) {
 			// Bad!
 			dbtest.Next(t, itr, false)
 
-			//Once invalid...
+			// Once invalid...
 			dbtest.Invalid(t, itr)
 		})
 	}

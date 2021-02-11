@@ -135,10 +135,12 @@ func (bdb *BoltDB) Print() error {
 	fmt.Printf("%v\n", stats)
 
 	err := bdb.db.View(func(tx *bbolt.Tx) error {
-		tx.Bucket(bucket).ForEach(func(k, v []byte) error {
+		if err := tx.Bucket(bucket).ForEach(func(k, v []byte) error {
 			fmt.Printf("[%X]:\t[%X]\n", k, v)
 			return nil
-		})
+		}); err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
