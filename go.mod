@@ -8,7 +8,7 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/facebookgo/subset v0.0.0-20150612182917-8dac2c3c4870 // indirect
 	github.com/gogo/protobuf v1.3.2
-	github.com/google/btree v1.0.0
+	github.com/google/btree v1.0.1
 	github.com/jmhodges/levigo v1.0.0
 	github.com/stretchr/testify v1.7.0
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
