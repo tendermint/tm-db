@@ -20,6 +20,7 @@ This tagging can be done [using github](https://docs.github.com/en/desktop/contr
 
 ## 3. Create a github release
 
+Finally, create a github release.
 To create a github release, follow the steps in the [github release documentation](https://docs.github.com/en/github/administering-a-repository/releasing-projects-on-github/managing-releases-in-a-repository#creating-a-release).
 
 When creating the github release, select the `Tag version` created in step 2. 
