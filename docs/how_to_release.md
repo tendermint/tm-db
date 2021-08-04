@@ -7,6 +7,7 @@ This document provides a step-by-step guide for creating a release of tm-db.
 Open the `CHANGELOG.md` at the root of the repository. 
 Amend the top of this file with a section for the latest version (0.6.x etc).
 Be sure to include any bug fixes, improvements, dependency upgrades, and breaking changes included in this version. 
+(It's OK to exclude changes to tooling dependencies, like updates to Github Actions.)
 Finally, create a pull request for the changelog update.
 Once the tests pass and the pull request is approved, merge the change into master.
 
