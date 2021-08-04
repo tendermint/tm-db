@@ -19,6 +19,8 @@ Tag the changelog commit in master created in step 1 with the latest version.
 Be sure to prefix the version tag with `v`. For example, `v0.6.5` for version 0.6.5.
 This tagging can be done [using github](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/managing-commits/managing-tags#creating-a-tag) or [using git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) on the command line. 
 
+Note that the golang modules tooling expects tags to be immutable. 
+If you make a mistake after pushing a tag, make a new tag and start over rather than fix and re-push the old tag.
 ## 3. Create a github release
 
 Finally, create a github release.
