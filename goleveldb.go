@@ -6,8 +6,27 @@ import (
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
+)
+
+const (
+	// minCache is the minimum amount of memory in megabytes to allocate to leveldb
+	// read and write caching, split half and half.
+	minCache = 16
+
+	// minHandles is the minimum number of files handles to allocate to the open
+	// database files.
+	minHandles = 16
+
+	FlagLevelDBCacheSize   = "leveldb-cache-size"
+	FlagLevelDBHandlersNum = "leveldb-handlers-num"
+)
+
+var (
+	LevelDBCacheSize   = 128
+	LevelDBHandlersNum = 1024
 )
 
 func init() {
@@ -24,7 +43,22 @@ type GoLevelDB struct {
 var _ DB = (*GoLevelDB)(nil)
 
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
-	return NewGoLevelDBWithOpts(name, dir, nil)
+	// Ensure we have some minimal caching and file guarantees
+	if LevelDBCacheSize < minCache {
+		LevelDBCacheSize = minCache
+	}
+	if LevelDBHandlersNum < minHandles {
+		LevelDBHandlersNum = minHandles
+	}
+
+	opt := &opt.Options{
+		OpenFilesCacheCapacity: LevelDBHandlersNum,
+		BlockCacheCapacity:     LevelDBCacheSize / 2 * opt.MiB,
+		WriteBuffer:            LevelDBCacheSize / 4 * opt.MiB,
+		Filter:                 filter.NewBloomFilter(15),
+		DisableSeeksCompaction: true,
+	}
+	return NewGoLevelDBWithOpts(name, dir, opt)
 }
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
