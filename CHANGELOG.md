@@ -1,5 +1,9 @@
 # Changelog
 
+## Pending
+
+* Add an option for creating a mem db with no mutex
+
 ## 0.6.4
 
 **2021-02-09**
