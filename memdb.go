@@ -190,3 +190,19 @@ func (db *MemDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	}
 	return newMemDBIterator(db, start, end, true), nil
 }
+
+// IteratorNoMtx makes an iterator with no mutex.
+func (db *MemDB) IteratorNoMtx(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
+	return newMemDBIteratorMtxChoice(db, start, end, false, false), nil
+}
+
+// ReverseIteratorNoMtx makes an iterator with no mutex.
+func (db *MemDB) ReverseIteratorNoMtx(start, end []byte) (Iterator, error) {
+	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+		return nil, errKeyEmpty
+	}
+	return newMemDBIteratorMtxChoice(db, start, end, true, false), nil
+}
