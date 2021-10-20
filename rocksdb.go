@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/spf13/viper"
 	"github.com/tecbot/gorocksdb"
 )
 
@@ -39,6 +40,9 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
+	if viper.GetBool(FlagRocksdbEnableStatistics) {
+		opts.EnableStatistics()
+	}
 	// 1.5GB maximum memory use for writebuffer.
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
 	return NewRocksDBWithOptions(name, dir, opts)
