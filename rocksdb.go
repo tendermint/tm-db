@@ -40,7 +40,7 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
-	if viper.GetBool(FlagEnableStatistics) {
+	if viper.GetBool(FlagRocksdbEnableStatistics) {
 		opts.EnableStatistics()
 	}
 	// 1.5GB maximum memory use for writebuffer.
