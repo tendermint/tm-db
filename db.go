@@ -33,6 +33,8 @@ const (
 	//   - requires gcc
 	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend BackendType = "rocksdb"
+
+	FlagEnableStatistics = "rocksdb.enable_statistics"
 )
 
 type dbCreator func(name string, dir string) (DB, error)

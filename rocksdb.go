@@ -18,8 +18,6 @@ func init() {
 	registerDBCreator(RocksDBBackend, dbCreator, false)
 }
 
-const flagEnableStatistics = "rocksdb.enable_statistics"
-
 // RocksDB is a RocksDB backend.
 type RocksDB struct {
 	db     *gorocksdb.DB
@@ -42,7 +40,7 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
-	if viper.GetBool(flagEnableStatistics) {
+	if viper.GetBool(FlagEnableStatistics) {
 		opts.EnableStatistics()
 	}
 	// 1.5GB maximum memory use for writebuffer.
