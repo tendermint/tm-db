@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
+	"github.com/spf13/viper"
 	"github.com/tecbot/gorocksdb"
 )
 
@@ -16,6 +17,8 @@ func init() {
 	}
 	registerDBCreator(RocksDBBackend, dbCreator, false)
 }
+
+const flagEnableStatistics = "rocksdb.enable_statistics"
 
 // RocksDB is a RocksDB backend.
 type RocksDB struct {
@@ -39,6 +42,9 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
+	if viper.GetBool(flagEnableStatistics) {
+		opts.EnableStatistics()
+	}
 	// 1.5GB maximum memory use for writebuffer.
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
 	return NewRocksDBWithOptions(name, dir, opts)
