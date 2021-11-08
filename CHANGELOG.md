@@ -24,7 +24,6 @@ used. The tag now points to the [package-reorg
 branch](https://github.com/tendermint/tm-db/tree/package-reorg) so that
 any existing dependencies should not break.
 
->>>>>>> 0c0f56e (Prepare CHANGELOG.md for release v0.6.6.)
 ## 0.6.4
 
 **2021-02-09**
