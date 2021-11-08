@@ -20,11 +20,11 @@ RUN \
 
 # Install Rocksdb
 RUN \
-  wget https://github.com/facebook/rocksdb/archive/v6.6.4.tar.gz \
-  && tar -zxf v6.6.4.tar.gz \
-  && cd rocksdb-6.6.4 \
+  wget https://github.com/facebook/rocksdb/archive/v6.24.2.tar.gz \
+  && tar -zxf v6.24.2.tar.gz \
+  && cd rocksdb-6.24.2 \
   && DEBUG_LEVEL=0 make -j4 shared_lib \
   && make install-shared \
   && ldconfig \
   && cd .. \
-  && rm -rf v6.6.4.tar.gz rocksdb-6.6.4
+  && rm -rf v6.24.2.tar.gz rocksdb-6.24.2
