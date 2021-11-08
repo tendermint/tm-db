@@ -19,6 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: test & coverage report creation
+        env:
+          CGO_ENABLED: 1
         run: |
           go test ./... -mod=readonly -timeout 8m -race -coverprofile=coverage.txt -covermode=atomic -tags=memdb,goleveldb,cleveldb,boltdb,rocksdb,badgerdb -v
       - uses: codecov/codecov-action@v2.0.3
