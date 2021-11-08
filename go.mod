@@ -17,5 +17,5 @@ require (
 	google.golang.org/grpc v1.38.0
 )
 
-// Breaking changes were released with the wrong tag (use v0.6.4).
+// Breaking changes were released with the wrong tag (use v0.6.6 or later).
 retract v0.6.5
