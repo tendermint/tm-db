@@ -10,6 +10,7 @@ jobs:
     # We need to run the linter on the same image we use for building, since it
     # needs the C libraries installed for the dependencies to typecheck.
     runs-on: ubuntu-latest
+    container: tendermintdev/docker-tm-db-testing
     steps:
       - uses: actions/checkout@v2
       - uses: golangci/golangci-lint-action@v2.5.2
