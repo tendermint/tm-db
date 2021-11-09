@@ -52,5 +52,5 @@ jobs:
         with:
           context: ./tools
           file: ./tools/Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          # push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
