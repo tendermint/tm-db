@@ -9,13 +9,13 @@
 name: Build & Push TM-DB-Testing
 on:
   pull_request:
-    paths:
-      - "tools/*"
-  push:
-    branches:
-      - master
-    paths:
-      - "tools/*"
+  #   paths:
+  #     - "tools/*"
+  # push:
+  #   branches:
+  #     - master
+  #   paths:
+  #     - "tools/*"
 
 jobs:
   build:
