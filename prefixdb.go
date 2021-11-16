@@ -202,3 +202,7 @@ func (pdb *PrefixDB) Stats() map[string]string {
 func (pdb *PrefixDB) prefixed(key []byte) []byte {
 	return append(cp(pdb.prefix), key...)
 }
+
+func (db *PrefixDB) ForceCompact(start, limit []byte) error {
+	panic("not implemented")
+}
