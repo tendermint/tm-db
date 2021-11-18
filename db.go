@@ -34,7 +34,7 @@ const (
 	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend BackendType = "rocksdb"
 
-	FlagRocksdbEnableStatistics = "rocksdb.enable_statistics"
+	FlagRocksdbOpts = "rocksdb.opts"
 )
 
 type dbCreator func(name string, dir string) (DB, error)

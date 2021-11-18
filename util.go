@@ -2,8 +2,24 @@ package db
 
 import (
 	"bytes"
+	"errors"
 	"os"
+	"strconv"
+	"strings"
+	"unicode"
 )
+
+const (
+	BYTE = 1 << (10 * iota)
+	KILOBYTE
+	MEGABYTE
+	GIGABYTE
+	TERABYTE
+	PETABYTE
+	EXABYTE
+)
+
+var invalidByteQuantityError = errors.New("byte quantity must be a positive integer with a unit of measurement like M, MB, MiB, G, GiB, or GB")
 
 // We defensively turn nil keys or values into []byte{} for
 // most operations.
@@ -57,4 +73,62 @@ func IsKeyInDomain(key, start, end []byte) bool {
 func FileExists(filePath string) bool {
 	_, err := os.Stat(filePath)
 	return !os.IsNotExist(err)
+}
+
+// toBytes parses a string formatted by ByteSize as bytes.
+// KB = K = KiB	= 1024
+// MB = M = MiB = 1024 * K
+// GB = G = GiB = 1024 * M
+// TB = T = TiB = 1024 * G
+// PB = P = PiB = 1024 * T
+// EB = E = EiB = 1024 * P
+func toBytes(s string) (uint64, error) {
+	s = strings.TrimSpace(s)
+	s = strings.ToUpper(s)
+
+	i := strings.IndexFunc(s, unicode.IsLetter)
+	if i == -1 {
+		return 0, invalidByteQuantityError
+	}
+
+	bytesString, multiple := s[:i], s[i:]
+	bytes, err := strconv.ParseFloat(bytesString, 64)
+	if err != nil || bytes < 0 {
+		return 0, invalidByteQuantityError
+	}
+
+	switch multiple {
+	case "E", "EB", "EIB":
+		return uint64(bytes * EXABYTE), nil
+	case "P", "PB", "PIB":
+		return uint64(bytes * PETABYTE), nil
+	case "T", "TB", "TIB":
+		return uint64(bytes * TERABYTE), nil
+	case "G", "GB", "GIB":
+		return uint64(bytes * GIGABYTE), nil
+	case "M", "MB", "MIB":
+		return uint64(bytes * MEGABYTE), nil
+	case "K", "KB", "KIB":
+		return uint64(bytes * KILOBYTE), nil
+	case "B":
+		return uint64(bytes), nil
+	default:
+		return 0, invalidByteQuantityError
+	}
+}
+
+func parseOptParams(params string) map[string]string {
+	if len(params) == 0 {
+		return nil
+	}
+
+	opts := make(map[string]string)
+	for _, s := range strings.Split(params, ",") {
+		opt := strings.Split(s, "=")
+		if len(opt) != 2 {
+			panic("Invalid options parameter, like this 'block_size=4kb,statistics=true")
+		}
+		opts[strings.TrimSpace(opt[0])] = strings.TrimSpace(opt[1])
+	}
+	return opts
 }

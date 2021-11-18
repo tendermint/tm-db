@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"strconv"
 
 	"github.com/spf13/viper"
 	"github.com/tecbot/gorocksdb"
@@ -28,21 +29,51 @@ type RocksDB struct {
 
 var _ DB = (*RocksDB)(nil)
 
+const (
+	BlockSize  = "block_size"
+	BlockCache = "block_cache"
+	Statistics = "statistics"
+)
+
 func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	// default rocksdb option, good enough for most cases, including heavy workloads.
 	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
 	// compression: snappy as default, need to -lsnappy to enable.
+	params := parseOptParams(viper.GetString(FlagRocksdbOpts))
+
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
+	if v, ok := params[BlockSize]; ok {
+		size, err := toBytes(v)
+		if err != nil {
+			panic(fmt.Sprintf("Invalid options parameter %s: %s", BlockSize, err))
+		}
+		bbto.SetBlockSize(int(size))
+	}
 	bbto.SetBlockCache(gorocksdb.NewLRUCache(1 << 30))
+	if v, ok := params[BlockCache]; ok {
+		cache, err := toBytes(v)
+		if err != nil {
+			panic(fmt.Sprintf("Invalid options parameter %s: %s", BlockCache, err))
+		}
+		bbto.SetBlockCache(gorocksdb.NewLRUCache(cache))
+	}
 	bbto.SetFilterPolicy(gorocksdb.NewBloomFilter(10))
 
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
-	if viper.GetBool(FlagRocksdbEnableStatistics) {
-		opts.EnableStatistics()
+
+	if v, ok := params[Statistics]; ok {
+		enable, err := strconv.ParseBool(v)
+		if err != nil {
+			panic(fmt.Sprintf("Invalid options parameter %s: %s", Statistics, err))
+		}
+		if enable {
+			opts.EnableStatistics()
+		}
 	}
+
 	// 1.5GB maximum memory use for writebuffer.
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
 	return NewRocksDBWithOptions(name, dir, opts)
