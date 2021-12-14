@@ -1,7 +1,10 @@
 package db
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -33,6 +36,8 @@ const (
 	//   - requires gcc
 	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend BackendType = "rocksdb"
+	// UnknownDBBackend unknown db type
+	UnknownDBBackend BackendType = "unknown"
 
 	FlagRocksdbOpts = "rocksdb.opts"
 )
@@ -54,6 +59,14 @@ func registerDBCreator(backend BackendType, creator dbCreator, force bool) {
 //   - backend is unknown (not registered)
 //   - creator function, provided during registration, returns error
 func NewDB(name string, backend BackendType, dir string) DB {
+	dataType := checkDBType(name, dir)
+	if dataType != UnknownDBBackend && dataType != backend {
+		panic(fmt.Sprintf("Invalid db_backend for <%s> ; expected %s, got %s",
+			filepath.Join(dir, name+".db"),
+			dataType,
+			backend))
+	}
+
 	dbCreator, ok := backends[backend]
 	if !ok {
 		keys := make([]string, len(backends))
@@ -70,4 +83,39 @@ func NewDB(name string, backend BackendType, dir string) DB {
 		panic(fmt.Sprintf("Error initializing DB: %v", err))
 	}
 	return db
+}
+
+// checkDBType check whether the db file is goleveldb or rocksdb,
+// only goleveldb and rocksdb are supported, otherwise it returns unknown.
+// Ignore artificial changes to db files
+func checkDBType(name string, dir string) BackendType {
+	logPath := filepath.Join(dir, name+".db", "LOG")
+	file, err := os.Open(logPath)
+	if err != nil {
+		return UnknownDBBackend
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var firstLine, secondLine string
+	line := 0
+	for scanner.Scan() {
+		line++
+		if line == 1 {
+			firstLine = scanner.Text()
+		}
+		if line == 2 {
+			secondLine = scanner.Text()
+			break
+		}
+	}
+
+	if strings.Contains(firstLine, "RocksDB") {
+		return RocksDBBackend
+	}
+	if strings.Contains(secondLine, "Level") {
+		return GoLevelDBBackend
+	}
+
+	return UnknownDBBackend
 }
