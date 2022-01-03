@@ -21,6 +21,12 @@ const (
 	// metricsGatheringInterval specifies the interval to retrieve leveldb database
 	// compaction, io and pause stats to report to the user.
 	metricsGatheringInterval = 3 * time.Second
+	// cache is the amount of memory in megabytes to allocate to leveldb
+	// read and write caching, split half and half.
+	cache = 16
+	// handles is the number of files handles to allocate to the open
+	// database files.
+	handles = 16
 )
 
 func init() {
@@ -44,6 +50,10 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
+	o.OpenFilesCacheCapacity = handles
+	o.BlockCacheCapacity = cache / 2 * opt.MiB
+	o.WriteBuffer = cache / 4 * opt.MiB // Two of these are used internally
+	// o.DisableSeeksCompaction = true //uncomment on one node
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err
