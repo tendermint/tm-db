@@ -3,7 +3,7 @@ module github.com/tendermint/tm-db
 go 1.17
 
 require (
-	github.com/armon/go-metrics v0.3.10 // indirect
+	github.com/armon/go-metrics v0.3.10
 	github.com/dgraph-io/badger/v2 v2.2007.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/btree v1.0.0
@@ -24,6 +24,8 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/hashicorp/go-immutable-radix v1.0.0 // indirect
+	github.com/hashicorp/golang-lru v0.5.0 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
