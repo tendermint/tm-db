@@ -50,10 +50,11 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
-	o.OpenFilesCacheCapacity = handles
-	o.BlockCacheCapacity = cache / 2 * opt.MiB
-	o.WriteBuffer = cache / 4 * opt.MiB // Two of these are used internally
+	// o.OpenFilesCacheCapacity = handles
+	// o.BlockCacheCapacity = cache / 2 * opt.MiB
+	// o.WriteBuffer = cache / 4 * opt.MiB // Two of these are used internally
 	// o.DisableSeeksCompaction = true //uncomment on one node
+	// o.Filter = filter.NewBloomFilter(10) // uncomment when ready to use bloom filter
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err
