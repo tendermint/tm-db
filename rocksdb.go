@@ -1,3 +1,4 @@
+//go:build rocksdb
 // +build rocksdb
 
 package db
@@ -63,6 +64,9 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
+	opts.SetAllowMmapReads(true)
+	opts.SetAllowMmapWrites(false)
+	opts.SetMaxOpenFiles(-1)
 
 	if v, ok := params[Statistics]; ok {
 		enable, err := strconv.ParseBool(v)
