@@ -40,7 +40,8 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
 	// 1.5GB maximum memory use for writebuffer.
-	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
+	opts.OptimizeLevelStyleCompaction(1536 * 1024 * 1024)
+	opts.SetMaxOpenFiles(4096)
 	return NewRocksDBWithOptions(name, dir, opts)
 }
 
