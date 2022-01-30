@@ -144,7 +144,6 @@ func benchmarkRandomReadsWrites(b *testing.B, db DB) {
 				// require.NoError() is very expensive (according to profiler), so check manually
 				b.Fatal(b, err)
 			}
-			// fmt.Printf("Get %X -> %X\n", idxBytes, valBytes)
 			if valExp == 0 {
 				if !bytes.Equal(valBytes, nil) {
 					b.Errorf("Expected %v for %v, got %X", nil, idx, valBytes)
