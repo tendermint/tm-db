@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/dgraph-io/badger/v2 v2.2007.2
+	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/google/btree v1.0.0
 	github.com/jmhodges/levigo v1.0.0
@@ -11,7 +12,7 @@ require (
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
 	github.com/tecbot/gorocksdb v0.0.0-20191217155057-f0fad39f321c
 	go.etcd.io/bbolt v1.3.6
-	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
+	google.golang.org/grpc v1.27.0
 	google.golang.org/protobuf v1.25.0 // indirect
 )
 
