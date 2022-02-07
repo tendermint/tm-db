@@ -168,10 +168,6 @@ func (db *MemDB) Stats() map[string]string {
 	return stats
 }
 
-func (db *MemDB) ForceCompact(start, limit []byte) error {
-	panic("not implemented")
-}
-
 // NewBatch implements DB.
 func (db *MemDB) NewBatch() Batch {
 	return newMemDBBatch(db)
