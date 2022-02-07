@@ -24,9 +24,6 @@ type RocksDB struct {
 	wo     *gorocksdb.WriteOptions
 	woSync *gorocksdb.WriteOptions
 	cache  *gorocksdb.Cache
-	filter gorocksdb.FilterPolicy
-	bbto   *gorocksdb.BlockBasedTableOptions
-	opts   *gorocksdb.Options
 }
 
 var _ DB = (*RocksDB)(nil)
@@ -65,9 +62,6 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 		wo:     wo,
 		woSync: woSync,
 		cache:  cache,
-		filter: filter,
-		opts:   opts,
-		bbto:   bbto,
 	}
 
 	return database, nil
@@ -157,11 +151,8 @@ func (db *RocksDB) Close() error {
 	db.ro.Destroy()
 	db.wo.Destroy()
 	db.woSync.Destroy()
-	db.db.Close()
-	db.opts.Destroy()
-	db.filter.Destroy()
 	db.cache.Destroy()
-	db.bbto.Destroy()
+	db.db.Close()
 	return nil
 }
 
