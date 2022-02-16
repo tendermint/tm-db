@@ -25,13 +25,17 @@ type GoLevelDB struct {
 var _ DB = (*GoLevelDB)(nil)
 
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
-	dbPath := filepath.Join(dir, name+".db")
 	o := &opt.Options{
 		// The default value is nil
 		Filter: filter.NewBloomFilter(10),
 		// The default value is 8MiB
-		BlockCacheCapacity: 100 * 1048576,
+		BlockCacheCapacity: 1 << 30,
 	}
+	return NewGoLevelDBWithOpts(name, dir, o)
+}
+
+func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
+	dbPath := filepath.Join(dir, name+".db")
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err
