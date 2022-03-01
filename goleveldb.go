@@ -28,8 +28,9 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	o := &opt.Options{
 		// The default value is nil
 		Filter: filter.NewBloomFilter(10),
-		// The default value is 8MiB
-		BlockCacheCapacity: 1 << 30,
+		// The default value is 8MiB. Use 1GB
+		BlockCacheCapacity: opt.GiB,
+		WriteBuffer:        64 * opt.MiB,
 	}
 	return NewGoLevelDBWithOpts(name, dir, o)
 }
