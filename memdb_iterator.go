@@ -21,12 +21,17 @@ type memDBIterator struct {
 	item   *item
 	start  []byte
 	end    []byte
+	useMtx bool
 }
 
 var _ Iterator = (*memDBIterator)(nil)
 
 // newMemDBIterator creates a new memDBIterator.
 func newMemDBIterator(db *MemDB, start []byte, end []byte, reverse bool) *memDBIterator {
+	return newMemDBIteratorMtxChoice(db, start, end, reverse, true)
+}
+
+func newMemDBIteratorMtxChoice(db *MemDB, start []byte, end []byte, reverse bool, useMtx bool) *memDBIterator {
 	ctx, cancel := context.WithCancel(context.Background())
 	ch := make(chan *item, chBufferSize)
 	iter := &memDBIterator{
@@ -34,11 +39,16 @@ func newMemDBIterator(db *MemDB, start []byte, end []byte, reverse bool) *memDBI
 		cancel: cancel,
 		start:  start,
 		end:    end,
+		useMtx: useMtx,
 	}
 
-	db.mtx.RLock()
+	if useMtx {
+		db.mtx.RLock()
+	}
 	go func() {
-		defer db.mtx.RUnlock()
+		if useMtx {
+			defer db.mtx.RUnlock()
+		}
 		// Because we use [start, end) for reverse ranges, while btree uses (start, end], we need
 		// the following variables to handle some reverse iteration conditions ourselves.
 		var (

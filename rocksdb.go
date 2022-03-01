@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/tecbot/gorocksdb"
+	"github.com/cosmos/gorocksdb"
 )
 
 func init() {
@@ -42,6 +42,8 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
+	// SetMaxOpenFiles to 4096 seems to provide a reliable performance boost
+	opts.SetMaxOpenFiles(4096)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
