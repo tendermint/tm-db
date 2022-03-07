@@ -32,6 +32,9 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 		BlockCacheCapacity: opt.GiB,
 		// Use 64 MiB instead of default 4 MiB
 		WriteBuffer: 64 * opt.MiB,
+		DisableBufferPool:      false,
+		DisableSeeksCompaction: true,
+
 		//CompactionTableSize:                   8 * opt.MiB,
 		//CompactionTotalSize:                   40 * opt.MiB,
 		//CompactionTotalSizeMultiplierPerLevel: []float64{1, 1, 10, 100, 1000, 10000, 100000},
