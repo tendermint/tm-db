@@ -62,10 +62,10 @@ func (itr *rocksDBIterator) Valid() bool {
 	}
 
 	// If source has error, invalid.
-	if err := itr.source.Err(); err != nil {
-		itr.isInvalid = true
-		return false
-	}
+	// if err := itr.source.Err(); err != nil {
+	// 	itr.isInvalid = true
+	// 	return false
+	// }
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
@@ -95,19 +95,19 @@ func (itr *rocksDBIterator) Valid() bool {
 
 // Key implements Iterator.
 func (itr *rocksDBIterator) Key() []byte {
-	itr.assertIsValid()
+	// itr.assertIsValid()
 	return moveSliceToBytes(itr.source.Key())
 }
 
 // Value implements Iterator.
 func (itr *rocksDBIterator) Value() []byte {
-	itr.assertIsValid()
+	// itr.assertIsValid()
 	return moveSliceToBytes(itr.source.Value())
 }
 
 // Next implements Iterator.
 func (itr rocksDBIterator) Next() {
-	itr.assertIsValid()
+	// itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
@@ -126,11 +126,11 @@ func (itr *rocksDBIterator) Close() error {
 	return nil
 }
 
-func (itr *rocksDBIterator) assertIsValid() {
-	if !itr.Valid() {
-		panic("iterator is invalid")
-	}
-}
+// func (itr *rocksDBIterator) assertIsValid() {
+// 	if !itr.Valid() {
+// 		panic("iterator is invalid")
+// 	}
+// }
 
 // moveSliceToBytes will free the slice and copy out a go []byte
 // This function can be applied on *Slice returned from Key() and Value()
