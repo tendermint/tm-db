@@ -86,12 +86,10 @@ func (itr *prefixDBIterator) Valid() bool {
 
 // Next implements Iterator.
 func (itr *prefixDBIterator) Next() {
-	itr.assertIsValid()
 	itr.source.Next()
 
 	if !itr.source.Valid() || !bytes.HasPrefix(itr.source.Key(), itr.prefix) {
 		itr.valid = false
-
 	} else if bytes.Equal(itr.source.Key(), itr.prefix) {
 		// Empty keys are not allowed, so if a key exists in the database that exactly matches the
 		// prefix we need to skip it.
@@ -101,14 +99,12 @@ func (itr *prefixDBIterator) Next() {
 
 // Next implements Iterator.
 func (itr *prefixDBIterator) Key() []byte {
-	itr.assertIsValid()
 	key := itr.source.Key()
 	return key[len(itr.prefix):] // we have checked the key in Valid()
 }
 
 // Value implements Iterator.
 func (itr *prefixDBIterator) Value() []byte {
-	itr.assertIsValid()
 	return itr.source.Value()
 }
 
@@ -123,10 +119,4 @@ func (itr *prefixDBIterator) Error() error {
 // Close implements Iterator.
 func (itr *prefixDBIterator) Close() error {
 	return itr.source.Close()
-}
-
-func (itr *prefixDBIterator) assertIsValid() {
-	if !itr.Valid() {
-		panic("iterator is invalid")
-	}
 }

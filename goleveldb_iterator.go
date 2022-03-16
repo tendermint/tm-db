@@ -60,12 +60,6 @@ func (itr *goLevelDBIterator) Valid() bool {
 		return false
 	}
 
-	// If source errors, invalid.
-	// if err := itr.Error(); err != nil {
-	// 	itr.isInvalid = true
-	// 	return false
-	// }
-
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
 		itr.isInvalid = true
@@ -97,7 +91,6 @@ func (itr *goLevelDBIterator) Valid() bool {
 func (itr *goLevelDBIterator) Key() []byte {
 	// Key returns a copy of the current key.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	// itr.assertIsValid()
 	return cp(itr.source.Key())
 }
 
@@ -105,13 +98,11 @@ func (itr *goLevelDBIterator) Key() []byte {
 func (itr *goLevelDBIterator) Value() []byte {
 	// Value returns a copy of the current value.
 	// See https://github.com/syndtr/goleveldb/blob/52c212e6c196a1404ea59592d3f1c227c9f034b2/leveldb/iterator/iter.go#L88
-	// itr.assertIsValid()
 	return cp(itr.source.Value())
 }
 
 // Next implements Iterator.
 func (itr *goLevelDBIterator) Next() {
-	// itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
@@ -129,9 +120,3 @@ func (itr *goLevelDBIterator) Close() error {
 	itr.source.Release()
 	return nil
 }
-
-// func (itr goLevelDBIterator) assertIsValid() {
-// 	if !itr.Valid() {
-// 		panic("iterator is invalid")
-// 	}
-// }
