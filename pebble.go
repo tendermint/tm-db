@@ -6,33 +6,30 @@ package db
 import (
 	"fmt"
 	"log"
-	"path/filepath"
 
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/bloom"
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewPebble(name, dir)
+	dbCreator := func(dir string) (DB, error) {
+		return NewPebbleDBWithOptions(dir)
 	}
-	registerDBCreator(PebbleBackend, dbCreator, false)
+	registerDBCreator(PebbleDBBackend, dbCreator, false)
 }
 
-// Pebble is a Pebble backend.
-type Pebble struct {
+// PebbleDB is a PebbleDB backend.
+type PebbleDB struct {
 	db *pebble.DB
 }
 
-var _ DB = (*Pebble)(nil)
+var _ DB = (*PebbleDB)(nil)
 
-func newPebble(dir string) DB {
+func NewPebbleDBWithOptions(dir string) (DB, error) {
 	cache := pebble.NewCache(1024 * 1024 * 1024)
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
-		Comparer:                    mvccComparer,
-		DisableWAL:                  disableWAL,
 		FormatMajorVersion:          pebble.FormatNewest,
 		L0CompactionThreshold:       2,
 		L0StopWritesThreshold:       1000,
@@ -60,49 +57,17 @@ func newPebble(dir string) DB {
 
 	opts.EnsureDefaults()
 
-	if verbose {
-		opts.EventListener = pebble.MakeLoggingEventListener(nil)
-		opts.EventListener.TableDeleted = nil
-		opts.EventListener.TableIngested = nil
-		opts.EventListener.WALCreated = nil
-		opts.EventListener.WALDeleted = nil
-	}
-
 	p, err := pebble.Open(dir, opts)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return pebbleDB{
-		d:       p,
-		ballast: make([]byte, 1<<30),
-	}
-}
-
-func NewPebble(name string, dir string) (*pebble.DB, error) {
-	// default rocksdb option, good enough for most cases, including heavy workloads.
-	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
-	// compression: snappy as default, need to -lsnappy to enable.
-
-	chicken := pebble.Options{
-		MaxOpenFiles: 4096,
-	}
-	// SetMaxOpenFiles to 4096 seems to provide a reliable performance boost
-
-	return NewPebbleWithOptions(name, dir, &chicken)
-}
-
-func NewPebbleWithOptions(name string, dir string, opts *pebble.Options) (*pebble.DB, error) {
-	dbPath := filepath.Join(dir, name+".db")
-	db, err := pebble.Open(dbPath, opts)
-	if err != nil {
-		return nil, err
-	}
-
-	return db, nil
+	return PebbleDB{
+		db: p,
+	}, err
 }
 
 // Get implements DB.
-func (db *Pebble) Get(key []byte) ([]byte, error) {
+func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
@@ -110,11 +75,11 @@ func (db *Pebble) Get(key []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return moveSliceToBytes(res), nil
+	return res, nil
 }
 
 // Has implements DB.
-func (db *Pebble) Has(key []byte) (bool, error) {
+func (db *PebbleDB) Has(key []byte) (bool, error) {
 	bytes, err := db.Get(key)
 	if err != nil {
 		return false, err
@@ -123,7 +88,7 @@ func (db *Pebble) Has(key []byte) (bool, error) {
 }
 
 // Set implements DB.
-func (db *Pebble) Set(key []byte, value []byte) error {
+func (db *PebbleDB) Set(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -138,7 +103,7 @@ func (db *Pebble) Set(key []byte, value []byte) error {
 }
 
 // SetSync implements DB.
-func (db *Pebble) SetSync(key []byte, value []byte) error {
+func (db *PebbleDB) SetSync(key []byte, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -153,7 +118,7 @@ func (db *Pebble) SetSync(key []byte, value []byte) error {
 }
 
 // Delete implements DB.
-func (db *Pebble) Delete(key []byte) error {
+func (db *PebbleDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -165,7 +130,7 @@ func (db *Pebble) Delete(key []byte) error {
 }
 
 // DeleteSync implements DB.
-func (db *Pebble) DeleteSync(key []byte) error {
+func (db PebbleDB) DeleteSync(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -176,18 +141,18 @@ func (db *Pebble) DeleteSync(key []byte) error {
 	return nil
 }
 
-func (db *Pebble) DB() *pebble.DB {
+func (db *PebbleDB) DB() *pebble.DB {
 	return db.db
 }
 
 // Close implements DB.
-func (db *Pebble) Close() error {
+func (db PebbleDB) Close() error {
 	db.Close()
 	return nil
 }
 
 // Print implements DB.
-func (db *Pebble) Print() error {
+func (db *PebbleDB) Print() error {
 	itr, err := db.Iterator(nil, nil)
 	if err != nil {
 		return err
@@ -202,7 +167,7 @@ func (db *Pebble) Print() error {
 }
 
 // Stats implements DB.
-func (db *Pebble) Stats() map[string]string {
+func (db *PebbleDB) Stats() map[string]string {
 	keys := []string{"rocksdb.stats"}
 	stats := make(map[string]string, len(keys))
 	for _, key := range keys {
@@ -212,24 +177,24 @@ func (db *Pebble) Stats() map[string]string {
 }
 
 // NewBatch implements DB.
-func (db *Pebble) NewBatch() Batch {
-	return newPebbleBatch(db)
+func (db *PebbleDB) NewBatch() Batch {
+	return newPebbleDBBatch(db)
 }
 
 // Iterator implements DB.
-func (db *Pebble) Iterator(start, end []byte) (Iterator, error) {
+func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
 	itr := db.NewIterator()
-	return newPebbleIterator(itr, start, end, false), nil
+	return newPebbleDBIterator(itr, start, end, false), nil
 }
 
 // ReverseIterator implements DB.
-func (db *Pebble) ReverseIterator(start, end []byte) (Iterator, error) {
+func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
 	itr := db.NewIterator()
-	return newPebbleIterator(itr, start, end, true), nil
+	return newPebbleDBIterator(itr, start, end, true), nil
 }

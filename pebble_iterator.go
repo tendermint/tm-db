@@ -17,7 +17,7 @@ type pebbleIterator struct {
 
 var _ Iterator = (*pebbleIterator)(nil)
 
-func newPebbleIterator(source *pebble.Iterator, start, end []byte, isReverse bool) *pebbleIterator {
+func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse bool) *pebbleIterator {
 	if isReverse {
 		if end == nil {
 			source.Last()

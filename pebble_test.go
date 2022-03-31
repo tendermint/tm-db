@@ -11,21 +11,21 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestPebbleBackend(t *testing.T) {
+func TestPebbleDBBackend(t *testing.T) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
-	db, err := NewDB(name, PebbleBackend, dir)
+	db, err := NewDB(name, PebbleDBBackend, dir)
 	require.NoError(t, err)
 	defer cleanupDBDir(dir, name)
 
-	_, ok := db.(*Pebble)
+	_, ok := db.(*PebbleDB)
 	assert.True(t, ok)
 }
 
-func TestPebbleStats(t *testing.T) {
+func TestPebbleDBStats(t *testing.T) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
-	db, err := NewDB(name, PebbleBackend, dir)
+	db, err := NewDB(name, PebbleDBBackend, dir)
 	require.NoError(t, err)
 	defer cleanupDBDir(dir, name)
 
