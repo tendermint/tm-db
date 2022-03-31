@@ -1,5 +1,4 @@
-//go:build rocksdb
-// +build rocksdb
+//go:build pebble
 
 package db
 

@@ -1,21 +1,20 @@
-//go:build rocksdb
-// +build rocksdb
+//go:build pebble
 
 package db
 
 import "github.com/cockroachdb/pebble"
 
 type pebbleBatch struct {
-	db    *RocksDB
-	batch *gorocksdb.WriteBatch
+	db    *Pebble
+	batch *pebble.Batch
 }
 
 var _ Batch = (*pebbleBatch)(nil)
 
-func newRocksDBBatch(db *RocksDB) *pebbleBatch {
+func newPebbleBatch(db *Pebble) *pebbleBatch {
 	return &pebbleBatch{
 		db:    db,
-		batch: gorocksdb.NewWriteBatch(),
+		batch: pebble.NewBatch(),
 	}
 }
 
@@ -30,7 +29,7 @@ func (b *pebbleBatch) Set(key, value []byte) error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Put(key, value)
+	b.batch.Set(key, value, nil)
 	return nil
 }
 
@@ -42,7 +41,7 @@ func (b *pebbleBatch) Delete(key []byte) error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Delete(key)
+	b.batch.Delete(key, nil)
 	return nil
 }
 
@@ -51,7 +50,7 @@ func (b *pebbleBatch) Write() error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	err := b.db.db.Write(b.db.wo, b.batch)
+	err := b.db.Write((b.batch)
 	if err != nil {
 		return err
 	}

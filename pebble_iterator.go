@@ -1,5 +1,4 @@
 //go:build pebble
-// +build pebble
 
 package db
 
@@ -23,21 +22,13 @@ func newPebbleIterator(source *pebble.Iterator, start, end []byte, isReverse boo
 		if end == nil {
 			source.Last()
 		} else {
-			source.SeekLT(end)
-			if source.Valid() {
-				eoakey := moveSliceToBytes(source.Key()) // end or after key
-				if bytes.Compare(end, eoakey) <= 0 {
-					source.Prev()
-				}
-			} else {
-				source.Last()
-			}
+			source.SetBounds(start, end)
 		}
 	} else {
 		if start == nil {
 			source.First()
 		} else {
-			source.Seek(start)
+			source.SetBounds(start, end)
 		}
 	}
 	return &pebbleIterator{
@@ -62,7 +53,7 @@ func (itr *pebbleIterator) Valid() bool {
 	}
 
 	// If source has error, invalid.
-	if err := itr.source.Err(); err != nil {
+	if err := itr.source.Error(); err != nil {
 		itr.isInvalid = true
 		return false
 	}
@@ -76,7 +67,7 @@ func (itr *pebbleIterator) Valid() bool {
 	// If key is end or past it, invalid.
 	start := itr.start
 	end := itr.end
-	key := moveSliceToBytes(itr.source.Key())
+	key := itr.source.Key()
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
@@ -96,13 +87,13 @@ func (itr *pebbleIterator) Valid() bool {
 // Key implements Iterator.
 func (itr *pebbleIterator) Key() []byte {
 	itr.assertIsValid()
-	return moveSliceToBytes(itr.source.Key())
+	return itr.source.Value()
 }
 
 // Value implements Iterator.
 func (itr *pebbleIterator) Value() []byte {
 	itr.assertIsValid()
-	return moveSliceToBytes(itr.source.Value())
+	return itr.source.Value()
 }
 
 // Next implements Iterator.
@@ -117,12 +108,15 @@ func (itr pebbleIterator) Next() {
 
 // Error implements Iterator.
 func (itr *pebbleIterator) Error() error {
-	return itr.source.Err()
+	return itr.source.Error()
 }
 
 // Close implements Iterator.
 func (itr *pebbleIterator) Close() error {
-	itr.source.Close()
+	err := itr.source.Close()
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -130,17 +124,4 @@ func (itr *pebbleIterator) assertIsValid() {
 	if !itr.Valid() {
 		panic("iterator is invalid")
 	}
-}
-
-// moveSliceToBytes will free the slice and copy out a go []byte
-// This function can be applied on *Slice returned from Key() and Value()
-// of an Iterator, because they are marked as freed.
-func moveSliceToBytes(s *pebble.Slice) []byte {
-	defer s.Free()
-	if !s.Exists() {
-		return nil
-	}
-	v := make([]byte, len(s.Data()))
-	copy(v, s.Data())
-	return v
 }
