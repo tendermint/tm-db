@@ -3,24 +3,24 @@
 
 package db
 
-import "github.com/cosmos/gorocksdb"
+import "github.com/cockroachdb/pebble"
 
-type rocksDBBatch struct {
+type pebbleBatch struct {
 	db    *RocksDB
 	batch *gorocksdb.WriteBatch
 }
 
-var _ Batch = (*rocksDBBatch)(nil)
+var _ Batch = (*pebbleBatch)(nil)
 
-func newRocksDBBatch(db *RocksDB) *rocksDBBatch {
-	return &rocksDBBatch{
+func newRocksDBBatch(db *RocksDB) *pebbleBatch {
+	return &pebbleBatch{
 		db:    db,
 		batch: gorocksdb.NewWriteBatch(),
 	}
 }
 
 // Set implements Batch.
-func (b *rocksDBBatch) Set(key, value []byte) error {
+func (b *pebbleBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -35,7 +35,7 @@ func (b *rocksDBBatch) Set(key, value []byte) error {
 }
 
 // Delete implements Batch.
-func (b *rocksDBBatch) Delete(key []byte) error {
+func (b *pebbleBatch) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -47,7 +47,7 @@ func (b *rocksDBBatch) Delete(key []byte) error {
 }
 
 // Write implements Batch.
-func (b *rocksDBBatch) Write() error {
+func (b *pebbleBatch) Write() error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -61,7 +61,7 @@ func (b *rocksDBBatch) Write() error {
 }
 
 // WriteSync implements Batch.
-func (b *rocksDBBatch) WriteSync() error {
+func (b *pebbleBatch) WriteSync() error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -74,7 +74,7 @@ func (b *rocksDBBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *rocksDBBatch) Close() error {
+func (b *pebbleBatch) Close() error {
 	if b.batch != nil {
 		b.batch.Destroy()
 		b.batch = nil
