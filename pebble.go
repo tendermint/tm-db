@@ -5,9 +5,11 @@ package db
 
 import (
 	"fmt"
+	"log"
 	"path/filepath"
 
 	"github.com/cockroachdb/pebble"
+	"github.com/cockroachdb/pebble/bloom"
 )
 
 func init() {
@@ -23,6 +25,58 @@ type Pebble struct {
 }
 
 var _ DB = (*Pebble)(nil)
+
+func newPebble(dir string) DB {
+	cache := pebble.NewCache(1024 * 1024 * 1024)
+	defer cache.Unref()
+	opts := &pebble.Options{
+		Cache:                       cache,
+		Comparer:                    mvccComparer,
+		DisableWAL:                  disableWAL,
+		FormatMajorVersion:          pebble.FormatNewest,
+		L0CompactionThreshold:       2,
+		L0StopWritesThreshold:       1000,
+		LBaseMaxBytes:               64 << 20, // 64 MB
+		Levels:                      make([]pebble.LevelOptions, 7),
+		MaxConcurrentCompactions:    3,
+		MaxOpenFiles:                16384,
+		MemTableSize:                64 << 20,
+		MemTableStopWritesThreshold: 4,
+	}
+
+	for i := 0; i < len(opts.Levels); i++ {
+		l := &opts.Levels[i]
+		l.BlockSize = 32 << 10       // 32 KB
+		l.IndexBlockSize = 256 << 10 // 256 KB
+		l.FilterPolicy = bloom.FilterPolicy(10)
+		l.FilterType = pebble.TableFilter
+		if i > 0 {
+			l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
+		}
+		l.EnsureDefaults()
+	}
+	opts.Levels[6].FilterPolicy = nil
+	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
+
+	opts.EnsureDefaults()
+
+	if verbose {
+		opts.EventListener = pebble.MakeLoggingEventListener(nil)
+		opts.EventListener.TableDeleted = nil
+		opts.EventListener.TableIngested = nil
+		opts.EventListener.WALCreated = nil
+		opts.EventListener.WALDeleted = nil
+	}
+
+	p, err := pebble.Open(dir, opts)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return pebbleDB{
+		d:       p,
+		ballast: make([]byte, 1<<30),
+	}
+}
 
 func NewPebble(name string, dir string) (*pebble.DB, error) {
 	// default rocksdb option, good enough for most cases, including heavy workloads.

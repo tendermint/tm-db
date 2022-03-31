@@ -6,15 +6,15 @@ import "github.com/cockroachdb/pebble"
 
 type pebbleBatch struct {
 	db    *Pebble
-	batch *pebble.Batch
+	batch pebble.Batch
 }
 
 var _ Batch = (*pebbleBatch)(nil)
 
 func newPebbleBatch(db *Pebble) *pebbleBatch {
 	return &pebbleBatch{
-		db:    db,
-		batch: pebble.NewBatch(),
+		db:    *Pebble,
+		batch: db.Batch{},
 	}
 }
 
@@ -26,9 +26,6 @@ func (b *pebbleBatch) Set(key, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	if b.batch == nil {
-		return errBatchClosed
-	}
 	b.batch.Set(key, value, nil)
 	return nil
 }
@@ -38,19 +35,13 @@ func (b *pebbleBatch) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	if b.batch == nil {
-		return errBatchClosed
-	}
 	b.batch.Delete(key, nil)
 	return nil
 }
 
 // Write implements Batch.
 func (b *pebbleBatch) Write() error {
-	if b.batch == nil {
-		return errBatchClosed
-	}
-	err := b.db.Write((b.batch)
+	err := b.db.NewBatch()
 	if err != nil {
 		return err
 	}
