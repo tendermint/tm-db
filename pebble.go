@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	dbCreator := func(dir string) (DB, error) {
+	dbCreator := func(name string, dir string) (DB, error) {
 		return NewPebbleDBWithOptions(dir)
 	}
 	registerDBCreator(PebbleDBBackend, dbCreator, false)
@@ -61,7 +61,7 @@ func NewPebbleDBWithOptions(dir string) (DB, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return PebbleDB{
+	return &PebbleDB{
 		db: p,
 	}, err
 }
@@ -168,12 +168,14 @@ func (db *PebbleDB) Print() error {
 
 // Stats implements DB.
 func (db *PebbleDB) Stats() map[string]string {
-	keys := []string{"rocksdb.stats"}
-	stats := make(map[string]string, len(keys))
-	for _, key := range keys {
-		stats[key] = db.(key)
-	}
-	return stats
+	/*
+		keys := []string{"rocksdb.stats"}
+		stats := make(map[string]string, len(keys))
+		for _, key := range keys {
+			stats[key] = db.(key)
+		}
+	*/
+	return nil
 }
 
 // NewBatch implements DB.
@@ -186,7 +188,11 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	itr := db.NewIterator()
+	o := &pebble.IterOptions{
+		LowerBound: start,
+		UpperBound: end,
+	}
+	itr := db.db.NewIter(o)
 	return newPebbleDBIterator(itr, start, end, false), nil
 }
 
@@ -195,6 +201,10 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	itr := db.NewIterator()
+	o := &pebble.IterOptions{
+		LowerBound: start,
+		UpperBound: end,
+	}
+	itr := db.db.NewIter(o)
 	return newPebbleDBIterator(itr, start, end, true), nil
 }
