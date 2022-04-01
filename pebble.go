@@ -72,17 +72,22 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	}
 	res, closer, err := db.db.Get(key)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	closer.Close()
+	if err = closer.Close(); err != nil {
+		log.Fatal(err)
+	}
 	return res, nil
 }
 
 // Has implements DB.
 func (db *PebbleDB) Has(key []byte) (bool, error) {
-	bytes, err := db.Get(key)
+	bytes, closer, err := db.db.Get(key)
 	if err != nil {
-		return false, err
+		log.Fatal(err)
+	}
+	if err = closer.Close(); err != nil {
+		log.Fatal(err)
 	}
 	return bytes != nil, nil
 }
@@ -95,7 +100,7 @@ func (db *PebbleDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	err := db.Set(key, value)
+	err := db.db.Set(key, value, pebble.NoSync)
 	if err != nil {
 		return err
 	}
@@ -110,7 +115,7 @@ func (db *PebbleDB) SetSync(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	err := db.SetSync(key, value)
+	err := db.db.Set(key, value, pebble.Sync)
 	if err != nil {
 		return err
 	}
@@ -122,7 +127,7 @@ func (db *PebbleDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	err := db.Delete(key)
+	err := db.db.Delete(key, pebble.NoSync)
 	if err != nil {
 		return err
 	}
@@ -134,7 +139,7 @@ func (db PebbleDB) DeleteSync(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	err := db.DeleteSync(key)
+	err := db.db.Delete(key, pebble.Sync)
 	if err != nil {
 		return nil
 	}
@@ -147,16 +152,14 @@ func (db *PebbleDB) DB() *pebble.DB {
 
 // Close implements DB.
 func (db PebbleDB) Close() error {
-	db.Close()
+	db.db.Close()
 	return nil
 }
 
 // Print implements DB.
 func (db *PebbleDB) Print() error {
-	itr, err := db.Iterator(nil, nil)
-	if err != nil {
-		return err
-	}
+	o := &pebble.IterOptions{}
+	itr := db.db.NewIter(o)
 	defer itr.Close()
 	for ; itr.Valid(); itr.Next() {
 		key := itr.Key()
@@ -188,11 +191,11 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	o := &pebble.IterOptions{
+	o := pebble.IterOptions{
 		LowerBound: start,
 		UpperBound: end,
 	}
-	itr := db.db.NewIter(o)
+	itr := db.db.NewIter(&o)
 	return newPebbleDBIterator(itr, start, end, false), nil
 }
 
@@ -201,10 +204,10 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	o := &pebble.IterOptions{
+	o := pebble.IterOptions{
 		LowerBound: start,
 		UpperBound: end,
 	}
-	itr := db.db.NewIter(o)
+	itr := db.db.NewIter(&o)
 	return newPebbleDBIterator(itr, start, end, true), nil
 }
