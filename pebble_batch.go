@@ -1,23 +1,23 @@
-//go:build pebble
+//go:build pebbledb
 
 package db
 
 import "github.com/cockroachdb/pebble"
 
-type pebbleBatch struct {
+type pebbleDBBatch struct {
 	batch *pebble.Batch
 }
 
-var _ Batch = (*pebbleBatch)(nil)
+var _ Batch = (*pebbleDBBatch)(nil)
 
-func newPebbleDBBatch(db *PebbleDB) *pebbleBatch {
-	return &pebbleBatch{
+func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
+	return &pebbleDBBatch{
 		batch: db.db.NewBatch(),
 	}
 }
 
 // Set implements Batch.
-func (b *pebbleBatch) Set(key, value []byte) error {
+func (b *pebbleDBBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -29,7 +29,7 @@ func (b *pebbleBatch) Set(key, value []byte) error {
 }
 
 // Delete implements Batch.
-func (b *pebbleBatch) Delete(key []byte) error {
+func (b *pebbleDBBatch) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -38,7 +38,7 @@ func (b *pebbleBatch) Delete(key []byte) error {
 }
 
 // Write implements Batch.
-func (b *pebbleBatch) Write() error {
+func (b *pebbleDBBatch) Write() error {
 	err := b.batch.Commit(pebble.NoSync)
 	if err != nil {
 		return err
@@ -49,7 +49,7 @@ func (b *pebbleBatch) Write() error {
 }
 
 // WriteSync implements Batch.
-func (b *pebbleBatch) WriteSync() error {
+func (b *pebbleDBBatch) WriteSync() error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -62,7 +62,7 @@ func (b *pebbleBatch) WriteSync() error {
 }
 
 // Close implements Batch.
-func (b *pebbleBatch) Close() error {
+func (b *pebbleDBBatch) Close() error {
 	err := b.batch.Close()
 	if err != nil {
 		return err

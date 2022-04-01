@@ -1,4 +1,4 @@
-//go:build pebble
+//go:build pebbledb
 
 package db
 
@@ -30,6 +30,21 @@ func TestPebbleDBStats(t *testing.T) {
 	defer cleanupDBDir(dir, name)
 
 	assert.NotEmpty(t, db.Stats())
+}
+
+func BenchmarkPebbleDBRandomReadsWrites(b *testing.B) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	dir := os.TempDir()
+	db, err := NewDB(name, PebbleDBBackend, dir)
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer func() {
+		db.Close()
+		cleanupDBDir("", name)
+	}()
+
+	benchmarkRandomReadsWrites(b, db)
 }
 
 // TODO: Add tests for pebble

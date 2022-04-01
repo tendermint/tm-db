@@ -39,8 +39,8 @@ const (
 	BadgerDBBackend BackendType = "badgerdb"
 	// PebbleDBDBBackend represents pebble (uses github.com/cockroachdb/pebble)
 	//   - EXPERIMENTAL
-	//   - use pebble build tag (go build -tags pebble)
-	PebbleDBBackend BackendType = "pebble"
+	//   - use pebble build tag (go build -tags pebbledb)
+	PebbleDBBackend BackendType = "pebbledb"
 )
 
 type dbCreator func(name string, dir string) (DB, error)

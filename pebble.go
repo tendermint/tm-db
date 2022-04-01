@@ -1,5 +1,4 @@
-//go:build pebble
-// +build pebble
+//go:build pebbledb
 
 package db
 
@@ -8,12 +7,11 @@ import (
 	"log"
 
 	"github.com/cockroachdb/pebble"
-	"github.com/cockroachdb/pebble/bloom"
 )
 
 func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
-		return NewPebbleDBWithOptions(dir)
+		return NewPebbleDB(name, dir)
 	}
 	registerDBCreator(PebbleDBBackend, dbCreator, false)
 }
@@ -25,35 +23,36 @@ type PebbleDB struct {
 
 var _ DB = (*PebbleDB)(nil)
 
-func NewPebbleDBWithOptions(dir string) (DB, error) {
-	cache := pebble.NewCache(1024 * 1024 * 1024)
-	defer cache.Unref()
+func NewPebbleDB(name string, dir string) (DB, error) {
+	//	cache := pebble.NewCache(1024 * 1024 * 32)
+	//	defer cache.Unref()
 	opts := &pebble.Options{
-		Cache:                       cache,
-		FormatMajorVersion:          pebble.FormatNewest,
-		L0CompactionThreshold:       2,
-		L0StopWritesThreshold:       1000,
-		LBaseMaxBytes:               64 << 20, // 64 MB
-		Levels:                      make([]pebble.LevelOptions, 7),
-		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                16384,
-		MemTableSize:                64 << 20,
-		MemTableStopWritesThreshold: 4,
+		//		Cache:                       cache,
+		//		FormatMajorVersion:          pebble.FormatNewest,
+		//		L0CompactionThreshold:       2,
+		//		L0StopWritesThreshold:       1000,
+		//		LBaseMaxBytes:               64 << 20, // 64 MB
+		//		Levels:                      make([]pebble.LevelOptions, 7),
+		//		MaxConcurrentCompactions:    3,
+		//		MaxOpenFiles:                1024,
+		//		MemTableSize:                64 << 20,
+		//		MemTableStopWritesThreshold: 4,
 	}
-
-	for i := 0; i < len(opts.Levels); i++ {
-		l := &opts.Levels[i]
-		l.BlockSize = 32 << 10       // 32 KB
-		l.IndexBlockSize = 256 << 10 // 256 KB
-		l.FilterPolicy = bloom.FilterPolicy(10)
-		l.FilterType = pebble.TableFilter
-		if i > 0 {
-			l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
+	/*
+		for i := 0; i < len(opts.Levels); i++ {
+			l := &opts.Levels[i]
+			l.BlockSize = 32 << 10       // 32 KB
+			l.IndexBlockSize = 256 << 10 // 256 KB
+			l.FilterPolicy = bloom.FilterPolicy(10)
+			l.FilterType = pebble.TableFilter
+			if i > 0 {
+				l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
+			}
+			l.EnsureDefaults()
 		}
-		l.EnsureDefaults()
-	}
-	opts.Levels[6].FilterPolicy = nil
-	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
+	*/
+	//	opts.Levels[6].FilterPolicy = nil
+	//	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
 	opts.EnsureDefaults()
 
@@ -71,10 +70,11 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
-	res, err := db.Get(key)
+	res, closer, err := db.db.Get(key)
 	if err != nil {
 		return nil, err
 	}
+	closer.Close()
 	return res, nil
 }
 

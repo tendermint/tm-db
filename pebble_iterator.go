@@ -1,4 +1,4 @@
-//go:build pebble
+//go:build pebbledb
 
 package db
 
@@ -8,30 +8,26 @@ import (
 	"github.com/cockroachdb/pebble"
 )
 
-type pebbleIterator struct {
+type pebbleDBIterator struct {
 	source     *pebble.Iterator
 	start, end []byte
 	isReverse  bool
 	isInvalid  bool
 }
 
-var _ Iterator = (*pebbleIterator)(nil)
+var _ Iterator = (*pebbleDBIterator)(nil)
 
-func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse bool) *pebbleIterator {
+func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse bool) *pebbleDBIterator {
 	if isReverse {
 		if end == nil {
 			source.Last()
-		} else {
-			source.SetBounds(start, end)
 		}
 	} else {
 		if start == nil {
 			source.First()
-		} else {
-			source.SetBounds(start, end)
 		}
 	}
-	return &pebbleIterator{
+	return &pebbleDBIterator{
 		source:    source,
 		start:     start,
 		end:       end,
@@ -41,12 +37,12 @@ func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse b
 }
 
 // Domain implements Iterator.
-func (itr *pebbleIterator) Domain() ([]byte, []byte) {
+func (itr *pebbleDBIterator) Domain() ([]byte, []byte) {
 	return itr.start, itr.end
 }
 
 // Valid implements Iterator.
-func (itr *pebbleIterator) Valid() bool {
+func (itr *pebbleDBIterator) Valid() bool {
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -85,19 +81,19 @@ func (itr *pebbleIterator) Valid() bool {
 }
 
 // Key implements Iterator.
-func (itr *pebbleIterator) Key() []byte {
+func (itr *pebbleDBIterator) Key() []byte {
 	itr.assertIsValid()
 	return itr.source.Value()
 }
 
 // Value implements Iterator.
-func (itr *pebbleIterator) Value() []byte {
+func (itr *pebbleDBIterator) Value() []byte {
 	itr.assertIsValid()
 	return itr.source.Value()
 }
 
 // Next implements Iterator.
-func (itr pebbleIterator) Next() {
+func (itr pebbleDBIterator) Next() {
 	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
@@ -107,12 +103,12 @@ func (itr pebbleIterator) Next() {
 }
 
 // Error implements Iterator.
-func (itr *pebbleIterator) Error() error {
+func (itr *pebbleDBIterator) Error() error {
 	return itr.source.Error()
 }
 
 // Close implements Iterator.
-func (itr *pebbleIterator) Close() error {
+func (itr *pebbleDBIterator) Close() error {
 	err := itr.source.Close()
 	if err != nil {
 		return err
@@ -120,7 +116,7 @@ func (itr *pebbleIterator) Close() error {
 	return nil
 }
 
-func (itr *pebbleIterator) assertIsValid() {
+func (itr *pebbleDBIterator) assertIsValid() {
 	if !itr.Valid() {
 		panic("iterator is invalid")
 	}

@@ -30,7 +30,7 @@ test-badgerdb:
 
 test-pebble:
 	@echo "--> Running go test"
-	@go test $(PACKAGES) -tags pebble -v
+	@go test $(PACKAGES) -tags pebbledb -v
 
 test-all:
 	@echo "--> Running go test"
