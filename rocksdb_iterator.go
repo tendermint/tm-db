@@ -1,3 +1,4 @@
+//go:build rocksdb
 // +build rocksdb
 
 package db
@@ -5,11 +6,11 @@ package db
 import (
 	"bytes"
 
-	"github.com/cosmos/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 )
 
 type rocksDBIterator struct {
-	source     *gorocksdb.Iterator
+	source     *grocksdb.Iterator
 	start, end []byte
 	isReverse  bool
 	isInvalid  bool
@@ -17,7 +18,7 @@ type rocksDBIterator struct {
 
 var _ Iterator = (*rocksDBIterator)(nil)
 
-func newRocksDBIterator(source *gorocksdb.Iterator, start, end []byte, isReverse bool) *rocksDBIterator {
+func newRocksDBIterator(source *grocksdb.Iterator, start, end []byte, isReverse bool) *rocksDBIterator {
 	if isReverse {
 		if end == nil {
 			source.SeekToLast()
@@ -55,7 +56,6 @@ func (itr *rocksDBIterator) Domain() ([]byte, []byte) {
 
 // Valid implements Iterator.
 func (itr *rocksDBIterator) Valid() bool {
-
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -74,9 +74,9 @@ func (itr *rocksDBIterator) Valid() bool {
 	}
 
 	// If key is end or past it, invalid.
-	var start = itr.start
-	var end = itr.end
-	var key = moveSliceToBytes(itr.source.Key())
+	start := itr.start
+	end := itr.end
+	key := moveSliceToBytes(itr.source.Key())
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
@@ -135,7 +135,7 @@ func (itr *rocksDBIterator) assertIsValid() {
 // moveSliceToBytes will free the slice and copy out a go []byte
 // This function can be applied on *Slice returned from Key() and Value()
 // of an Iterator, because they are marked as freed.
-func moveSliceToBytes(s *gorocksdb.Slice) []byte {
+func moveSliceToBytes(s *grocksdb.Slice) []byte {
 	defer s.Free()
 	if !s.Exists() {
 		return nil
