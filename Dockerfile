@@ -1,4 +1,3 @@
 FROM faddat/archlinux
 
-RUN pacman -Sy --noconfirm archlinux-keyring
 RUN pacman -Syyu --noconfirm go git rocksdb leveldb
