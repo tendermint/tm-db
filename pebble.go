@@ -58,7 +58,7 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 
 	p, err := pebble.Open(dir, opts)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &PebbleDB{
 		db: p,
@@ -85,7 +85,7 @@ func (db *PebbleDB) Has(key []byte) (bool, error) {
 	}
 	bytes, err := db.Get(key)
 	if err != nil {
-		log.Fatal(err)
+		return false, err
 	}
 	return bytes != nil, nil
 }
