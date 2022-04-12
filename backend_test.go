@@ -92,6 +92,7 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	require.Nil(t, value)
 
 	// Setting, getting, and deleting an empty key should error.
+
 	_, err = db.Get([]byte{})
 	require.Equal(t, errKeyEmpty, err)
 	_, err = db.Get(nil)
@@ -186,6 +187,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 	require.Equal(t, errKeyEmpty, err)
 
 	itr, err := db.Iterator(nil, nil)
+	fmt.Println(itr.Key(), "key")
 	require.NoError(t, err)
 	verifyIterator(t, itr, []int64{0, 1, 2, 3, 4, 5, 7, 8, 9}, "forward iterator")
 
@@ -202,6 +204,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 	verifyIterator(t, ritr, []int64(nil), "reverse iterator from 10 (ex)")
 
 	itr, err = db.Iterator(int642Bytes(0), nil)
+	fmt.Println(itr.Key())
 	require.NoError(t, err)
 	verifyIterator(t, itr, []int64{0, 1, 2, 3, 4, 5, 7, 8, 9}, "forward iterator from 0")
 

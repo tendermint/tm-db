@@ -28,7 +28,6 @@ func BenchmarkRandomReadsWrites2(b *testing.B) {
 		return
 	}
 
-	fmt.Println("ok, starting")
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {

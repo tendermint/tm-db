@@ -177,6 +177,7 @@ func (db *MemDB) NewBatch() Batch {
 // Takes out a read-lock on the database until the iterator is closed.
 func (db *MemDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
+
 		return nil, errKeyEmpty
 	}
 	return newMemDBIterator(db, start, end, false), nil

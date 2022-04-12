@@ -45,18 +45,21 @@ func (itr *pebbleDBIterator) Domain() ([]byte, []byte) {
 func (itr *pebbleDBIterator) Valid() bool {
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
+
 		return false
 	}
 
 	// If source has error, invalid.
 	if err := itr.source.Error(); err != nil {
 		itr.isInvalid = true
+
 		return false
 	}
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
 		itr.isInvalid = true
+
 		return false
 	}
 
@@ -67,11 +70,13 @@ func (itr *pebbleDBIterator) Valid() bool {
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
+
 			return false
 		}
 	} else {
 		if end != nil && bytes.Compare(end, key) <= 0 {
 			itr.isInvalid = true
+
 			return false
 		}
 	}
@@ -83,7 +88,7 @@ func (itr *pebbleDBIterator) Valid() bool {
 // Key implements Iterator.
 func (itr *pebbleDBIterator) Key() []byte {
 	itr.assertIsValid()
-	return itr.source.Value()
+	return itr.source.Key()
 }
 
 // Value implements Iterator.

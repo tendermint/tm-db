@@ -72,16 +72,17 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	}
 	res, closer, err := db.db.Get(key)
 	if err != nil {
-		log.Fatal(err)
+		return res, nil
 	}
-	if err = closer.Close(); err != nil {
-		log.Fatal(err)
-	}
+	closer.Close()
 	return res, nil
 }
 
 // Has implements DB.
 func (db *PebbleDB) Has(key []byte) (bool, error) {
+	if len(key) == 0 {
+		return false, errKeyEmpty
+	}
 	bytes, err := db.Get(key)
 	if err != nil {
 		log.Fatal(err)
@@ -194,7 +195,9 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 		LowerBound: start,
 		UpperBound: end,
 	}
-	itr := db.db.NewIter(&o)
+	itr := db.DB().NewIter(&o)
+	itr.First()
+
 	return newPebbleDBIterator(itr, start, end, false), nil
 }
 
