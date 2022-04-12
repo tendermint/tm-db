@@ -5,6 +5,7 @@ package db
 import "github.com/cockroachdb/pebble"
 
 type pebbleDBBatch struct {
+	db    *PebbleDB
 	batch *pebble.Batch
 }
 
@@ -24,6 +25,9 @@ func (b *pebbleDBBatch) Set(key, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
+	if b.batch == nil {
+		return errBatchClosed
+	}
 	b.batch.Set(key, value, nil)
 	return nil
 }
@@ -33,19 +37,25 @@ func (b *pebbleDBBatch) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
+	if b.batch == nil {
+		return errBatchClosed
+	}
 	b.batch.Delete(key, nil)
 	return nil
 }
 
 // Write implements Batch.
 func (b *pebbleDBBatch) Write() error {
+	if b.batch == nil {
+		return errBatchClosed
+	}
 	err := b.batch.Commit(pebble.NoSync)
 	if err != nil {
 		return err
 	}
 	// Make sure batch cannot be used afterwards. Callers should still call Close(), for errors.
-	b.Close()
-	return nil
+
+	return b.Close()
 }
 
 // WriteSync implements Batch.
@@ -63,9 +73,12 @@ func (b *pebbleDBBatch) WriteSync() error {
 
 // Close implements Batch.
 func (b *pebbleDBBatch) Close() error {
-	err := b.batch.Close()
-	if err != nil {
-		return err
+	if b.batch != nil {
+		err := b.batch.Close()
+		if err != nil {
+			return err
+		}
+		b.batch = nil
 	}
 
 	return nil
