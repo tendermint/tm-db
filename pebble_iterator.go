@@ -45,7 +45,6 @@ func (itr *pebbleDBIterator) Domain() ([]byte, []byte) {
 func (itr *pebbleDBIterator) Valid() bool {
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
-
 		return false
 	}
 
