@@ -4,7 +4,6 @@ package db
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/cockroachdb/pebble"
 )
