@@ -3,7 +3,7 @@ module github.com/tendermint/tm-db
 go 1.17
 
 require (
-	github.com/cosmos/gorocksdb v1.2.0
+
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/btree v1.0.0
@@ -12,6 +12,8 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.45.0
 )
+
+require github.com/linxGnu/grocksdb v1.7.1-0.20220327020612-ee0c6690507f
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
@@ -34,7 +36,7 @@ require (
 	golang.org/x/text v0.3.3 // indirect
 	google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
-	gopkg.in/yaml.v3 v3.0.0-20200313102051-9f266ea9e77c // indirect
+	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 )
 
 // Breaking changes were released with the wrong tag (use v0.6.6 or later).
