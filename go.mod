@@ -7,12 +7,12 @@ require (
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/btree v1.0.0
 	github.com/jmhodges/levigo v1.0.0
+	github.com/linxGnu/grocksdb v1.7.1-0.20220327020612-ee0c6690507f
 	github.com/stretchr/testify v1.7.1
+	github.com/syndtr/goleveldb v1.0.0
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.45.0
 )
-
-require github.com/linxGnu/grocksdb v1.7.1-0.20220327020612-ee0c6690507f
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
@@ -28,7 +28,6 @@ require (
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/syndtr/goleveldb v1.0.0 // indirect
 	go.opencensus.io v0.22.5 // indirect
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974 // indirect
 	golang.org/x/sys v0.0.0-20220227234510-4e6760a101f9 // indirect
