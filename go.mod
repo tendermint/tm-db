@@ -3,7 +3,6 @@ module github.com/tendermint/tm-db
 go 1.17
 
 require (
-
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/btree v1.0.0
