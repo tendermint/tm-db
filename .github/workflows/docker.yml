@@ -36,6 +36,7 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
+          file: tools/Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ghcr.io/${{ github.repository_owner }}/tm-db:latest
