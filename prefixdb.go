@@ -43,8 +43,7 @@ func (pdb *PrefixDB) Has(key []byte) (bool, error) {
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	ok, err := pdb.db.Has(pdb.prefixed(key))
 	if err != nil {
@@ -62,8 +61,7 @@ func (pdb *PrefixDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	pkey := pdb.prefixed(key)
 	if err := pdb.db.Set(pkey, value); err != nil {
@@ -80,8 +78,7 @@ func (pdb *PrefixDB) SetSync(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	return pdb.db.SetSync(pdb.prefixed(key), value)
 }
@@ -91,8 +88,7 @@ func (pdb *PrefixDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	return pdb.db.Delete(pdb.prefixed(key))
 }
@@ -102,8 +98,7 @@ func (pdb *PrefixDB) DeleteSync(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	return pdb.db.DeleteSync(pdb.prefixed(key))
 }
@@ -113,8 +108,7 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	var pstart, pend []byte
 	pstart = append(cp(pdb.prefix), start...)
@@ -136,8 +130,7 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	var pstart, pend []byte
 	pstart = append(cp(pdb.prefix), start...)
@@ -156,8 +149,7 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 
 // NewBatch implements DB.
 func (pdb *PrefixDB) NewBatch() Batch {
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
+
 
 	return newPrefixBatch(pdb.prefix, pdb.db.NewBatch())
 }
