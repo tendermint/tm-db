@@ -68,9 +68,9 @@ func (itr *rocksDBIterator) Valid() bool {
 	}
 
 	// If key is end or past it, invalid.
-	var start = itr.start
-	var end = itr.end
-	var key = moveSliceToBytes(itr.source.Key())
+	start := itr.start
+	end := itr.end
+	key := moveSliceToBytes(itr.source.Key())
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
