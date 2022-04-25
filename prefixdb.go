@@ -44,7 +44,6 @@ func (pdb *PrefixDB) Has(key []byte) (bool, error) {
 		return false, errKeyEmpty
 	}
 
-
 	ok, err := pdb.db.Has(pdb.prefixed(key))
 	if err != nil {
 		return ok, err
@@ -62,7 +61,6 @@ func (pdb *PrefixDB) Set(key []byte, value []byte) error {
 		return errValueNil
 	}
 
-
 	pkey := pdb.prefixed(key)
 	if err := pdb.db.Set(pkey, value); err != nil {
 		return err
@@ -79,7 +77,6 @@ func (pdb *PrefixDB) SetSync(key []byte, value []byte) error {
 		return errValueNil
 	}
 
-
 	return pdb.db.SetSync(pdb.prefixed(key), value)
 }
 
@@ -88,7 +85,6 @@ func (pdb *PrefixDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-
 
 	return pdb.db.Delete(pdb.prefixed(key))
 }
@@ -99,7 +95,6 @@ func (pdb *PrefixDB) DeleteSync(key []byte) error {
 		return errKeyEmpty
 	}
 
-
 	return pdb.db.DeleteSync(pdb.prefixed(key))
 }
 
@@ -108,7 +103,6 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
-
 
 	var pstart, pend []byte
 	pstart = append(cp(pdb.prefix), start...)
@@ -131,7 +125,6 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 		return nil, errKeyEmpty
 	}
 
-
 	var pstart, pend []byte
 	pstart = append(cp(pdb.prefix), start...)
 	if end == nil {
@@ -149,7 +142,6 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 
 // NewBatch implements DB.
 func (pdb *PrefixDB) NewBatch() Batch {
-
 
 	return newPrefixBatch(pdb.prefix, pdb.db.NewBatch())
 }
