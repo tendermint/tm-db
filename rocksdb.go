@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cosmos/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 )
 
 func init() {

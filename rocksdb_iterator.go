@@ -5,7 +5,7 @@ package db
 import (
 	"bytes"
 
-	"github.com/cosmos/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 )
 
 type rocksDBIterator struct {

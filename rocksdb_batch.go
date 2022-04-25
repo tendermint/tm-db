@@ -2,7 +2,7 @@
 
 package db
 
-import "github.com/cosmos/gorocksdb"
+import "github.com/linxGnu/grocksdb"
 
 type rocksDBBatch struct {
 	db    *RocksDB
