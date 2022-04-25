@@ -44,7 +44,7 @@ func (pdb *PrefixDB) Has(key []byte) (bool, error) {
 		return false, errKeyEmpty
 	}
 	// pdb.mtx.Lock()
-	//defer pdb.mtx.Unlock()
+	// defer pdb.mtx.Unlock()
 
 	ok, err := pdb.db.Has(pdb.prefixed(key))
 	if err != nil {
@@ -114,7 +114,7 @@ func (pdb *PrefixDB) Iterator(start, end []byte) (Iterator, error) {
 		return nil, errKeyEmpty
 	}
 	// pdb.mtx.Lock()
-	//defer pdb.mtx.Unlock()
+	// defer pdb.mtx.Unlock()
 
 	var pstart, pend []byte
 	pstart = append(cp(pdb.prefix), start...)
