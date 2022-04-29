@@ -28,6 +28,7 @@ Go 1.13+
 
 - **[BadgerDB](https://github.com/dgraph-io/badger) [experimental]:** A key-value database written as a pure-Go alternative to e.g. LevelDB and RocksDB, with LSM-tree storage. Makes use of multiple goroutines for performance, and includes advanced features such as serializable ACID transactions, write batches, compression, and more.
 
+
 ## Meta-databases
 
 - **PrefixDB [stable]:** A database which wraps another database and uses a static prefix for all keys. This allows multiple logical databases to be stored in a common underlying databases by using different namespaces. Used by the Cosmos SDK to give different modules their own namespaced database in a single application database.
