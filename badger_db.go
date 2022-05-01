@@ -28,7 +28,11 @@ func NewBadgerDB(dbName, dir string) (*BadgerDB, error) {
 	if err := os.MkdirAll(path, 0755); err != nil {
 		return nil, err
 	}
+
 	opts := badger.DefaultOptions(path)
+	opts.IndexCacheSize = 256 << 20 // 100 mb or some other size based on the amount of data
+	opts.DetectConflicts = false
+	opts.NumGoroutines = 32
 	opts.SyncWrites = false // note that we have Sync methods
 	opts.Logger = nil       // badger is too chatty by default
 	return NewBadgerDBWithOptions(opts)
