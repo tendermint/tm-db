@@ -29,7 +29,8 @@ func NewBadgerDB(dbName, dir string) (*BadgerDB, error) {
 		return nil, err
 	}
 
-	opts := badger.LSMOnlyOptions(path)
+	opts := badger.DefaultOptions(path)
+	opts.WithValueThreshold(2 << 20)
 	opts.ValueThreshold = 2 << 20   // 1MB (we may be able to further adjust this)
 	opts.IndexCacheSize = 256 << 20 // 100 mb or some other size based on the amount of data
 	opts.DetectConflicts = false
