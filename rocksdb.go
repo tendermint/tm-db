@@ -1,8 +1,5 @@
 //go:build rocksdb
-<<<<<<< HEAD
 // +build rocksdb
-=======
->>>>>>> origin/notional/grocksdb
 
 package db
 
@@ -23,18 +20,11 @@ func init() {
 
 // RocksDB is a RocksDB backend.
 type RocksDB struct {
-<<<<<<< HEAD
 	db     *gorocksdb.DB
 	ro     *gorocksdb.ReadOptions
 	wo     *gorocksdb.WriteOptions
 	woSync *gorocksdb.WriteOptions
 	cache  *gorocksdb.Cache
-=======
-	db     *grocksdb.DB
-	ro     *grocksdb.ReadOptions
-	wo     *grocksdb.WriteOptions
-	woSync *grocksdb.WriteOptions
->>>>>>> origin/notional/grocksdb
 }
 
 var _ DB = (*RocksDB)(nil)
@@ -43,7 +33,6 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	// default rocksdb option, good enough for most cases, including heavy workloads.
 	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
 	// compression: snappy as default, need to -lsnappy to enable.
-<<<<<<< HEAD
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
 	cache := gorocksdb.NewLRUCache(1 << 30)
 	bbto.SetBlockCache(cache)
@@ -51,11 +40,6 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	bbto.SetFilterPolicy(filter)
 	bbto.SetCacheIndexAndFilterBlocks(true)
 	bbto.SetPinL0FilterAndIndexBlocksInCache(true)
-=======
-	bbto := grocksdb.NewDefaultBlockBasedTableOptions()
-	bbto.SetBlockCache(grocksdb.NewLRUCache(1 << 30))
-	bbto.SetFilterPolicy(grocksdb.NewBloomFilter(10))
->>>>>>> origin/notional/grocksdb
 
 	opts := grocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
@@ -66,10 +50,6 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
 	opts.SetMaxOpenFiles(2048)
 
-<<<<<<< HEAD
-=======
-func NewRocksDBWithOptions(name string, dir string, opts *grocksdb.Options) (*RocksDB, error) {
->>>>>>> origin/notional/grocksdb
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := grocksdb.OpenDb(opts, dbPath)
 	if err != nil {
