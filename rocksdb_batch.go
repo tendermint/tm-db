@@ -1,8 +1,5 @@
 //go:build rocksdb
-<<<<<<< HEAD
 // +build rocksdb
-=======
->>>>>>> origin/notional/grocksdb
 
 package db
 
