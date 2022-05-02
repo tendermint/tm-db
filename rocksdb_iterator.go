@@ -1,3 +1,4 @@
+//go:build rocksdb
 // +build rocksdb
 
 package db
@@ -55,15 +56,8 @@ func (itr *rocksDBIterator) Domain() ([]byte, []byte) {
 
 // Valid implements Iterator.
 func (itr *rocksDBIterator) Valid() bool {
-
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
-		return false
-	}
-
-	// If source has error, invalid.
-	if err := itr.source.Err(); err != nil {
-		itr.isInvalid = true
 		return false
 	}
 
@@ -74,9 +68,9 @@ func (itr *rocksDBIterator) Valid() bool {
 	}
 
 	// If key is end or past it, invalid.
-	var start = itr.start
-	var end = itr.end
-	var key = moveSliceToBytes(itr.source.Key())
+	start := itr.start
+	end := itr.end
+	key := moveSliceToBytes(itr.source.Key())
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
@@ -95,19 +89,16 @@ func (itr *rocksDBIterator) Valid() bool {
 
 // Key implements Iterator.
 func (itr *rocksDBIterator) Key() []byte {
-	itr.assertIsValid()
 	return moveSliceToBytes(itr.source.Key())
 }
 
 // Value implements Iterator.
 func (itr *rocksDBIterator) Value() []byte {
-	itr.assertIsValid()
 	return moveSliceToBytes(itr.source.Value())
 }
 
 // Next implements Iterator.
 func (itr rocksDBIterator) Next() {
-	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
 	} else {
@@ -124,12 +115,6 @@ func (itr *rocksDBIterator) Error() error {
 func (itr *rocksDBIterator) Close() error {
 	itr.source.Close()
 	return nil
-}
-
-func (itr *rocksDBIterator) assertIsValid() {
-	if !itr.Valid() {
-		panic("iterator is invalid")
-	}
 }
 
 // moveSliceToBytes will free the slice and copy out a go []byte

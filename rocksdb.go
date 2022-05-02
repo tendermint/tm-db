@@ -1,3 +1,4 @@
+//go:build rocksdb
 // +build rocksdb
 
 package db
@@ -23,6 +24,7 @@ type RocksDB struct {
 	ro     *gorocksdb.ReadOptions
 	wo     *gorocksdb.WriteOptions
 	woSync *gorocksdb.WriteOptions
+	cache  *gorocksdb.Cache
 }
 
 var _ DB = (*RocksDB)(nil)
@@ -32,8 +34,12 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
 	// compression: snappy as default, need to -lsnappy to enable.
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
-	bbto.SetBlockCache(gorocksdb.NewLRUCache(1 << 30))
-	bbto.SetFilterPolicy(gorocksdb.NewBloomFilter(10))
+	cache := gorocksdb.NewLRUCache(1 << 30)
+	bbto.SetBlockCache(cache)
+	filter := gorocksdb.NewBloomFilter(10)
+	bbto.SetFilterPolicy(filter)
+	bbto.SetCacheIndexAndFilterBlocks(true)
+	bbto.SetPinL0FilterAndIndexBlocksInCache(true)
 
 	opts := gorocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
@@ -41,12 +47,9 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetMaxOpenFiles(4096)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
-	// 1.5GB maximum memory use for writebuffer.
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
-	return NewRocksDBWithOptions(name, dir, opts)
-}
+	opts.SetMaxOpenFiles(2048)
 
-func NewRocksDBWithOptions(name string, dir string, opts *gorocksdb.Options) (*RocksDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := gorocksdb.OpenDb(opts, dbPath)
 	if err != nil {
@@ -61,7 +64,9 @@ func NewRocksDBWithOptions(name string, dir string, opts *gorocksdb.Options) (*R
 		ro:     ro,
 		wo:     wo,
 		woSync: woSync,
+		cache:  cache,
 	}
+
 	return database, nil
 }
 
@@ -149,6 +154,7 @@ func (db *RocksDB) Close() error {
 	db.ro.Destroy()
 	db.wo.Destroy()
 	db.woSync.Destroy()
+	db.cache.Destroy()
 	db.db.Close()
 	return nil
 }

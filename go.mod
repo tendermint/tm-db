@@ -9,7 +9,7 @@ require (
 	github.com/google/btree v1.0.0
 	github.com/jmhodges/levigo v1.0.0
 	github.com/stretchr/testify v1.7.1
-	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
+	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.46.0
 )
@@ -24,7 +24,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/golang/groupcache v0.0.0-20190702054246-869f871628b6 // indirect
-	github.com/golang/snappy v0.0.3 // indirect
+	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
