@@ -25,15 +25,8 @@ func mockDBWithStuff(t *testing.T) DB {
 	return db
 }
 
-func taskKey(i, k uint32) []byte {
-
-	ibyte := make([]byte, 4)
-	binary.LittleEndian.PutUint32(ibyte, i)
-
-	kbyte := make([]byte, 4)
-	binary.LittleEndian.PutUint32(kbyte, i)
-
-	return append(ibyte, kbyte...)
+func taskKey(i, k int) []byte {
+	return []byte(fmt.Sprintf("task-%d-key-%d", i, k))
 }
 
 func randomValue() []byte {
@@ -67,7 +60,7 @@ func Run(t *testing.T) {
 
 			// Insert a bunch of keys with random data.
 			for k := 1; k <= numKeys; k++ {
-				key := taskKey(uint32(i), uint32(k)) // say, "task-<i>-key-<k>"
+				key := taskKey(i, k) // say, "task-<i>-key-<k>"
 				value := randomValue()
 				if err := db.Set(key, value); err != nil {
 					t.Errorf("Task %d: db.Set(%q=%q) failed: %v",
