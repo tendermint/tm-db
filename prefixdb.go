@@ -27,8 +27,6 @@ func (pdb *PrefixDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
-	// pdb.mtx.Lock()
-	// defer pdb.mtx.Unlock()
 
 	pkey := pdb.prefixed(key)
 	value, err := pdb.db.Get(pkey)
