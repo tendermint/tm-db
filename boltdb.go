@@ -1,3 +1,4 @@
+//go:build boltdb
 // +build boltdb
 
 package db
@@ -11,9 +12,7 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-var (
-	bucket = []byte("tm")
-)
+var bucket = []byte("tm")
 
 func init() {
 	registerDBCreator(BoltDBBackend, func(name, dir string) (DB, error) {
@@ -49,11 +48,11 @@ func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error)
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := bbolt.Open(dbPath, os.ModePerm, opts)
 	if err != nil {
-		err = os.MkdirAll(dbPath, 0755)
+		err = os.MkdirAll(dbPath, 0o755)
 		if err != nil {
 			return nil, err
 		}
-	}	
+	}
 
 	// create a global bucket
 	err = db.Update(func(tx *bbolt.Tx) error {
