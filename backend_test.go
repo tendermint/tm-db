@@ -315,6 +315,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 	ritr, err = db2.ReverseIterator(nil, nil)
 	require.NoError(t, err)
 	verifyIterator(t, ritr, nil, "reverse iterator with empty db")
+
 }
 
 func verifyIterator(t *testing.T, itr Iterator, expected []int64, msg string) {

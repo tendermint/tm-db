@@ -1,4 +1,3 @@
-//go:build cleveldb
 // +build cleveldb
 
 package db
