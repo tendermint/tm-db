@@ -2,6 +2,9 @@ package db
 
 import (
 	"testing"
+	"sync"
+	"fmt"
+	"bytes"
 
 	"github.com/stretchr/testify/require"
 )
@@ -19,6 +22,70 @@ func mockDBWithStuff(t *testing.T) DB {
 	require.NoError(t, db.Set(bz("kee"), bz("valuu")))
 	return db
 }
+
+// Run generates concurrent reads and writes to db so the race detector can
+// verify concurrent operations are properly synchronized.
+// The contents of db are garbage after Run returns.
+func Run(t *testing.T) {
+
+	db := mockDBWithStuff(t)
+	t.Helper()
+
+	const numWorkers = 10
+	const numKeys = 32
+
+	var wg sync.WaitGroup
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+		i := i
+		go func() {
+			defer wg.Done()
+
+			// Insert a bunch of keys with random data.
+			for k := 1; k <= numKeys; k++ {
+				key := taskKey(i, k) // say, "task-<i>-key-<k>"
+				value := someRandomValue()
+				if err := db.Set(key, value); err != nil {
+					t.Errorf("Task %d: db.Set(%q=%q) failed: %v", 
+						i, string(key), string(value), err)
+				}
+			}
+
+			// Iterate over the database to make sure our keys are there.
+			it, err := db.Iterator(nil, nil)
+			if err != nil {
+				t.Errorf("Iterator[%d]: %v", i, err)
+				return
+			}
+			found := make(map[string][]byte)
+			mine := []byte(fmt.Sprintf("task-%d-", i))
+			for it.Valid() {
+				it.Next()
+				if key := it.Key(); bytes.HasPrefix(key, mine) {
+					found[string(key)] = it.Value()
+				}
+			}
+			if err := it.Error(); err != nil {
+				t.Errorf("Iterator[%d] reported error: %v", i, err)
+			}
+			if err := it.Close(); err != nil {
+				t.Errorf("Close iterator[%d]: %v", i, err)
+			}
+			if len(mine) != numKeys {
+				t.Errorf("Task %d: found %d keys, wanted %d", i, len(mine), numKeys)
+			}
+
+			// Delete all the keys we inserted.
+			for key := range mine {
+				if err := db.Delete([]byte(key)); err != nil {
+					t.Errorf("Delete %q: %v", key, err)
+				}
+			}
+		}()
+	}
+	wg.Wait()
+}
+
 
 func TestPrefixDBSimple(t *testing.T) {
 	db := mockDBWithStuff(t)
