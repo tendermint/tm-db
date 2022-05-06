@@ -1,4 +1,0 @@
-{
-    "go.inferGopath": false,
-    "go.buildTags": "badgerdb,cleveldb,rocksdb,boltdb"
-}
