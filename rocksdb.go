@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"os"
 
 	"github.com/cosmos/gorocksdb"
 )
