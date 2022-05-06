@@ -25,12 +25,10 @@ func NewBadgerDB(dbName, dir string) (*BadgerDB, error) {
 	// the final directory to use for the database.
 	path := filepath.Join(dir, dbName)
 
-	if err := os.MkdirAll(path, 0o755); err != nil {
+	if err := os.MkdirAll(path, 0755); err != nil {
 		return nil, err
 	}
-
-	opts := badger.LSMOnlyOptions(path)
-	opts.WithValueThreshold(2 << 20)
+	opts := badger.DefaultOptions(path)
 	opts.IndexCacheSize = 256 << 20 // 100 mb or some other size based on the amount of data
 	opts.DetectConflicts = false
 	opts.NumGoroutines = 64
