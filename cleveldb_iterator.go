@@ -1,4 +1,3 @@
-//go:build cleveldb
 // +build cleveldb
 
 package db
@@ -57,6 +56,7 @@ func (itr cLevelDBIterator) Domain() ([]byte, []byte) {
 
 // Valid implements Iterator.
 func (itr cLevelDBIterator) Valid() bool {
+
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -75,9 +75,9 @@ func (itr cLevelDBIterator) Valid() bool {
 	}
 
 	// If key is end or past it, invalid.
-	start := itr.start
-	end := itr.end
-	key := itr.source.Key()
+	var start = itr.start
+	var end = itr.end
+	var key = itr.source.Key()
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
