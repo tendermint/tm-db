@@ -46,12 +46,12 @@ func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error)
 	}
 
 	dbPath := filepath.Join(dir, name+".db")
-	if err := os.MkdirAll(filepath.Dir(dbPath), 00700); err != nil {
-   	return nil, err
+	if err := os.MkdirAll(filepath.Dir(dbPath), 0o0700); err != nil {
+		return nil, err
 	}
 	db, err := bbolt.Open(dbPath, os.ModePerm, opts)
 	if err != nil {
-	return nil, err
+		return nil, err
 	}
 
 	// create a global bucket
