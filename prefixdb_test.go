@@ -1,10 +1,12 @@
 package db
 
 import (
-	"testing"
-	"sync"
-	"fmt"
 	"bytes"
+	"encoding/binary"
+	"fmt"
+	"math/rand"
+	"sync"
+	"testing"
 
 	"github.com/stretchr/testify/require"
 )
@@ -21,6 +23,28 @@ func mockDBWithStuff(t *testing.T) DB {
 	require.NoError(t, db.Set(bz("ke"), bz("valu")))
 	require.NoError(t, db.Set(bz("kee"), bz("valuu")))
 	return db
+}
+
+func taskKey(i, k uint32) []byte {
+
+	ibyte := make([]byte, 4)
+	binary.LittleEndian.PutUint32(ibyte, i)
+
+	kbyte := make([]byte, 4)
+	binary.LittleEndian.PutUint32(kbyte, i)
+
+	return append(ibyte, kbyte...)
+}
+
+func randomValue() []byte {
+	b := make([]byte, 16)
+	_, err := rand.Read(b)
+
+	if err != nil {
+		return nil
+	}
+
+	return b
 }
 
 // Run generates concurrent reads and writes to db so the race detector can
@@ -43,10 +67,10 @@ func Run(t *testing.T) {
 
 			// Insert a bunch of keys with random data.
 			for k := 1; k <= numKeys; k++ {
-				key := taskKey(i, k) // say, "task-<i>-key-<k>"
-				value := someRandomValue()
+				key := taskKey(uint32(i), uint32(k)) // say, "task-<i>-key-<k>"
+				value := randomValue()
 				if err := db.Set(key, value); err != nil {
-					t.Errorf("Task %d: db.Set(%q=%q) failed: %v", 
+					t.Errorf("Task %d: db.Set(%q=%q) failed: %v",
 						i, string(key), string(value), err)
 				}
 			}
@@ -77,7 +101,9 @@ func Run(t *testing.T) {
 
 			// Delete all the keys we inserted.
 			for key := range mine {
-				if err := db.Delete([]byte(key)); err != nil {
+				bs := make([]byte, 4)
+				binary.LittleEndian.PutUint32(bs, uint32(key))
+				if err := db.Delete(bs); err != nil {
 					t.Errorf("Delete %q: %v", key, err)
 				}
 			}
@@ -85,7 +111,6 @@ func Run(t *testing.T) {
 	}
 	wg.Wait()
 }
-
 
 func TestPrefixDBSimple(t *testing.T) {
 	db := mockDBWithStuff(t)
