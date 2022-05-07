@@ -45,9 +45,9 @@ func TestWithGolevelDB(t *testing.T) {
 	defer cleanupDBDir("", name)
 
 	db, err := NewGoLevelDB(name, "")
-	pdb := NewPrefixDB(db, bz("key"))
-
 	require.Nil(t, err)
+
+	pdb := NewPrefixDB(db, bz("key"))
 
 	t.Run("PrefixDB", func(t *testing.T) { Run(t, pdb) })
 }
