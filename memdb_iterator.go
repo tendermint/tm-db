@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"context"
 
-	"github.com/google/btree"
+	"github.com/tidwall/btree"
 )
 
 const (

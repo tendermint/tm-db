@@ -5,13 +5,9 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/google/btree"
+	"github.com/tidwall/btree"
 )
 
-const (
-	// The approximate number of items and children per B-tree node. Tuned with benchmarks.
-	bTreeDegree = 32
-)
 
 func init() {
 	registerDBCreator(MemDBBackend, func(name, dir string) (DB, error) {
@@ -58,7 +54,7 @@ var _ DB = (*MemDB)(nil)
 // NewMemDB creates a new in-memory database.
 func NewMemDB() *MemDB {
 	database := &MemDB{
-		btree: btree.New(bTreeDegree),
+		btree: btree.New(),
 	}
 	return database
 }
