@@ -20,7 +20,7 @@ func TestDBIteratorSingleKey(t *testing.T) {
 			assert.NoError(t, err)
 
 			//			checkValid(t, itr, true)
-			checkNext(t, itr, false)
+			//			checkNext(t, itr, false)
 			//			checkValid(t, itr, false)
 			//			checkNextPanics(t, itr)
 
