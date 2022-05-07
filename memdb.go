@@ -32,6 +32,14 @@ func (i *item) Less(other btree.Item) bool {
 	return bytes.Compare(i.key, other.(*item).key) == -1
 }
 
+// LessDirect implements btree.Item directly on item instead of its pointer.
+// Question: is this it, or do we need to get the pointer off of other.(*item).key?
+func (i item) LessDirect(other btree.Item) bool {
+	// this considers nil == []byte{}, but that's ok since we handle nil endpoints
+	// in iterators specially anyway
+	return bytes.Compare(i.key, other.(*item).key) == -1
+}
+
 // newKey creates a new key item.
 func newKey(key []byte) *item {
 	return &item{key: key}
