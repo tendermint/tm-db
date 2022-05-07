@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cosmos/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 )
 
 func init() {
@@ -21,11 +21,10 @@ func init() {
 
 // RocksDB is a RocksDB backend.
 type RocksDB struct {
-	db     *gorocksdb.DB
-	ro     *gorocksdb.ReadOptions
-	wo     *gorocksdb.WriteOptions
-	woSync *gorocksdb.WriteOptions
-	cache  *gorocksdb.Cache
+	db     *grocksdb.DB
+	ro     *grocksdb.ReadOptions
+	wo     *grocksdb.WriteOptions
+	woSync *grocksdb.WriteOptions
 }
 
 var _ DB = (*RocksDB)(nil)
@@ -42,7 +41,7 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	bbto.SetCacheIndexAndFilterBlocks(true)
 	bbto.SetPinL0FilterAndIndexBlocksInCache(true)
 
-	opts := gorocksdb.NewDefaultOptions()
+	opts := grocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
 	// SetMaxOpenFiles to 4096 seems to provide a reliable performance boost
 	opts.SetMaxOpenFiles(4096)
@@ -52,16 +51,16 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.SetMaxOpenFiles(2048)
 
 	dbPath := filepath.Join(dir, name+".db")
-	db, err := gorocksdb.OpenDb(opts, dbPath)
+	db, err := grocksdb.OpenDb(opts, dbPath)
 	if err != nil {
 		err = os.MkdirAll(dbPath, 0o755)
 		if err != nil {
 			return nil, err
 		}
 	}
-	ro := gorocksdb.NewDefaultReadOptions()
-	wo := gorocksdb.NewDefaultWriteOptions()
-	woSync := gorocksdb.NewDefaultWriteOptions()
+	ro := grocksdb.NewDefaultReadOptions()
+	wo := grocksdb.NewDefaultWriteOptions()
+	woSync := grocksdb.NewDefaultWriteOptions()
 	woSync.SetSync(true)
 	database := &RocksDB{
 		db:     db,
@@ -149,7 +148,7 @@ func (db *RocksDB) DeleteSync(key []byte) error {
 	return nil
 }
 
-func (db *RocksDB) DB() *gorocksdb.DB {
+func (db *RocksDB) DB() *grocksdb.DB {
 	return db.db
 }
 
