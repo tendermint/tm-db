@@ -25,6 +25,7 @@ type RocksDB struct {
 	ro     *grocksdb.ReadOptions
 	wo     *grocksdb.WriteOptions
 	woSync *grocksdb.WriteOptions
+	cache  *grocksdb.Cache
 }
 
 var _ DB = (*RocksDB)(nil)
