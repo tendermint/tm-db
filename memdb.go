@@ -21,10 +21,14 @@ type item struct {
 }
 
 // Less implements btree.Item.
-func Less(other btree.Item) bool {
+func Less(other item) bool {
 	// this considers nil == []byte{}, but that's ok since we handle nil endpoints
 	// in iterators specially anyway
 	return bytes.Compare(i.key, other.(*item).key) == -1
+}
+
+func comparator(a, b item) bool {
+	return bytes.Compare((a.key), b.key) == -1
 }
 
 // newKey creates a new key item.
@@ -45,7 +49,7 @@ func newPair(key, value []byte) *item {
 // important with MemDB.
 type MemDB struct {
 	mtx   sync.RWMutex
-	btree *btree.BTree
+	btree *btree.Generic[item]
 }
 
 var _ DB = (*MemDB)(nil)
@@ -53,8 +57,9 @@ var _ DB = (*MemDB)(nil)
 // NewMemDB creates a new in-memory database.
 func NewMemDB() *MemDB {
 	database := &MemDB{
-		btree: btree.NewGeneric[item](),
+		btree: btree.NewGeneric[item](comparator),
 	}
+
 	return database
 }
 
@@ -63,8 +68,6 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
 
 	i := db.btree.Get(newKey(key))
 	if i != nil {
@@ -97,8 +100,6 @@ func (db *MemDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	db.mtx.Lock()
-	defer db.mtx.Unlock()
 
 	db.set(key, value)
 	return nil
@@ -146,12 +147,9 @@ func (db *MemDB) Close() error {
 
 // Print implements DB.
 func (db *MemDB) Print() error {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
-
-	db.btree.Ascend(func(i btree.Item) bool {
-		item := i.(*item)
-		fmt.Printf("[%X]:\t[%X]\n", item.key, item.value)
+	db.btree.Ascend(nil, func(i item) bool {
+		pitem := i
+		fmt.Printf("[%X]:\t[%X]\n", pitem.key, pitem.value)
 		return true
 	})
 	return nil
@@ -159,9 +157,6 @@ func (db *MemDB) Print() error {
 
 // Stats implements DB.
 func (db *MemDB) Stats() map[string]string {
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
-
 	stats := make(map[string]string)
 	stats["database.type"] = "memDB"
 	stats["database.size"] = fmt.Sprintf("%d", db.btree.Len())
