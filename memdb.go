@@ -8,7 +8,6 @@ import (
 	"github.com/tidwall/btree"
 )
 
-
 func init() {
 	registerDBCreator(MemDBBackend, func(name, dir string) (DB, error) {
 		return NewMemDB(), nil
@@ -22,7 +21,7 @@ type item struct {
 }
 
 // Less implements btree.Item.
-func (i *item) Less(other btree.Item) bool {
+func Less(other btree.Item) bool {
 	// this considers nil == []byte{}, but that's ok since we handle nil endpoints
 	// in iterators specially anyway
 	return bytes.Compare(i.key, other.(*item).key) == -1
@@ -54,7 +53,7 @@ var _ DB = (*MemDB)(nil)
 // NewMemDB creates a new in-memory database.
 func NewMemDB() *MemDB {
 	database := &MemDB{
-		btree: btree.New(),
+		btree: btree.NewGeneric[item](),
 	}
 	return database
 }
@@ -79,10 +78,15 @@ func (db *MemDB) Has(key []byte) (bool, error) {
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
-	db.mtx.RLock()
-	defer db.mtx.RUnlock()
+	if db.btree.Get(key) != nil {
+		return true, nil
+	}
 
-	return db.btree.Has(newKey(key)), nil
+	if db.btree.Get(key) == nil {
+		return false, nil
+	}
+
+	return false, nil
 }
 
 // Set implements DB.
@@ -102,7 +106,7 @@ func (db *MemDB) Set(key []byte, value []byte) error {
 
 // set sets a value without locking the mutex.
 func (db *MemDB) set(key []byte, value []byte) {
-	db.btree.ReplaceOrInsert(newPair(key, value))
+	db.btree.Set(newPair(key, value))
 }
 
 // SetSync implements DB.
