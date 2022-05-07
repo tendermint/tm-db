@@ -22,7 +22,7 @@ func TestDBIteratorSingleKey(t *testing.T) {
 			//			checkValid(t, itr, true)
 			checkNext(t, itr, false)
 			//			checkValid(t, itr, false)
-			checkNextPanics(t, itr)
+			//			checkNextPanics(t, itr)
 
 			// Once invalid...
 			checkInvalid(t, itr)
