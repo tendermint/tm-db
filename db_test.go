@@ -94,7 +94,6 @@ func TestDBIteratorMany(t *testing.T) {
 	}
 }
 
-
 func TestDBIteratorEmpty(t *testing.T) {
 	for backend := range backends {
 		t.Run(fmt.Sprintf("Backend %s", backend), func(t *testing.T) {
