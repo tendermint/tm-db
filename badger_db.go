@@ -29,7 +29,6 @@ func NewBadgerDB(dbName, dir string) (*BadgerDB, error) {
 		return nil, err
 	}
 
-
 	opts := badger.DefaultOptions(path)
 	opts.IndexCacheSize = 256 << 20 // 100 mb or some other size based on the amount of data
 	opts.DetectConflicts = false
