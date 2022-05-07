@@ -40,16 +40,26 @@ func randomValue() []byte {
 	return b
 }
 
+func TestWithGolevelDB(t *testing.T) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	defer cleanupDBDir("", name)
+
+	db, err := NewGoLevelDB(name, "")
+	pdb := NewPrefixDB(db, bz("key"))
+
+	require.Nil(t, err)
+
+	t.Run("PrefixDB", func(t *testing.T) { Run(t, pdb) })
+}
+
 // Run generates concurrent reads and writes to db so the race detector can
 // verify concurrent operations are properly synchronized.
 // The contents of db are garbage after Run returns.
-func Run(t *testing.T) {
-
-	db := mockDBWithStuff(t)
+func Run(t *testing.T, db DB) {
 	t.Helper()
 
 	const numWorkers = 10
-	const numKeys = 32
+	const numKeys = 64
 
 	var wg sync.WaitGroup
 	for i := 0; i < numWorkers; i++ {
@@ -76,10 +86,13 @@ func Run(t *testing.T) {
 			}
 			found := make(map[string][]byte)
 			mine := []byte(fmt.Sprintf("task-%d-", i))
-			for it.Valid() {
-				it.Next()
+			for true {
 				if key := it.Key(); bytes.HasPrefix(key, mine) {
 					found[string(key)] = it.Value()
+				}
+				it.Next()
+				if !it.Valid() {
+					break
 				}
 			}
 			if err := it.Error(); err != nil {
@@ -88,8 +101,8 @@ func Run(t *testing.T) {
 			if err := it.Close(); err != nil {
 				t.Errorf("Close iterator[%d]: %v", i, err)
 			}
-			if len(mine) != numKeys {
-				t.Errorf("Task %d: found %d keys, wanted %d", i, len(mine), numKeys)
+			if len(found) != numKeys {
+				t.Errorf("Task %d: found %d keys, wanted %d", i, len(found), numKeys)
 			}
 
 			// Delete all the keys we inserted.
