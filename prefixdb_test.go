@@ -49,7 +49,63 @@ func TestWithGolevelDB(t *testing.T) {
 
 	pdb := NewPrefixDB(db, bz("key"))
 
-	t.Run("PrefixDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("GolevelDB", func(t *testing.T) { Run(t, pdb) })
+}
+
+func TestWithClevelDB(t *testing.T) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	defer cleanupDBDir("", name)
+
+	db, err := NewCLevelDB(name, "")
+	require.Nil(t, err)
+
+	pdb := NewPrefixDB(db, bz("key"))
+
+	t.Run("ClevelDB", func(t *testing.T) { Run(t, pdb) })
+}
+
+func TestWithRocksDB(t *testing.T) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	defer cleanupDBDir("", name)
+
+	db, err := NewRocksDB(name, "")
+	require.Nil(t, err)
+
+	pdb := NewPrefixDB(db, bz("key"))
+
+	t.Run("RocksDB", func(t *testing.T) { Run(t, pdb) })
+}
+
+func TestWithBadgerDB(t *testing.T) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	defer cleanupDBDir("", name)
+
+	db, err := NewBadgerDB(name, "")
+	require.Nil(t, err)
+
+	pdb := NewPrefixDB(db, bz("key"))
+
+	t.Run("BadgerDB", func(t *testing.T) { Run(t, pdb) })
+}
+
+func TestWithBoltDB(t *testing.T) {
+	name := fmt.Sprintf("test_%x", randStr(12))
+	defer cleanupDBDir("", name)
+
+	db, err := NewBoltDB(name, "")
+	require.Nil(t, err)
+
+	pdb := NewPrefixDB(db, bz("key"))
+
+	t.Run("BoltDB", func(t *testing.T) { Run(t, pdb) })
+}
+
+func TestWithMemDB(t *testing.T) {
+	db := NewMemDB()
+
+	pdb := NewPrefixDB(db, bz("key"))
+
+	t.Run("MemDB", func(t *testing.T) { Run(t, pdb) })
 }
 
 // Run generates concurrent reads and writes to db so the race detector can
