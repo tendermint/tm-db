@@ -50,4 +50,3 @@ jobs:
           gaiad init gaia-matrix
           cp /genesis.json ~/.gaia/config/genesis.json
           gaiad start --x-crisis-skip-assert-invariants --db_backend ${{ matrix.database }}
-i
