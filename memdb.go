@@ -20,24 +20,19 @@ type item struct {
 	value []byte
 }
 
-// Less implements btree.Item.
-func Less(other item) bool {
-	// this considers nil == []byte{}, but that's ok since we handle nil endpoints
-	// in iterators specially anyway
-	return bytes.Compare(i.key, other.(*item).key) == -1
-}
+type itemRef *item
 
-func comparator(a, b item) bool {
+func less(a, b itemRef) bool {
 	return bytes.Compare((a.key), b.key) == -1
 }
 
 // newKey creates a new key item.
-func newKey(key []byte) *item {
+func newKey(key []byte) itemRef {
 	return &item{key: key}
 }
 
 // newPair creates a new pair item.
-func newPair(key, value []byte) *item {
+func newPair(key, value []byte) itemRef {
 	return &item{key: key, value: value}
 }
 
@@ -49,7 +44,7 @@ func newPair(key, value []byte) *item {
 // important with MemDB.
 type MemDB struct {
 	mtx   sync.RWMutex
-	btree *btree.Generic[item]
+	btree *btree.Generic[itemRef]
 }
 
 var _ DB = (*MemDB)(nil)
@@ -57,7 +52,7 @@ var _ DB = (*MemDB)(nil)
 // NewMemDB creates a new in-memory database.
 func NewMemDB() *MemDB {
 	database := &MemDB{
-		btree: btree.NewGeneric[item](comparator),
+		btree: btree.NewGeneric[itemRef](less),
 	}
 
 	return database
@@ -69,9 +64,9 @@ func (db *MemDB) Get(key []byte) ([]byte, error) {
 		return nil, errKeyEmpty
 	}
 
-	i := db.btree.Get(newKey(key))
-	if i != nil {
-		return i.(*item).value, nil
+	i, found := db.btree.Get(newKey(key))
+	if found {
+		return i.value, nil
 	}
 	return nil, nil
 }
@@ -81,15 +76,10 @@ func (db *MemDB) Has(key []byte) (bool, error) {
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
-	if db.btree.Get(key) != nil {
-		return true, nil
-	}
 
-	if db.btree.Get(key) == nil {
-		return false, nil
-	}
+	_, found := db.btree.Get(newKey(key))
 
-	return false, nil
+	return found, nil
 }
 
 // Set implements DB.
@@ -147,7 +137,7 @@ func (db *MemDB) Close() error {
 
 // Print implements DB.
 func (db *MemDB) Print() error {
-	db.btree.Ascend(nil, func(i item) bool {
+	db.btree.Ascend(nil, func(i itemRef) bool {
 		pitem := i
 		fmt.Printf("[%X]:\t[%X]\n", pitem.key, pitem.value)
 		return true
