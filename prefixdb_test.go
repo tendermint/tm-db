@@ -53,8 +53,10 @@ func TestWithGolevelDB(t *testing.T) {
 }
 
 func TestWithClevelDB(t *testing.T) {
-	name := fmt.Sprintf("test_%x", randStr(12))
-	defer cleanupDBDir("", name)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cleveldb")
+	db, err := NewCLevelDB(path, "")
+	require.NoError(t, err)
 
 	db, err := NewCLevelDB(name, "")
 	require.Nil(t, err)
