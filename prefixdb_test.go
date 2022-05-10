@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math/rand"
+	"path/filepath"
 	"sync"
 	"testing"
 
@@ -41,73 +42,64 @@ func randomValue() []byte {
 }
 
 func TestWithGolevelDB(t *testing.T) {
-	name := fmt.Sprintf("test_%x", randStr(12))
-	defer cleanupDBDir("", name)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "goleveldb")
+	defer cleanupDBDir("", path)
 
-	db, err := NewGoLevelDB(name, "")
-	require.Nil(t, err)
+	db, err := NewGoLevelDB(path, "")
+	require.NoError(t, err)
 
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("GolevelDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("GolevelDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestWithClevelDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "cleveldb")
+	defer cleanupDBDir("", path)
+
 	db, err := NewCLevelDB(path, "")
 	require.NoError(t, err)
 
-	db, err := NewCLevelDB(name, "")
-	require.Nil(t, err)
-
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("ClevelDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestWithRocksDB(t *testing.T) {
-	name := fmt.Sprintf("test_%x", randStr(12))
-	defer cleanupDBDir("", name)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "rocksdb")
+	defer cleanupDBDir("", path)
 
-	db, err := NewRocksDB(name, "")
-	require.Nil(t, err)
+	db, err := NewRocksDB(path, "")
+	require.NoError(t, err)
 
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("RocksDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestWithBadgerDB(t *testing.T) {
-	name := fmt.Sprintf("test_%x", randStr(12))
-	defer cleanupDBDir("", name)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "badgerdb")
+	defer cleanupDBDir("", path)
 
-	db, err := NewBadgerDB(name, "")
-	require.Nil(t, err)
+	db, err := NewBadgerDB(path, "")
+	require.NoError(t, err)
 
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("BadgerDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("BadgerDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestWithBoltDB(t *testing.T) {
-	name := fmt.Sprintf("test_%x", randStr(12))
-	defer cleanupDBDir("", name)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "boltdb")
+	defer cleanupDBDir("", path)
 
-	db, err := NewBoltDB(name, "")
-	require.Nil(t, err)
+	db, err := NewBoltDB(path, "")
+	require.NoError(t, err)
 
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("BoltDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("BoltDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestWithMemDB(t *testing.T) {
 	db := NewMemDB()
 
-	pdb := NewPrefixDB(db, bz("key"))
-
-	t.Run("MemDB", func(t *testing.T) { Run(t, pdb) })
+	t.Run("MemDB", func(t *testing.T) { Run(t, db) })
 }
 
 // Run generates concurrent reads and writes to db so the race detector can
