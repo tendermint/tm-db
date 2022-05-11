@@ -44,7 +44,6 @@ func randomValue() []byte {
 func TestWithGolevelDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "goleveldb")
-	defer cleanupDBDir("", path)
 
 	db, err := NewGoLevelDB(path, "")
 	require.NoError(t, err)
@@ -55,7 +54,6 @@ func TestWithGolevelDB(t *testing.T) {
 func TestWithClevelDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "cleveldb")
-	defer cleanupDBDir("", path)
 
 	db, err := NewCLevelDB(path, "")
 	require.NoError(t, err)
@@ -66,7 +64,6 @@ func TestWithClevelDB(t *testing.T) {
 func TestWithRocksDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "rocksdb")
-	defer cleanupDBDir("", path)
 
 	db, err := NewRocksDB(path, "")
 	require.NoError(t, err)
@@ -77,7 +74,6 @@ func TestWithRocksDB(t *testing.T) {
 func TestWithBadgerDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "badgerdb")
-	defer cleanupDBDir("", path)
 
 	db, err := NewBadgerDB(path, "")
 	require.NoError(t, err)
@@ -88,7 +84,6 @@ func TestWithBadgerDB(t *testing.T) {
 func TestWithBoltDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "boltdb")
-	defer cleanupDBDir("", path)
 
 	db, err := NewBoltDB(path, "")
 	require.NoError(t, err)
