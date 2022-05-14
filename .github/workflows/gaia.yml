@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     container: ghcr.io/faddat/gaia
     continue-on-error: true
     env:
