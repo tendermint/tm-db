@@ -10,7 +10,7 @@ on:
 
 jobs:
   build:
-    runs-on: buildjet-4vcpu-ubuntu-2004
+    runs-on: ubuntu-latest
     container: ghcr.io/faddat/gaia
     continue-on-error: true
     env:
