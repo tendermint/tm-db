@@ -16,8 +16,8 @@ func TestDBIteratorSingleKey(t *testing.T) {
 
 			err := db.SetSync(bz("1"), bz("value_1"))
 			assert.NoError(t, err)
-//			itr, err := db.Iterator(nil, nil)
-//			assert.NoError(t, err)
+			//			itr, err := db.Iterator(nil, nil)
+			//			assert.NoError(t, err)
 
 			//			checkValid(t, itr, true)
 			//			checkNext(t, itr, false)
