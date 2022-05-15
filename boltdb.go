@@ -6,6 +6,7 @@ package db
 import (
 	"fmt"
 	"path/filepath"
+	"os"
 
 	"go.etcd.io/bbolt"
 )
