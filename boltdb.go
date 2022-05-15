@@ -46,6 +46,7 @@ func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error)
 	}
 
 	dbPath := filepath.Join(dir, name+".db")
+	os.MkdirAll(filepath.Join(dir, "snapshots"))
 	db, err := bbolt.Open(dbPath, os.ModePerm, opts)
 	if err != nil {
 		return nil, err

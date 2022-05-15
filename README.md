@@ -1,4 +1,4 @@
-# Tendermint DB 
+# Tendermint DB, Custom Edition
 
 [![version](https://img.shields.io/github/tag/tendermint/tm-db.svg)](https://github.com/tendermint/tm-db/releases/latest)
 [![license](https://img.shields.io/github/license/tendermint/tm-db.svg)](https://github.com/tendermint/tm-db/blob/master/LICENSE)
@@ -10,9 +10,23 @@
 
 Common database interface for various database backends. Primarily meant for applications built on [Tendermint](https://github.com/tendermint/tendermint), such as the [Cosmos SDK](https://github.com/cosmos/cosmos-sdk), but can be used independently of these as well.
 
+### Learnings
+
+Rocksdb uses the most RAM of any of these options.  We know this because it is killed in this run:
+
+https://github.com/notional-labs/tm-db/runs/6437891115 on a 4cpu runner.  We'll increase to 8 now. 
+
+buildjet-4vcpu-ubuntu-2004
+
+Yeilds 2m 30s to consensus reactor.
+
+
+
 ### Minimum Go Version
 
-Go 1.13+
+Go 1.18+
+
+
 
 ## Supported Database Backends
 
