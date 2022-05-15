@@ -44,7 +44,7 @@ func NewBoltDB(name, dir string) (DB, error) {
 	}
 
 	dbPath := filepath.Join(dir, name+".db")
-	db, err := bolt.Open(dbPath, 0666, nil)
+	db, err := bbolt.Open(dbPath, 0666, nil)
 	if err != nil {
 
 			return nil, err
