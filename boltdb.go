@@ -6,7 +6,6 @@ package db
 import (
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"go.etcd.io/bbolt"
@@ -36,12 +35,6 @@ var _ DB = (*BoltDB)(nil)
 // NewBoltDB returns a BoltDB with default options.
 func NewBoltDB(name, dir string) (DB, error) {
 
-
-// NewBoltDBWithOpts allows you to supply *bbolt.Options. ReadOnly: true is not
-// supported because NewBoltDBWithOpts creates a global bucket.
-	if opts.ReadOnly {
-		return nil, errors.New("ReadOnly: true is not supported")
-	}
 
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := bbolt.Open(dbPath, 0666, nil)
