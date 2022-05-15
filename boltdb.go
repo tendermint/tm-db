@@ -35,23 +35,20 @@ var _ DB = (*BoltDB)(nil)
 
 // NewBoltDB returns a BoltDB with default options.
 func NewBoltDB(name, dir string) (DB, error) {
-	return NewBoltDBWithOpts(name, dir, bbolt.DefaultOptions)
-}
+
 
 // NewBoltDBWithOpts allows you to supply *bbolt.Options. ReadOnly: true is not
 // supported because NewBoltDBWithOpts creates a global bucket.
-func NewBoltDBWithOpts(name string, dir string, opts *bbolt.Options) (DB, error) {
 	if opts.ReadOnly {
 		return nil, errors.New("ReadOnly: true is not supported")
 	}
 
 	dbPath := filepath.Join(dir, name+".db")
-	db, err := bbolt.Open(dbPath, os.ModePerm, opts)
+	db, err := bolt.Open(dbPath, 0666, nil)
 	if err != nil {
-		err = os.MkdirAll(dbPath, 0o755)
-		if err != nil {
+
 			return nil, err
-		}
+	
 	}
 
 	// create a global bucket
