@@ -36,7 +36,10 @@ func NewCLevelDB(name string, dir string) (*CLevelDB, error) {
 	opts.SetCreateIfMissing(true)
 	db, err := levigo.Open(dbPath, opts)
 	if err != nil {
-		return nil, err
+		err = os.MkdirAll(dbPath, 0o755)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ro := levigo.NewReadOptions()
 	wo := levigo.NewWriteOptions()
