@@ -36,8 +36,12 @@ func NewBoltDB(name, dir string) (DB, error) {
 
 
 	dbPath := filepath.Join(dir, name+".db")
+	if _, err := os.Stat(dbPath.Dir()); os.IsNotExist(err) {
+		MkdirAll(dbPath.Dir())
+	}
 	db, err := bbolt.Open(dbPath, 0666, nil)
 	if err != nil {
+
 
 			return nil, err
 	
