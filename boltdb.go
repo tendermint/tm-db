@@ -4,7 +4,6 @@
 package db
 
 import (
-	"errors"
 	"fmt"
 	"path/filepath"
 
