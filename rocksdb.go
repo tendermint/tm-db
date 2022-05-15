@@ -44,12 +44,10 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 
 	opts := grocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
-	// SetMaxOpenFiles to 4096 seems to provide a reliable performance boost
-	opts.SetMaxOpenFiles(4096)
+	opts.SetMaxOpenFiles(DefaultOpenFilesCapacity)
 	opts.SetCreateIfMissing(true)
 	opts.IncreaseParallelism(runtime.NumCPU())
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
-	opts.SetMaxOpenFiles(2048)
 
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := grocksdb.OpenDb(opts, dbPath)
