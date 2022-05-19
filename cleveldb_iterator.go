@@ -65,13 +65,11 @@ func (itr cLevelDBIterator) Valid() bool {
 
 	// If source errors, invalid.
 	if itr.source.GetError() != nil {
-		itr.isInvalid = true
 		return false
 	}
 
 	// If source is invalid, invalid.
 	if !itr.source.Valid() {
-		itr.isInvalid = true
 		return false
 	}
 
@@ -81,12 +79,10 @@ func (itr cLevelDBIterator) Valid() bool {
 	var key = itr.source.Key()
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
-			itr.isInvalid = true
 			return false
 		}
 	} else {
 		if end != nil && bytes.Compare(end, key) <= 0 {
-			itr.isInvalid = true
 			return false
 		}
 	}
