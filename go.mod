@@ -1,6 +1,6 @@
 module github.com/tendermint/tm-db
 
-go 1.18
+go 1.17
 
 require (
 	github.com/cosmos/gorocksdb v1.2.0

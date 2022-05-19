@@ -131,7 +131,7 @@ func Run(t *testing.T, db DB) {
 			}
 			found := make(map[string][]byte)
 			mine := []byte(fmt.Sprintf("task-%d-", i))
-			for true {
+			for {
 				if key := it.Key(); bytes.HasPrefix(key, mine) {
 					found[string(key)] = it.Value()
 				}
