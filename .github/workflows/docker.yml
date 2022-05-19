@@ -6,7 +6,7 @@
 # For that reason, changes here should be done in a separate PR in advance of
 # work that depends on them.
 
-name: Build & Push TM-DB-Testing
+name: Build & Push TM-DB Docker image
 on:
   pull_request:
     paths:
@@ -49,10 +49,11 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Publish to Docker Hub
+      - name: Publish to ghcr.io
         uses: docker/build-push-action@v3
         with:
           context: ./tools
           file: ./tools/Dockerfile
+          platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.prep.outputs.tags }}
