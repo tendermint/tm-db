@@ -16,8 +16,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     make tar wget
 
 FROM build AS install
-ARG LEVELDB=1.23
-ARG ROCKSDB=6.29.5
+ARG LEVELDB=1.20
+ARG ROCKSDB=6.24.2
 
 # Install cleveldb
 RUN \
