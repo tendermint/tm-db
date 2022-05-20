@@ -1,3 +1,4 @@
+//go:build boltdb
 // +build boltdb
 
 package db
@@ -11,9 +12,7 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-var (
-	bucket = []byte("tm")
-)
+var bucket = []byte("tm")
 
 func init() {
 	registerDBCreator(BoltDBBackend, func(name, dir string) (DB, error) {

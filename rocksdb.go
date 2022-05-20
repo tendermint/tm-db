@@ -5,6 +5,7 @@ package db
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"runtime"
 
@@ -20,11 +21,11 @@ func init() {
 
 // RocksDB is a RocksDB backend.
 type RocksDB struct {
-	db     *gorocksdb.DB
-	ro     *gorocksdb.ReadOptions
-	wo     *gorocksdb.WriteOptions
-	woSync *gorocksdb.WriteOptions
-	cache  *gorocksdb.Cache
+	db     *grocksdb.DB
+	ro     *grocksdb.ReadOptions
+	wo     *grocksdb.WriteOptions
+	woSync *grocksdb.WriteOptions
+	cache  *grocksdb.Cache
 }
 
 var _ DB = (*RocksDB)(nil)
@@ -33,10 +34,10 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	// default rocksdb option, good enough for most cases, including heavy workloads.
 	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
 	// compression: snappy as default, need to -lsnappy to enable.
-	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
-	cache := gorocksdb.NewLRUCache(1 << 30)
+	bbto := grocksdb.NewDefaultBlockBasedTableOptions()
+	cache := grocksdb.NewLRUCache(1 << 30)
 	bbto.SetBlockCache(cache)
-	filter := gorocksdb.NewBloomFilter(10)
+	filter := grocksdb.NewBloomFilter(10)
 	bbto.SetFilterPolicy(filter)
 	bbto.SetCacheIndexAndFilterBlocks(true)
 	bbto.SetPinL0FilterAndIndexBlocksInCache(true)
@@ -51,7 +52,10 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := grocksdb.OpenDb(opts, dbPath)
 	if err != nil {
-		return nil, err
+		err = os.MkdirAll(dbPath, 0755)
+		if err != nil {
+			return nil, err
+		}
 	}
 	ro := grocksdb.NewDefaultReadOptions()
 	wo := grocksdb.NewDefaultWriteOptions()
