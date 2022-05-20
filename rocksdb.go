@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 
-	"github.com/cosmos/gorocksdb"
+	"github.com/linxGnu/grocksdb"
 )
 
 func init() {
@@ -41,7 +41,7 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	bbto.SetCacheIndexAndFilterBlocks(true)
 	bbto.SetPinL0FilterAndIndexBlocksInCache(true)
 
-	opts := gorocksdb.NewDefaultOptions()
+	opts := grocksdb.NewDefaultOptions()
 	opts.SetBlockBasedTableFactory(bbto)
 	opts.SetMaxOpenFiles(DefaultOpenFilesCapacity)
 	opts.SetCreateIfMissing(true)
@@ -49,13 +49,13 @@ func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
 
 	dbPath := filepath.Join(dir, name+".db")
-	db, err := gorocksdb.OpenDb(opts, dbPath)
+	db, err := grocksdb.OpenDb(opts, dbPath)
 	if err != nil {
 		return nil, err
 	}
-	ro := gorocksdb.NewDefaultReadOptions()
-	wo := gorocksdb.NewDefaultWriteOptions()
-	woSync := gorocksdb.NewDefaultWriteOptions()
+	ro := grocksdb.NewDefaultReadOptions()
+	wo := grocksdb.NewDefaultWriteOptions()
+	woSync := grocksdb.NewDefaultWriteOptions()
 	woSync.SetSync(true)
 	database := &RocksDB{
 		db:     db,
@@ -143,7 +143,7 @@ func (db *RocksDB) DeleteSync(key []byte) error {
 	return nil
 }
 
-func (db *RocksDB) DB() *gorocksdb.DB {
+func (db *RocksDB) DB() *grocksdb.DB {
 	return db.db
 }
 
