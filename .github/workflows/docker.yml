@@ -13,10 +13,6 @@ on:
     paths:
       - "tools/*"
   push:
-    branches:
-      - master
-    paths:
-      - "tools/*"
 
 jobs:
   build:
