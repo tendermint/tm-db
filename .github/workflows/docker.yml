@@ -8,6 +8,7 @@
 
 name: Build & Push TM-DB-Testing
 on:
+  workflow_dispatch:
   pull_request:
     paths:
       - "tools/*"
