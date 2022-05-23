@@ -40,7 +40,6 @@ func BenchmarkRandomReadsWrites2(b *testing.B) {
 			val := internal[idx]
 			idxBytes := int642Bytes(idx)
 			valBytes := int642Bytes(val)
-			// fmt.Printf("Set %X -> %X\n", idxBytes, valBytes)
 			db.Set(
 				idxBytes,
 				valBytes,
