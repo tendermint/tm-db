@@ -32,12 +32,7 @@ func taskKey(i, k int) []byte {
 
 func randomValue() []byte {
 	b := make([]byte, 16)
-	_, err := rand.Read(b)
-
-	if err != nil {
-		return nil
-	}
-
+	rand.Read(b)
 	return b
 }
 
