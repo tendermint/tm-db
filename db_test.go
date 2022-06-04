@@ -53,7 +53,7 @@ func TestDBIteratorTwoKeys(t *testing.T) {
 				checkNext(t, itr, false)
 				checkValid(t, itr, false)
 
-				//checkNextPanics(t, itr)
+				// checkNextPanics(t, itr)
 
 				// Once invalid...
 				checkInvalid(t, itr)
