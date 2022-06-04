@@ -35,7 +35,7 @@ jobs:
       - name: state sync gaia with ${{ matrix.database }}
         run: |
           cd ..
-          git clone https://github.com/cosmos/gaia
+          git clone https://github.com/cosmos/gaia --branch release/v7.0.x
           cd gaia
           go mod edit -replace github.com/tendermint/tm-db=../tm-db
           go mod tidy -go=1.18
