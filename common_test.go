@@ -66,9 +66,11 @@ func checkKeyPanics(t *testing.T, itr Iterator) {
 }
 */
 
+/*
 func checkValuePanics(t *testing.T, itr Iterator) {
 	assert.Panics(t, func() { itr.Value() })
 }
+*/
 
 func newTempDB(t *testing.T, backend BackendType) (db DB, dbDir string) {
 	dirname, err := ioutil.TempDir("", "db_common_test")
