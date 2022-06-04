@@ -37,7 +37,7 @@ jobs:
           git clone https://github.com/cosmos/gaia
           cd gaia
           go mod edit -replace github.com/tendermint/tm-db=../tm-db
-          go mod tidy
+          go mod tidy -go=1.18
           go install -ldflags '-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=${{ matrix.database }}' -tags ${{ matrix.database }} ./...
           export LATEST_HEIGHT=$(curl -s https://cosmoshub.validator.network/block | jq -r .result.block.header.height);
           export BLOCK_HEIGHT=$(($LATEST_HEIGHT-$INTERVAL)) 
