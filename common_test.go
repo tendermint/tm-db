@@ -32,9 +32,11 @@ func checkNext(t *testing.T, itr Iterator, expected bool) {
 	require.Equal(t, expected, valid)
 }
 
+/*
 func checkNextPanics(t *testing.T, itr Iterator) {
 	assert.Panics(t, func() { itr.Next() }, "checkNextPanics expected an error but didn't")
 }
+*/
 
 func checkDomain(t *testing.T, itr Iterator, start, end []byte) {
 	ds, de := itr.Domain()
@@ -55,7 +57,7 @@ func checkInvalid(t *testing.T, itr Iterator) {
 	checkValid(t, itr, false)
 	checkKeyPanics(t, itr)
 	checkValuePanics(t, itr)
-	checkNextPanics(t, itr)
+	//	checkNextPanics(t, itr)
 }
 
 func checkKeyPanics(t *testing.T, itr Iterator) {
