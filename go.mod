@@ -1,8 +1,9 @@
 module github.com/tendermint/tm-db
 
-go 1.17
+go 1.18
 
 require (
+	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/btree v1.0.1
@@ -13,8 +14,6 @@ require (
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.47.0
 )
-
-require github.com/dgraph-io/badger/v3 v3.2103.2
 
 require (
 	github.com/cespare/xxhash v1.1.0 // indirect
