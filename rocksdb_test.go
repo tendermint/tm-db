@@ -6,8 +6,8 @@ package db
 import (
 	"fmt"
 	"os"
-	"testing"
 	"path/filepath"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -33,7 +33,6 @@ func TestWithRocksDB(t *testing.T) {
 
 	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
 }
-
 
 func TestRocksDBStats(t *testing.T) {
 	name := fmt.Sprintf("test_%x", randStr(12))

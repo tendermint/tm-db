@@ -140,7 +140,6 @@ func (pdb *PrefixDB) ReverseIterator(start, end []byte) (Iterator, error) {
 
 // NewBatch implements DB.
 func (pdb *PrefixDB) NewBatch() Batch {
-
 	return newPrefixBatch(pdb.prefix, pdb.db.NewBatch())
 }
 
