@@ -14,6 +14,16 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestWithClevelDB(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cleveldb")
+
+	db, err := NewCLevelDB(path, "")
+	require.NoError(t, err)
+
+	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
+}
+
 //nolint: errcheck
 func BenchmarkRandomReadsWrites2(b *testing.B) {
 	b.StopTimer()

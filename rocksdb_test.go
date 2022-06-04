@@ -23,6 +23,17 @@ func TestRocksDBBackend(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestWithRocksDB(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "rocksdb")
+
+	db, err := NewRocksDB(path, "")
+	require.NoError(t, err)
+
+	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
+}
+
+
 func TestRocksDBStats(t *testing.T) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()

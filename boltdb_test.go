@@ -21,6 +21,16 @@ func TestBoltDBNewBoltDB(t *testing.T) {
 	db.Close()
 }
 
+func TestWithBoltDB(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "boltdb")
+
+	db, err := NewBoltDB(path, "")
+	require.NoError(t, err)
+
+	t.Run("BoltDB", func(t *testing.T) { Run(t, db) })
+}
+
 func BenchmarkBoltDBRandomReadsWrites(b *testing.B) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	db, err := NewBoltDB(name, "")

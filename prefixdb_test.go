@@ -45,26 +45,7 @@ func TestGolevelDB(t *testing.T) {
 	Run(t, db)
 }
 
-func TestWithClevelDB(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "cleveldb")
-
-	db, err := NewCLevelDB(path, "")
-	require.NoError(t, err)
-
-	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
-}
-
-func TestWithRocksDB(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "rocksdb")
-
-	db, err := NewRocksDB(path, "")
-	require.NoError(t, err)
-
-	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
-}
-
+/* We don't seem to test badger anywhere.
 func TestWithBadgerDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "badgerdb")
@@ -74,16 +55,7 @@ func TestWithBadgerDB(t *testing.T) {
 
 	t.Run("BadgerDB", func(t *testing.T) { Run(t, db) })
 }
-
-func TestWithBoltDB(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "boltdb")
-
-	db, err := NewBoltDB(path, "")
-	require.NoError(t, err)
-
-	t.Run("BoltDB", func(t *testing.T) { Run(t, db) })
-}
+*/
 
 func TestWithMemDB(t *testing.T) {
 	db := NewMemDB()
