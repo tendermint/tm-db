@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"testing"
+	"path/filepath"
 
 	"github.com/stretchr/testify/require"
 	"github.com/syndtr/goleveldb/leveldb/opt"
