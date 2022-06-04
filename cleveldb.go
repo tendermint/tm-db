@@ -4,8 +4,8 @@
 package db
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/jmhodges/levigo"

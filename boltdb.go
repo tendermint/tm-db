@@ -5,8 +5,8 @@ package db
 
 import (
 	"fmt"
-	"path/filepath"
 	"os"
+	"path/filepath"
 
 	"go.etcd.io/bbolt"
 )
@@ -32,18 +32,16 @@ var _ DB = (*BoltDB)(nil)
 
 // NewBoltDB returns a BoltDB with default options.
 func NewBoltDB(name, dir string) (DB, error) {
-
-
 	dbPath := filepath.Join(dir, name+".db")
 	if _, err := os.Stat(filepath.Dir(dbPath)); os.IsNotExist(err) {
-		os.MkdirAll(filepath.Dir(dbPath), 0o755)
+		err := os.MkdirAll(filepath.Dir(dbPath), 0o755)
+		if err != nil {
+			return nil, err
+		}
 	}
 	db, err := bbolt.Open(dbPath, 0o755, nil)
 	if err != nil {
-
-
-			return nil, err
-	
+		return nil, err
 	}
 
 	// create a global bucket

@@ -3,6 +3,4 @@
 
 package db
 
-var (
-	DefaultOpenFilesCapacity = 32768
-)
+var DefaultOpenFilesCapacity = 32768

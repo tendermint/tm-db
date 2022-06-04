@@ -34,9 +34,9 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 		WriteBuffer:            64 * opt.MiB,
 		DisableSeeksCompaction: true,
 		OpenFilesCacheCapacity: DefaultOpenFilesCapacity,
-		//CompactionTableSize:                   8 * opt.MiB,
-		//CompactionTotalSize:                   40 * opt.MiB,
-		//CompactionTotalSizeMultiplierPerLevel: []float64{1, 1, 10, 100, 1000, 10000, 100000},
+		// CompactionTableSize:                   8 * opt.MiB,
+		// CompactionTotalSize:                   40 * opt.MiB,
+		// CompactionTotalSizeMultiplierPerLevel: []float64{1, 1, 10, 100, 1000, 10000, 100000},
 		// Increase table size(ldb) and total size of by using follwing options
 		//             L1   L2    L3     L4      L5       L6
 		// TableSize    4    8    16     32      64      128
