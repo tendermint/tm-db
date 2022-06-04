@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/faddat/gaia
     continue-on-error: true
+    timeout-minutes: 5
     env:
       INTERVAL: 1000
       GAIAD_STATESYNC_ENABLE: true
