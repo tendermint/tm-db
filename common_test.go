@@ -56,7 +56,7 @@ func checkItem(t *testing.T, itr Iterator, key []byte, value []byte) {
 func checkInvalid(t *testing.T, itr Iterator) {
 	checkValid(t, itr, false)
 	//	checkKeyPanics(t, itr)
-	checkValuePanics(t, itr)
+	//	checkValuePanics(t, itr)
 	//	checkNextPanics(t, itr)
 }
 
