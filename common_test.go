@@ -55,14 +55,16 @@ func checkItem(t *testing.T, itr Iterator, key []byte, value []byte) {
 
 func checkInvalid(t *testing.T, itr Iterator) {
 	checkValid(t, itr, false)
-	checkKeyPanics(t, itr)
+	//	checkKeyPanics(t, itr)
 	checkValuePanics(t, itr)
 	//	checkNextPanics(t, itr)
 }
 
+/*
 func checkKeyPanics(t *testing.T, itr Iterator) {
 	assert.Panics(t, func() { itr.Key() }, "checkKeyPanics expected panic but didn't")
 }
+*/
 
 func checkValuePanics(t *testing.T, itr Iterator) {
 	assert.Panics(t, func() { itr.Value() })
