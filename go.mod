@@ -11,7 +11,6 @@ require (
 	github.com/linxGnu/grocksdb v1.7.1
 	github.com/stretchr/testify v1.7.1
 	github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7
-
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.47.0
 )
