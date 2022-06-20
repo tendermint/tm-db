@@ -6,7 +6,7 @@ require (
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/btree v1.1.1
+	github.com/google/btree v1.1.2
 	github.com/jmhodges/levigo v1.0.0
 	github.com/linxGnu/grocksdb v1.7.1
 	github.com/stretchr/testify v1.7.1
