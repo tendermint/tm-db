@@ -32,10 +32,6 @@ func checkNext(t *testing.T, itr Iterator, expected bool) {
 	require.Equal(t, expected, valid)
 }
 
-func checkNextPanics(t *testing.T, itr Iterator) {
-	assert.Panics(t, func() { itr.Next() }, "checkNextPanics expected an error but didn't")
-}
-
 func checkDomain(t *testing.T, itr Iterator, start, end []byte) {
 	ds, de := itr.Domain()
 	assert.Equal(t, start, ds, "checkDomain domain start incorrect")
@@ -53,17 +49,9 @@ func checkItem(t *testing.T, itr Iterator, key []byte, value []byte) {
 
 func checkInvalid(t *testing.T, itr Iterator) {
 	checkValid(t, itr, false)
-//	checkKeyPanics(t, itr)
-//	checkValuePanics(t, itr)
-//	checkNextPanics(t, itr)
-}
-
-func checkKeyPanics(t *testing.T, itr Iterator) {
-	assert.Panics(t, func() { itr.Key() }, "checkKeyPanics expected panic but didn't")
-}
-
-func checkValuePanics(t *testing.T, itr Iterator) {
-	assert.Panics(t, func() { itr.Value() })
+	//	checkKeyPanics(t, itr)
+	//	checkValuePanics(t, itr)
+	//	checkNextPanics(t, itr)
 }
 
 func newTempDB(t *testing.T, backend BackendType) (db DB, dbDir string) {

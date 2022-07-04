@@ -33,12 +33,12 @@ func TestPrefixIteratorNoMatch1(t *testing.T) {
 		t.Run(fmt.Sprintf("Prefix w/ backend %s", backend), func(t *testing.T) {
 			db, dir := newTempDB(t, backend)
 			defer os.RemoveAll(dir)
-//			itr, err := IteratePrefix(db, []byte("2"))
-//			require.NoError(t, err)
+			//			itr, err := IteratePrefix(db, []byte("2"))
+			//			require.NoError(t, err)
 			err := db.SetSync(bz("1"), bz("value_1"))
 			require.NoError(t, err)
 
-//			checkInvalid(t, itr)
+			//			checkInvalid(t, itr)
 		})
 	}
 }
@@ -51,10 +51,10 @@ func TestPrefixIteratorNoMatch2(t *testing.T) {
 			defer os.RemoveAll(dir)
 			err := db.SetSync(bz("3"), bz("value_3"))
 			require.NoError(t, err)
-	//		itr, err := IteratePrefix(db, []byte("4"))
-	//		require.NoError(t, err)
+			//		itr, err := IteratePrefix(db, []byte("4"))
+			//		require.NoError(t, err)
 
-//			checkInvalid(t, itr)
+			//			checkInvalid(t, itr)
 		})
 	}
 }
@@ -75,7 +75,7 @@ func TestPrefixIteratorMatch1(t *testing.T) {
 			checkNext(t, itr, false)
 
 			// Once invalid...
-//			checkInvalid(t, itr)
+			//			checkInvalid(t, itr)
 		})
 	}
 }
@@ -114,7 +114,7 @@ func TestPrefixIteratorMatches1N(t *testing.T) {
 			checkNext(t, itr, false)
 
 			// Once invalid...
-//			checkInvalid(t, itr)
+			//			checkInvalid(t, itr)
 		})
 	}
 }
