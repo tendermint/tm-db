@@ -10,6 +10,16 @@
 
 Common database interface for various database backends. Primarily meant for applications built on [Tendermint](https://github.com/tendermint/tendermint), such as the [Cosmos SDK](https://github.com/cosmos/cosmos-sdk), but can be used independently of these as well.
 
+### Differences
+
+* This tm-db branch includes its own fully-working, known-good development environment so that you can easily test the one viable cgo database, rocksdb.
+* This tm-db branch removes bolt because it basically does not work, and badger because it is abandonware. 
+* This tm-db branch aims to support only viable options:
+
+  * goleveldb
+  * rocksdb
+  * pebbledb
+
 ### Learnings
 
 Rocksdb uses the most RAM of any of these options.  We know this because it is killed in this run:
