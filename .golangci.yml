@@ -31,13 +31,11 @@ linters:
     - structcheck
     - stylecheck
     - typecheck
+    - revive
     - unconvert
-    # - unparam
+    - unparam
     - unused
     - varcheck
-    # - whitespace
-    # - wsl
-    # - gocognit
     - nolintlint
 
 issues:
