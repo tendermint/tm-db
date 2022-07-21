@@ -34,14 +34,7 @@ Go 1.18+
 
 - **MemDB [stable]:** An in-memory database using [Google's B-tree package](https://github.com/google/btree). Has very high performance both for reads, writes, and range scans, but is not durable and will lose all data on process exit. Does not support transactions. Suitable for e.g. caches, working sets, and tests. Used for [IAVL](https://github.com/tendermint/iavl) working sets when the pruning strategy allows it.
 
-- **[LevelDB](https://github.com/google/leveldb) [experimental]:** A [Go wrapper](https://github.com/jmhodges/levigo) around [LevelDB](https://github.com/google/leveldb). Uses LSM-trees for on-disk storage, which have good performance for write-heavy workloads, particularly on spinning disks, but requires periodic compaction to maintain decent read performance and reclaim disk space. Does not support transactions.
-
-- **[BoltDB](https://github.com/etcd-io/bbolt) [experimental]:** A [fork](https://github.com/etcd-io/bbolt) of [BoltDB](https://github.com/boltdb/bolt). Uses B+trees for on-disk storage, which have good performance for read-heavy workloads and range scans. Supports serializable ACID transactions.
-
 - **[RocksDB](https://github.com/linxGnu/grocksdb) [experimental]:** A [Go wrapper](https://github.com/linxGnu/grocksdb) around [RocksDB](https://rocksdb.org). Similarly to LevelDB (above) it uses LSM-trees for on-disk storage, but is optimized for fast storage media such as SSDs and memory. Supports atomic transactions, but not full ACID transactions.
-
-- **[BadgerDB](https://github.com/dgraph-io/badger) [experimental]:** A key-value database written as a pure-Go alternative to e.g. LevelDB and RocksDB, with LSM-tree storage. Makes use of multiple goroutines for performance, and includes advanced features such as serializable ACID transactions, write batches, compression, and more.
-
 
 ## Meta-databases
 
