@@ -62,6 +62,8 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		l.EnsureDefaults()
 	}
 
+	opts.DisableAutomaticCompactions = true
+
 	opts.EnsureDefaults()
 
 	p, err := pebble.Open(dbPath, opts)
