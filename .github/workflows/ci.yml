@@ -42,3 +42,27 @@ jobs:
         run: |
           go test -count 5000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
   
+  Pebble2:
+    # The custom image here contains pre-built libraries for leveldb and
+    # rocksdb, which are needed to build and test those modules.
+    # To update the container image, see docker.yml.
+    runs-on: ubuntu-latest
+    container: tendermintdev/docker-tm-db-testing
+    steps:
+      - uses: actions/checkout@v3
+      - name: test & coverage report creation
+        run: |
+          go test -count 5000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
+          
+  
+  Pebble3:
+    # The custom image here contains pre-built libraries for leveldb and
+    # rocksdb, which are needed to build and test those modules.
+    # To update the container image, see docker.yml.
+    runs-on: ubuntu-latest
+    container: tendermintdev/docker-tm-db-testing
+    steps:
+      - uses: actions/checkout@v3
+      - name: test & coverage report creation
+        run: |
+          go test -count 5000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
