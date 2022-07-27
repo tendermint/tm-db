@@ -5,6 +5,7 @@ package db
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,7 +25,7 @@ func TestPebbleDBBackend(t *testing.T) {
 
 func TestWithPebbleDB(t *testing.T) {
 	dir := t.TempDir()
-	path := filepath.Join(dir, "cleveldb")
+	path := filepath.Join(dir, "pebbledb")
 
 	db, err := NewPebbleDB(path, "")
 	require.NoError(t, err)
