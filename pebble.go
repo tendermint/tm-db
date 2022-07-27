@@ -34,7 +34,7 @@ func (db *PebbleDB) DB() *pebble.DB {
 func NewPebbleDB(name string, dir string) (DB, error) {
 
 	// This is config that we could use later.  When it is enabled, we hit the error more rapidly and frequently as can be seen in this test run:
-	
+
 	/*
 		cache := pebble.NewCache(1024 * 1024 * 32)
 		defer cache.Unref()
