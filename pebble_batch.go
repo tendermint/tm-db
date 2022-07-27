@@ -11,6 +11,7 @@ type pebbleDBBatch struct {
 
 var _ Batch = (*pebbleDBBatch)(nil)
 
+// new PebbleDBBatch returns a new PebbleDBBatch.
 func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
 	return &pebbleDBBatch{
 		batch: db.db.NewBatch(),
@@ -18,6 +19,11 @@ func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
 }
 
 // Set implements Batch.
+// 1) we make sure that the key is not empty, and if it is we return errKeyEmpty.
+// 2) Then we check if the value is nil, If the value is nil, we return an error.
+// 3) Then we check if the batch is nil value, and return errBatchClosed if it is.
+// 4) We set a new value in the batch.
+// 5) We return nil.
 func (b *pebbleDBBatch) Set(key, value []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
