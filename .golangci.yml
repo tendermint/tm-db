@@ -44,7 +44,6 @@ run:
   build-tags:
     - cleveldb
     - rocksdb
-    - badgerdb
     - boltdb
 
 issues:

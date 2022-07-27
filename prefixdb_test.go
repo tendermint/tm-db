@@ -45,18 +45,6 @@ func TestGolevelDB(t *testing.T) {
 	Run(t, db)
 }
 
-/* We don't seem to test badger anywhere.
-func TestWithBadgerDB(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "badgerdb")
-
-	db, err := NewBadgerDB(path, "")
-	require.NoError(t, err)
-
-	t.Run("BadgerDB", func(t *testing.T) { Run(t, db) })
-}
-*/
-
 func TestWithMemDB(t *testing.T) {
 	db := NewMemDB()
 
