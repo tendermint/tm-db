@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/cockroachdb/pebble"
-	"github.com/cockroachdb/pebble/bloom"
 )
 
 func init() {
@@ -33,36 +32,42 @@ func (db *PebbleDB) DB() *pebble.DB {
 
 // NewPebbleDB makes and configures a new instance of PebbleDB.
 func NewPebbleDB(name string, dir string) (DB, error) {
-	cache := pebble.NewCache(1024 * 1024 * 32)
-	defer cache.Unref()
-	opts := &pebble.Options{
-		Cache:                       cache,
-		DisableWAL:                  false,
-		FormatMajorVersion:          pebble.FormatNewest,
-		L0CompactionThreshold:       2,
-		L0StopWritesThreshold:       1000,
-		LBaseMaxBytes:               64 << 20, // 64 MB
-		Levels:                      make([]pebble.LevelOptions, 7),
-		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                16384, // lowering this value can cause the db to use less disk space, and this can matter when running the tests in github actions.
-		MemTableSize:                64 << 20,
-		MemTableStopWritesThreshold: 4,
-	}
 
-	for i := 0; i < len(opts.Levels); i++ {
-		l := &opts.Levels[i]
-		l.BlockSize = 32 << 10       // 32 KB
-		l.IndexBlockSize = 256 << 10 // 256 KB
-		l.FilterPolicy = bloom.FilterPolicy(10)
-		l.FilterType = pebble.TableFilter
-		if i > 0 {
-			l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
+	// This is config that we could use later.  When it is enabled, we hit the error more rapidly and frequently as can be seen in this test run:
+	
+	/*
+		cache := pebble.NewCache(1024 * 1024 * 32)
+		defer cache.Unref()
+		opts := &pebble.Options{
+			Cache:                       cache,
+			DisableWAL:                  false,
+			FormatMajorVersion:          pebble.FormatNewest,
+			L0CompactionThreshold:       2,
+			L0StopWritesThreshold:       1000,
+			LBaseMaxBytes:               64 << 20, // 64 MB
+			Levels:                      make([]pebble.LevelOptions, 7),
+			MaxConcurrentCompactions:    3,
+			MaxOpenFiles:                16384, // lowering this value can cause the db to use less disk space, and this can matter when running the tests in github actions.
+			MemTableSize:                64 << 20,
+			MemTableStopWritesThreshold: 4,
 		}
-		l.EnsureDefaults()
-	}
-	opts.Levels[6].FilterPolicy = nil
-	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
+		for i := 0; i < len(opts.Levels); i++ {
+			l := &opts.Levels[i]
+			l.BlockSize = 32 << 10       // 32 KB
+			l.IndexBlockSize = 256 << 10 // 256 KB
+			l.FilterPolicy = bloom.FilterPolicy(10)
+			l.FilterType = pebble.TableFilter
+			if i > 0 {
+				l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
+			}
+			l.EnsureDefaults()
+		}
+		opts.Levels[6].FilterPolicy = nil
+		opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
+	*/
+
+	opts := &pebble.Options{}
 	opts.EnsureDefaults()
 
 	p, err := pebble.Open(dir, opts)
@@ -153,7 +158,6 @@ func (db PebbleDB) DeleteSync(key []byte) error {
 	return nil
 }
 
-
 // Close implements DB.
 func (db PebbleDB) Close() error {
 	db.db.Close()
@@ -189,7 +193,6 @@ func (db *PebbleDB) NewBatch() Batch {
 }
 
 // NB For the reverse iterator and the iterator, this seems to make some sense: https://github.com/cockroachdb/pebble/blob/7b78c71e40558c8d6cc1c673b5075376609ff4ea/cmd/pebble/db.go#L120
-
 
 // Iterator implements DB.
 func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
