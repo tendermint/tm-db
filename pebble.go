@@ -26,7 +26,7 @@ var _ DB = (*PebbleDB)(nil)
 
 func NewPebbleDB(name string, dir string) (DB, error) {
 	dbPath := filepath.Join(dir, name+".db")
-	cache := pebble.NewCache(1024 * 1024 * 128) // 128 megabytes
+	cache := pebble.NewCache(1024 * 1024 * 32) // 32 megabytes
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
