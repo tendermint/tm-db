@@ -197,6 +197,7 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 		UpperBound: end,
 	}
 	itr := db.db.NewIter(&o)
+	itr.Next()
 
 	return newPebbleDBIterator(itr, start, end, false), nil
 }
@@ -211,6 +212,6 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 		UpperBound: end,
 	}
 	itr := db.db.NewIter(&o)
-	itr.Last()
+	itr.Prev()
 	return newPebbleDBIterator(itr, start, end, true), nil
 }
