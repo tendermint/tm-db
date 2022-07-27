@@ -24,7 +24,6 @@ jobs:
       - name: test & coverage report creation
         run: |
           CGO_ENABLED=1 go test ./... -mod=readonly -timeout 8m -race -coverprofile=coverage.txt -covermode=atomic -tags=memdb,goleveldb,cleveldb,boltdb,rocksdb,badgerdb -v
-          go test -count 5000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
       - uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
@@ -41,5 +40,5 @@ jobs:
       - uses: actions/checkout@v3
       - name: test & coverage report creation
         run: |
-          go test -count 10000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
+          go test -count 1000 -tags pebbledb -test.run ^TestDBIterator/pebbledb$
   
