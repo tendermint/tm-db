@@ -26,7 +26,7 @@ var _ DB = (*PebbleDB)(nil)
 
 func NewPebbleDB(name string, dir string) (DB, error) {
 	dbPath := filepath.Join(dir, name+".db")
-	cache := pebble.NewCache(1024 * 1024 * 32)
+	cache := pebble.NewCache(1024 * 1024 * 128) // 128 megabytes
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
@@ -36,7 +36,7 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		LBaseMaxBytes:               64 << 20, // 64 MB
 		Levels:                      make([]pebble.LevelOptions, 7),
 		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                4096,
+		MaxOpenFiles:                2048,
 		MemTableSize:                64 << 20,
 		MemTableStopWritesThreshold: 4,
 	}
