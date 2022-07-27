@@ -4,7 +4,7 @@ package db
 
 import (
 	"fmt"
-	"path/filepath"
+	"log"
 
 	"github.com/cockroachdb/pebble"
 	"github.com/cockroachdb/pebble/bloom"
@@ -24,21 +24,28 @@ type PebbleDB struct {
 
 var _ DB = (*PebbleDB)(nil)
 
+// NB:  A lot of the code in this file is sourced from here: https://github.com/cockroachdb/pebble/blob/master/cmd/pebble/db.go
+
+// NewPebbleDB makes and configures a new instance of PebbleDB.
 func NewPebbleDB(name string, dir string) (DB, error) {
-	dbPath := filepath.Join(dir, name+".db")
-	cache := pebble.NewCache(1024 * 1024 * 32) // 32 megabytes
+	cache := pebble.NewCache(cacheSize)
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
+		Comparer:                    mvccComparer,
+		DisableWAL:                  false,
 		FormatMajorVersion:          pebble.FormatNewest,
 		L0CompactionThreshold:       2,
 		L0StopWritesThreshold:       1000,
 		LBaseMaxBytes:               64 << 20, // 64 MB
 		Levels:                      make([]pebble.LevelOptions, 7),
 		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                1024,
+		MaxOpenFiles:                16384,
 		MemTableSize:                64 << 20,
 		MemTableStopWritesThreshold: 4,
+		Merger: &pebble.Merger{
+			Name: "cockroach_merge_operator",
+		},
 	}
 
 	for i := 0; i < len(opts.Levels); i++ {
@@ -52,19 +59,19 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		}
 		l.EnsureDefaults()
 	}
-
 	opts.Levels[6].FilterPolicy = nil
 	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
 	opts.EnsureDefaults()
 
-	p, err := pebble.Open(dbPath, opts)
+	p, err := pebble.Open(dir, opts)
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return &PebbleDB{
-		db: p,
-	}, err
+	return DB{
+		d:       p,
+		ballast: make([]byte, 1<<30),
+	}
 }
 
 // Get implements DB.
@@ -172,14 +179,9 @@ func (db *PebbleDB) Print() error {
 
 // Stats implements DB.
 func (db *PebbleDB) Stats() map[string]string {
-	/*
-		keys := []string{"rocksdb.stats"}
-		stats := make(map[string]string, len(keys))
-		for _, key := range keys {
-			stats[key] = db.(key)
-		}
-	*/
-	return nil
+	stats := make(map[string]string, 1)
+	stats["Metrics"] = fmt.Sprint(db.db.Metrics())
+	return stats
 }
 
 // NewBatch implements DB.
