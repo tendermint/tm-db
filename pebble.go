@@ -24,7 +24,12 @@ type PebbleDB struct {
 
 var _ DB = (*PebbleDB)(nil)
 
+func (db *PebbleDB) DB() *pebble.DB {
+	return db.db
+}
+
 // NB:  A lot of the code in this file is sourced from here: https://github.com/cockroachdb/pebble/blob/master/cmd/pebble/db.go
+// NB: This was my best working commit from today July 27 2022: https://github.com/notional-labs/tm-db/tree/6a41b774b9c362cac7d22156fa1021780d801f8a
 
 // NewPebbleDB makes and configures a new instance of PebbleDB.
 func NewPebbleDB(name string, dir string) (DB, error) {
@@ -39,7 +44,7 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		LBaseMaxBytes:               64 << 20, // 64 MB
 		Levels:                      make([]pebble.LevelOptions, 7),
 		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                16384,
+		MaxOpenFiles:                16384, // lowering this value can cause the db to use less disk space, and this can matter when running the tests in github actions.
 		MemTableSize:                64 << 20,
 		MemTableStopWritesThreshold: 4,
 	}
@@ -74,10 +79,11 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
-	res, _, err := db.db.Get(key)
+	res, closer, err := db.db.Get(key)
 	if err != nil {
 		return res, nil
 	}
+	closer.Close()
 	return res, nil
 }
 
@@ -147,9 +153,6 @@ func (db PebbleDB) DeleteSync(key []byte) error {
 	return nil
 }
 
-func (db *PebbleDB) DB() *pebble.DB {
-	return db.db
-}
 
 // Close implements DB.
 func (db PebbleDB) Close() error {
@@ -185,6 +188,9 @@ func (db *PebbleDB) NewBatch() Batch {
 	return newPebbleDBBatch(db)
 }
 
+// NB For the reverse iterator and the iterator, this seems to make some sense: https://github.com/cockroachdb/pebble/blob/7b78c71e40558c8d6cc1c673b5075376609ff4ea/cmd/pebble/db.go#L120
+
+
 // Iterator implements DB.
 func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
@@ -195,7 +201,7 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 		UpperBound: end,
 	}
 	itr := db.db.NewIter(&o)
-	itr.Next()
+	itr.First()
 
 	return newPebbleDBIterator(itr, start, end, false), nil
 }
@@ -210,6 +216,6 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 		UpperBound: end,
 	}
 	itr := db.db.NewIter(&o)
-	itr.Prev()
+	itr.Last()
 	return newPebbleDBIterator(itr, start, end, true), nil
 }
