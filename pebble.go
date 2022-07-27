@@ -4,7 +4,7 @@ package db
 
 import (
 	"fmt"
-	"log"
+	"path/filepath"
 
 	"github.com/cockroachdb/pebble"
 )
@@ -30,28 +30,23 @@ func (db *PebbleDB) DB() *pebble.DB {
 // NB:  A lot of the code in this file is sourced from here: https://github.com/cockroachdb/pebble/blob/master/cmd/pebble/db.go
 // NB: This was my best working commit from today July 27 2022: https://github.com/notional-labs/tm-db/tree/6a41b774b9c362cac7d22156fa1021780d801f8a
 
-// NewPebbleDB makes and configures a new instance of PebbleDB.
 func NewPebbleDB(name string, dir string) (DB, error) {
-
-	// This is config that we could use later.  When it is enabled, we hit the error more rapidly and frequently as can be seen in this test run:
-
+	dbPath := filepath.Join(dir, name+".db")
+	//	cache := pebble.NewCache(1024 * 1024 * 32)
+	//	defer cache.Unref()
+	opts := &pebble.Options{
+		//		Cache:                       cache,
+		//		FormatMajorVersion:          pebble.FormatNewest,
+		//		L0CompactionThreshold:       2,
+		//		L0StopWritesThreshold:       1000,
+		//		LBaseMaxBytes:               64 << 20, // 64 MB
+		//		Levels:                      make([]pebble.LevelOptions, 7),
+		//		MaxConcurrentCompactions:    3,
+		//		MaxOpenFiles:                1024,
+		//		MemTableSize:                64 << 20,
+		//		MemTableStopWritesThreshold: 4,
+	}
 	/*
-		cache := pebble.NewCache(1024 * 1024 * 32)
-		defer cache.Unref()
-		opts := &pebble.Options{
-			Cache:                       cache,
-			DisableWAL:                  false,
-			FormatMajorVersion:          pebble.FormatNewest,
-			L0CompactionThreshold:       2,
-			L0StopWritesThreshold:       1000,
-			LBaseMaxBytes:               64 << 20, // 64 MB
-			Levels:                      make([]pebble.LevelOptions, 7),
-			MaxConcurrentCompactions:    3,
-			MaxOpenFiles:                16384, // lowering this value can cause the db to use less disk space, and this can matter when running the tests in github actions.
-			MemTableSize:                64 << 20,
-			MemTableStopWritesThreshold: 4,
-		}
-
 		for i := 0; i < len(opts.Levels); i++ {
 			l := &opts.Levels[i]
 			l.BlockSize = 32 << 10       // 32 KB
@@ -63,16 +58,15 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 			}
 			l.EnsureDefaults()
 		}
-		opts.Levels[6].FilterPolicy = nil
-		opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 	*/
+	//	opts.Levels[6].FilterPolicy = nil
+	//	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
-	opts := &pebble.Options{}
 	opts.EnsureDefaults()
 
-	p, err := pebble.Open(dir, opts)
+	p, err := pebble.Open(dbPath, opts)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	return &PebbleDB{
 		db: p,
