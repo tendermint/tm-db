@@ -22,6 +22,16 @@ func TestPebbleDBBackend(t *testing.T) {
 	assert.True(t, ok)
 }
 
+func TestWithPebbleDB(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "cleveldb")
+
+	db, err := NewPebbleDB(path, "")
+	require.NoError(t, err)
+
+	t.Run("PebbleDB", func(t *testing.T) { Run(t, db) })
+}
+
 // func TestPebbleDBStats(t *testing.T) {
 // 	name := fmt.Sprintf("test_%x", randStr(12))
 // 	dir := os.TempDir()
