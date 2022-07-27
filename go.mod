@@ -1,6 +1,6 @@
 module github.com/tendermint/tm-db
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cockroachdb/pebble v0.0.0-20220726134658-7b78c71e4055
