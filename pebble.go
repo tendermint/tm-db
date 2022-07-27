@@ -28,11 +28,10 @@ var _ DB = (*PebbleDB)(nil)
 
 // NewPebbleDB makes and configures a new instance of PebbleDB.
 func NewPebbleDB(name string, dir string) (DB, error) {
-	cache := pebble.NewCache(cacheSize)
+	cache := pebble.NewCache(1024 * 1024 * 32)
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
-		Comparer:                    mvccComparer,
 		DisableWAL:                  false,
 		FormatMajorVersion:          pebble.FormatNewest,
 		L0CompactionThreshold:       2,
@@ -43,9 +42,6 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		MaxOpenFiles:                16384,
 		MemTableSize:                64 << 20,
 		MemTableStopWritesThreshold: 4,
-		Merger: &pebble.Merger{
-			Name: "cockroach_merge_operator",
-		},
 	}
 
 	for i := 0; i < len(opts.Levels); i++ {
@@ -68,10 +64,9 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return DB{
-		d:       p,
-		ballast: make([]byte, 1<<30),
-	}
+	return &PebbleDB{
+		db: p,
+	}, err
 }
 
 // Get implements DB.
@@ -177,6 +172,7 @@ func (db *PebbleDB) Print() error {
 	return nil
 }
 
+// The stats section was contributed by ValNodes.  Toss e'm some stake!
 // Stats implements DB.
 func (db *PebbleDB) Stats() map[string]string {
 	stats := make(map[string]string, 1)
