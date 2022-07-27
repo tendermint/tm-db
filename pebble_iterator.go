@@ -4,6 +4,7 @@ package db
 
 import (
 	"bytes"
+	"fmt"
 
 	"github.com/cockroachdb/pebble"
 )
@@ -113,6 +114,11 @@ func (itr *pebbleDBIterator) Error() error {
 
 // Close implements Iterator.
 func (itr *pebbleDBIterator) Close() error {
+	valid := itr.source.Valid()
+	if valid == false {
+		fmt.Println("hey, you're to close an invalid iterator maybe it's closed already.")
+		return nil
+	}
 	err := itr.source.Close()
 	if err != nil {
 		return err
