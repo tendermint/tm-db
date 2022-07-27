@@ -36,7 +36,7 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 		LBaseMaxBytes:               64 << 20, // 64 MB
 		Levels:                      make([]pebble.LevelOptions, 7),
 		MaxConcurrentCompactions:    3,
-		MaxOpenFiles:                2048,
+		MaxOpenFiles:                1024,
 		MemTableSize:                64 << 20,
 		MemTableStopWritesThreshold: 4,
 	}
