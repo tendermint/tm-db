@@ -3,7 +3,7 @@ module github.com/tendermint/tm-db
 go 1.17
 
 require (
-	github.com/cockroachdb/pebble v0.0.0-20220331191355-c6ff69042f1c
+	github.com/cockroachdb/pebble v0.0.0-20220726134658-7b78c71e4055
 	github.com/cosmos/gorocksdb v1.2.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
@@ -18,6 +18,7 @@ require (
 
 require (
 	github.com/DataDog/zstd v1.4.5 // indirect
+	github.com/HdrHistogram/hdrhistogram-go v1.1.2 // indirect
 	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.1 // indirect
 	github.com/cockroachdb/errors v1.8.1 // indirect
@@ -33,7 +34,7 @@ require (
 	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/klauspost/compress v1.12.3 // indirect
 	github.com/kr/pretty v0.1.0 // indirect
-	github.com/kr/text v0.1.0 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opencensus.io v0.22.5 // indirect
