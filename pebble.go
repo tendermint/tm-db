@@ -71,11 +71,10 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
-	res, closer, err := db.db.Get(key)
+	res, _, err := db.db.Get(key)
 	if err != nil {
 		return res, nil
 	}
-	closer.Close()
 	return res, nil
 }
 
