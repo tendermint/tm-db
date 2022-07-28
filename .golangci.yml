@@ -44,7 +44,7 @@ run:
   build-tags:
     - cleveldb
     - rocksdb
-    - boltdb
+    - pebbledb
 
 issues:
   exclude-rules:
