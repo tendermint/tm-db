@@ -83,10 +83,10 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	}
 	res, closer, err := db.db.Get(key)
 	v := cp(res)
-	if err != nil {
-		return v, nil
-	}
 	closer.Close()
+	if err != nil {
+		return nil, err
+	}
 	return res, nil
 }
 
