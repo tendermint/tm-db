@@ -24,6 +24,8 @@ type PebbleDB struct {
 
 var _ DB = (*PebbleDB)(nil)
 
+// NewPebbleDB creates a new PebbleDB instance.
+// The commented out pieces are things that can be used at a later time to further boost performance.
 func NewPebbleDB(name string, dir string) (DB, error) {
 	dbPath := filepath.Join(dir, name+".db")
 	//	cache := pebble.NewCache(1024 * 1024 * 32)
@@ -77,13 +79,12 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 
 // Get implements DB.
 func (db *PebbleDB) Get(key []byte) ([]byte, error) {
-	//fmt.Println("PebbleDB.Get")
+	// fmt.Println("PebbleDB.Get")
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
 
 	res, closer, err := db.db.Get(key)
-
 	if err != nil {
 		if err == pebble.ErrNotFound {
 			return nil, nil
@@ -97,7 +98,7 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 
 // Has implements DB.
 func (db *PebbleDB) Has(key []byte) (bool, error) {
-	//fmt.Println("PebbleDB.Has")
+	// fmt.Println("PebbleDB.Has")
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
@@ -110,7 +111,7 @@ func (db *PebbleDB) Has(key []byte) (bool, error) {
 
 // Set implements DB.
 func (db *PebbleDB) Set(key []byte, value []byte) error {
-	//fmt.Println("PebbleDB.Set")
+	// fmt.Println("PebbleDB.Set")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -126,7 +127,7 @@ func (db *PebbleDB) Set(key []byte, value []byte) error {
 
 // SetSync implements DB.
 func (db *PebbleDB) SetSync(key []byte, value []byte) error {
-	//fmt.Println("PebbleDB.SetSync")
+	// fmt.Println("PebbleDB.SetSync")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -142,7 +143,7 @@ func (db *PebbleDB) SetSync(key []byte, value []byte) error {
 
 // Delete implements DB.
 func (db *PebbleDB) Delete(key []byte) error {
-	//fmt.Println("PebbleDB.Delete")
+	// fmt.Println("PebbleDB.Delete")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -155,7 +156,7 @@ func (db *PebbleDB) Delete(key []byte) error {
 
 // DeleteSync implements DB.
 func (db PebbleDB) DeleteSync(key []byte) error {
-	//fmt.Println("PebbleDB.DeleteSync")
+	// fmt.Println("PebbleDB.DeleteSync")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -172,7 +173,7 @@ func (db *PebbleDB) DB() *pebble.DB {
 
 // Close implements DB.
 func (db PebbleDB) Close() error {
-	//fmt.Println("PebbleDB.Close")
+	// fmt.Println("PebbleDB.Close")
 	db.db.Close()
 	return nil
 }
@@ -192,16 +193,12 @@ func (db *PebbleDB) Print() error {
 	return nil
 }
 
+// The stats section was contributed by ValNodes.  Toss e'm some stake!
 // Stats implements DB.
 func (db *PebbleDB) Stats() map[string]string {
-	/*
-		keys := []string{"rocksdb.stats"}
-		stats := make(map[string]string, len(keys))
-		for _, key := range keys {
-			stats[key] = db.(key)
-		}
-	*/
-	return nil
+	stats := make(map[string]string, 1)
+	stats["Metrics"] = fmt.Sprint(db.db.Metrics())
+	return stats
 }
 
 // NewBatch implements DB.
@@ -211,7 +208,7 @@ func (db *PebbleDB) NewBatch() Batch {
 
 // Iterator implements DB.
 func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
-	//fmt.Println("PebbleDB.Iterator")
+	// fmt.Println("PebbleDB.Iterator")
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
@@ -227,7 +224,7 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 
 // ReverseIterator implements DB.
 func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
-	//fmt.Println("PebbleDB.ReverseIterator")
+	// fmt.Println("PebbleDB.ReverseIterator")
 	if (start != nil && len(start) == 0) || (end != nil && len(end) == 0) {
 		return nil, errKeyEmpty
 	}
@@ -257,7 +254,7 @@ func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
 
 // Set implements Batch.
 func (b *pebbleDBBatch) Set(key, value []byte) error {
-	//fmt.Println("pebbleDBBatch.Set")
+	// fmt.Println("pebbleDBBatch.Set")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -273,7 +270,7 @@ func (b *pebbleDBBatch) Set(key, value []byte) error {
 
 // Delete implements Batch.
 func (b *pebbleDBBatch) Delete(key []byte) error {
-	//fmt.Println("pebbleDBBatch.Delete")
+	// fmt.Println("pebbleDBBatch.Delete")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -286,7 +283,7 @@ func (b *pebbleDBBatch) Delete(key []byte) error {
 
 // Write implements Batch.
 func (b *pebbleDBBatch) Write() error {
-	//fmt.Println("pebbleDBBatch.Write")
+	// fmt.Println("pebbleDBBatch.Write")
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -301,7 +298,7 @@ func (b *pebbleDBBatch) Write() error {
 
 // WriteSync implements Batch.
 func (b *pebbleDBBatch) WriteSync() error {
-	//fmt.Println("pebbleDBBatch.WriteSync")
+	// fmt.Println("pebbleDBBatch.WriteSync")
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -315,7 +312,7 @@ func (b *pebbleDBBatch) WriteSync() error {
 
 // Close implements Batch.
 func (b *pebbleDBBatch) Close() error {
-	//fmt.Println("pebbleDBBatch.Close")
+	// fmt.Println("pebbleDBBatch.Close")
 	if b.batch != nil {
 		err := b.batch.Close()
 		if err != nil {
@@ -357,13 +354,13 @@ func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse b
 
 // Domain implements Iterator.
 func (itr *pebbleDBIterator) Domain() ([]byte, []byte) {
-	//fmt.Println("pebbleDBIterator.Domain")
+	// fmt.Println("pebbleDBIterator.Domain")
 	return itr.start, itr.end
 }
 
 // Valid implements Iterator.
 func (itr *pebbleDBIterator) Valid() bool {
-	//fmt.Println("pebbleDBIterator.Valid")
+	// fmt.Println("pebbleDBIterator.Valid")
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -407,21 +404,21 @@ func (itr *pebbleDBIterator) Valid() bool {
 
 // Key implements Iterator.
 func (itr *pebbleDBIterator) Key() []byte {
-	//fmt.Println("pebbleDBIterator.Key")
+	// fmt.Println("pebbleDBIterator.Key")
 	itr.assertIsValid()
 	return cp(itr.source.Key())
 }
 
 // Value implements Iterator.
 func (itr *pebbleDBIterator) Value() []byte {
-	//fmt.Println("pebbleDBIterator.Value")
+	// fmt.Println("pebbleDBIterator.Value")
 	itr.assertIsValid()
 	return cp(itr.source.Value())
 }
 
 // Next implements Iterator.
 func (itr pebbleDBIterator) Next() {
-	//fmt.Println("pebbleDBIterator.Next")
+	// fmt.Println("pebbleDBIterator.Next")
 	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
@@ -437,7 +434,7 @@ func (itr *pebbleDBIterator) Error() error {
 
 // Close implements Iterator.
 func (itr *pebbleDBIterator) Close() error {
-	//fmt.Println("pebbleDBIterator.Close")
+	// fmt.Println("pebbleDBIterator.Close")
 	err := itr.source.Close()
 	if err != nil {
 		return err
