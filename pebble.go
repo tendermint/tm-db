@@ -81,13 +81,18 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	if len(key) == 0 {
 		return nil, errKeyEmpty
 	}
+
 	res, closer, err := db.db.Get(key)
-	v := cp(res)
-	closer.Close()
+
 	if err != nil {
+		if err == pebble.ErrNotFound {
+			return nil, nil
+		}
 		return nil, err
 	}
-	return res, nil
+	defer closer.Close()
+
+	return cp(res), nil
 }
 
 // Has implements DB.
