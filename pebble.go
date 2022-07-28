@@ -56,13 +56,13 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 	//	opts.Levels[6].FilterPolicy = nil
 	//	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
-	for i := 0; i < len(opts.Levels); i++ {
-		l := &opts.Levels[i]
-		l.Compression = pebble.NoCompression
-		l.EnsureDefaults()
-	}
-
-	opts.DisableAutomaticCompactions = true
+	//for i := 0; i < len(opts.Levels); i++ {
+	//	l := &opts.Levels[i]
+	//	l.Compression = pebble.NoCompression
+	//	l.EnsureDefaults()
+	//}
+	//
+	//opts.DisableAutomaticCompactions = true
 
 	opts.EnsureDefaults()
 
