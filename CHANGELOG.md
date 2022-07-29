@@ -3,6 +3,7 @@
 ## Unreleased
 
 - remove mutex from prefixdb
+- [#284](https://github.com/tendermint/tm-db/pull/284): Add pebbledb, a rocks-like database that doesn't need to use cgo.
 
 ## 0.6.7
 
