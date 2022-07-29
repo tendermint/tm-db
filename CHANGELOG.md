@@ -2,7 +2,9 @@
 
 ## Unreleased
 
-- remove mutex from prefixdb
+- [#156](https://github.com/tendermint/tm-db/issues/156) remove mutex from prefixdb
+- [#276](https://github.com/tendermint/tm-db/pull/276): Remove boltdb and badgerdb because neither is used, and badger is abandonware.
+
 
 ## 0.6.7
 
