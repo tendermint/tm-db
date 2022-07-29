@@ -7,3 +7,6 @@ tasks:
     command: go run
 
 
+image: tendermintdev/docker-tm-db-testing
+
+# this means that there's a one-click known good environment available to developers.
