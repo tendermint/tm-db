@@ -3,6 +3,7 @@
 ## Unreleased
 
 - remove mutex from prefixdb
+- [#278](https://github.com/tendermint/tm-db/pull/278): Use a maintained library for rocksdb and upgrade the docker image to one that uses rocks v7.x
 
 ## 0.6.7
 
