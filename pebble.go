@@ -28,10 +28,10 @@ var _ DB = (*PebbleDB)(nil)
 // The commented out pieces are things that can be used at a later time to further boost performance.
 func NewPebbleDB(name string, dir string) (DB, error) {
 	dbPath := filepath.Join(dir, name+".db")
-	//	cache := pebble.NewCache(1024 * 1024 * 32)
-	//	defer cache.Unref()
+	cache := pebble.NewCache(1024 * 1024 * 64)
+	defer cache.Unref()
 	opts := &pebble.Options{
-		//		Cache:                       cache,
+		Cache:                       cache,
 		//		FormatMajorVersion:          pebble.FormatNewest,
 		//		L0CompactionThreshold:       2,
 		//		L0StopWritesThreshold:       1000,
