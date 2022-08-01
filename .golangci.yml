@@ -28,13 +28,6 @@ linters:
     - varcheck
     - nolintlint
 
-run:
-  build-tags:
-    - cleveldb
-    - rocksdb
-    - badgerdb
-    - boltdb
-
 issues:
   exclude-rules:
     - path: _test\.go

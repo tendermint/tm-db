@@ -1,4 +1,3 @@
-//go:build boltdb
 // +build boltdb
 
 package db
@@ -12,10 +11,14 @@ import (
 	"go.etcd.io/bbolt"
 )
 
-var bucket = []byte("tm")
+var (
+	bucket = []byte("tm")
+)
 
 func init() {
-	registerDBCreator(BoltDBBackend, NewBoltDB, false)
+	registerDBCreator(BoltDBBackend, func(name, dir string) (DB, error) {
+		return NewBoltDB(name, dir)
+	}, false)
 }
 
 // BoltDB is a wrapper around etcd's fork of bolt (https://github.com/etcd-io/bbolt).
@@ -136,7 +139,6 @@ func (bdb *BoltDB) Close() error {
 }
 
 // Print implements DB.
-// nolint: errcheck
 func (bdb *BoltDB) Print() error {
 	stats := bdb.db.Stats()
 	fmt.Printf("%v\n", stats)

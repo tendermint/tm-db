@@ -1,9 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- remove mutex from prefixdb
-
 ## 0.6.7
 
 **2022-2-21**
