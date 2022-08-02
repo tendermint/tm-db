@@ -24,6 +24,8 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
+// these settings were put together by the terra engineering team in their performance branch.
+// NewGoLevelDB implements DB and returns a new GoLevelDB
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	o := &opt.Options{
 		// The default value is nil
