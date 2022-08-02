@@ -28,7 +28,7 @@ type RocksDB struct {
 
 var _ DB = (*RocksDB)(nil)
 
-// these settings were put together by the terra engineering team in their performance branch. 
+// these settings were put together by the terra engineering team in their performance branch.
 // NewRocksDB makes a new RocksDB
 func NewRocksDB(name string, dir string) (*RocksDB, error) {
 	// default rocksdb option, good enough for most cases, including heavy workloads.
