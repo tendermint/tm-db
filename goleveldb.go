@@ -24,9 +24,6 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
-
-
-
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	o := &opt.Options{
 		// The default value is nil
