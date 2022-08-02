@@ -6,6 +6,7 @@ import (
 
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
+	"github.com/syndtr/goleveldb/leveldb/filter"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
 )
@@ -23,6 +24,9 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
+
+
+
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	o := &opt.Options{
 		// The default value is nil
@@ -32,7 +36,7 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 		// Use 64 MiB instead of default 4 MiB
 		WriteBuffer:            64 * opt.MiB,
 		DisableSeeksCompaction: true,
-		OpenFilesCacheCapacity: DefaultOpenFilesCapacity,
+		OpenFilesCacheCapacity: 32768,
 		// CompactionTableSize:                   8 * opt.MiB,
 		// CompactionTotalSize:                   40 * opt.MiB,
 		// CompactionTotalSizeMultiplierPerLevel: []float64{1, 1, 10, 100, 1000, 10000, 100000},
