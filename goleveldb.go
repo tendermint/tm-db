@@ -48,7 +48,7 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 		CompactionTotalSizeMultiplier: 10.0,
 	}
 	return NewGoLevelDBWithOpts(name, dir, o)
-}}
+}
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
