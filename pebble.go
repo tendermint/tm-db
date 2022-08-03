@@ -1,5 +1,3 @@
-//go:build pebbledb
-
 package db
 
 import (
@@ -8,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/cockroachdb/pebble"
+	"github.com/cockroachdb/pebble/bloom"
 )
 
 func init() {
@@ -32,29 +31,28 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 	defer cache.Unref()
 	opts := &pebble.Options{
 		Cache:                       cache,
-		//		FormatMajorVersion:          pebble.FormatNewest,
-		//		L0CompactionThreshold:       2,
-		//		L0StopWritesThreshold:       1000,
-		//		LBaseMaxBytes:               64 << 20, // 64 MB
-		//		Levels:                      make([]pebble.LevelOptions, 7),
-		//		MaxConcurrentCompactions:    3,
-		//		MaxOpenFiles:                1024,
-		//		MemTableSize:                64 << 20,
-		//		MemTableStopWritesThreshold: 4,
+		FormatMajorVersion:          pebble.FormatNewest,
+		L0CompactionThreshold:       2,
+		L0StopWritesThreshold:       1000,
+		LBaseMaxBytes:               64 << 20, // 64 MB
+		Levels:                      make([]pebble.LevelOptions, 7),
+		MaxOpenFiles:                32768,
+		MemTableSize:                64 << 20,
+		MemTableStopWritesThreshold: 4,
 	}
-	/*
-		for i := 0; i < len(opts.Levels); i++ {
-			l := &opts.Levels[i]
-			l.BlockSize = 32 << 10       // 32 KB
-			l.IndexBlockSize = 256 << 10 // 256 KB
-			l.FilterPolicy = bloom.FilterPolicy(10)
-			l.FilterType = pebble.TableFilter
-			if i > 0 {
-				l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
-			}
-			l.EnsureDefaults()
+
+	for i := 0; i < len(opts.Levels); i++ {
+		l := &opts.Levels[i]
+		l.BlockSize = 32 << 10       // 32 KB
+		l.IndexBlockSize = 256 << 10 // 256 KB
+		l.FilterPolicy = bloom.FilterPolicy(10)
+		l.FilterType = pebble.TableFilter
+		if i > 0 {
+			l.TargetFileSize = opts.Levels[i-1].TargetFileSize * 2
 		}
-	*/
+		l.EnsureDefaults()
+	}
+
 	//	opts.Levels[6].FilterPolicy = nil
 	//	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
@@ -98,7 +96,6 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 
 // Has implements DB.
 func (db *PebbleDB) Has(key []byte) (bool, error) {
-	// fmt.Println("PebbleDB.Has")
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
@@ -111,7 +108,6 @@ func (db *PebbleDB) Has(key []byte) (bool, error) {
 
 // Set implements DB.
 func (db *PebbleDB) Set(key []byte, value []byte) error {
-	// fmt.Println("PebbleDB.Set")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -127,7 +123,6 @@ func (db *PebbleDB) Set(key []byte, value []byte) error {
 
 // SetSync implements DB.
 func (db *PebbleDB) SetSync(key []byte, value []byte) error {
-	// fmt.Println("PebbleDB.SetSync")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -143,7 +138,6 @@ func (db *PebbleDB) SetSync(key []byte, value []byte) error {
 
 // Delete implements DB.
 func (db *PebbleDB) Delete(key []byte) error {
-	// fmt.Println("PebbleDB.Delete")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -156,7 +150,6 @@ func (db *PebbleDB) Delete(key []byte) error {
 
 // DeleteSync implements DB.
 func (db PebbleDB) DeleteSync(key []byte) error {
-	// fmt.Println("PebbleDB.DeleteSync")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
@@ -173,7 +166,6 @@ func (db *PebbleDB) DB() *pebble.DB {
 
 // Close implements DB.
 func (db PebbleDB) Close() error {
-	// fmt.Println("PebbleDB.Close")
 	db.db.Close()
 	return nil
 }
@@ -240,7 +232,6 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 var _ Batch = (*pebbleDBBatch)(nil)
 
 type pebbleDBBatch struct {
-	db    *PebbleDB
 	batch *pebble.Batch
 }
 
