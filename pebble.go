@@ -10,9 +10,7 @@ import (
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewPebbleDB(name, dir)
-	}
+	dbCreator := NewPebbleDB
 	registerDBCreator(PebbleDBBackend, dbCreator, false)
 }
 
@@ -56,13 +54,13 @@ func NewPebbleDB(name string, dir string) (DB, error) {
 	//	opts.Levels[6].FilterPolicy = nil
 	//	opts.FlushSplitBytes = opts.Levels[0].TargetFileSize
 
-	//for i := 0; i < len(opts.Levels); i++ {
+	// for i := 0; i < len(opts.Levels); i++ {
 	//	l := &opts.Levels[i]
 	//	l.Compression = pebble.NoCompression
 	//	l.EnsureDefaults()
-	//}
+	// }
 	//
-	//opts.DisableAutomaticCompactions = true
+	// opts.DisableAutomaticCompactions = true
 
 	opts.EnsureDefaults()
 
@@ -255,26 +253,24 @@ func (b *pebbleDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Set(key, value, nil)
-	return nil
+	err := b.batch.Set(key, value, nil)
+	return err
 }
 
 // Delete implements Batch.
 func (b *pebbleDBBatch) Delete(key []byte) error {
-	// fmt.Println("pebbleDBBatch.Delete")
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Delete(key, nil)
-	return nil
+	err := b.batch.Delete(key, nil)
+	return err
 }
 
 // Write implements Batch.
 func (b *pebbleDBBatch) Write() error {
-	// fmt.Println("pebbleDBBatch.Write")
 	if b.batch == nil {
 		return errBatchClosed
 	}
@@ -303,7 +299,6 @@ func (b *pebbleDBBatch) WriteSync() error {
 
 // Close implements Batch.
 func (b *pebbleDBBatch) Close() error {
-	// fmt.Println("pebbleDBBatch.Close")
 	if b.batch != nil {
 		err := b.batch.Close()
 		if err != nil {
@@ -345,13 +340,11 @@ func newPebbleDBIterator(source *pebble.Iterator, start, end []byte, isReverse b
 
 // Domain implements Iterator.
 func (itr *pebbleDBIterator) Domain() ([]byte, []byte) {
-	// fmt.Println("pebbleDBIterator.Domain")
 	return itr.start, itr.end
 }
 
 // Valid implements Iterator.
 func (itr *pebbleDBIterator) Valid() bool {
-	// fmt.Println("pebbleDBIterator.Valid")
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -395,21 +388,18 @@ func (itr *pebbleDBIterator) Valid() bool {
 
 // Key implements Iterator.
 func (itr *pebbleDBIterator) Key() []byte {
-	// fmt.Println("pebbleDBIterator.Key")
 	itr.assertIsValid()
 	return cp(itr.source.Key())
 }
 
 // Value implements Iterator.
 func (itr *pebbleDBIterator) Value() []byte {
-	// fmt.Println("pebbleDBIterator.Value")
 	itr.assertIsValid()
 	return cp(itr.source.Value())
 }
 
 // Next implements Iterator.
 func (itr pebbleDBIterator) Next() {
-	// fmt.Println("pebbleDBIterator.Next")
 	itr.assertIsValid()
 	if itr.isReverse {
 		itr.source.Prev()
@@ -425,7 +415,6 @@ func (itr *pebbleDBIterator) Error() error {
 
 // Close implements Iterator.
 func (itr *pebbleDBIterator) Close() error {
-	// fmt.Println("pebbleDBIterator.Close")
 	err := itr.source.Close()
 	if err != nil {
 		return err
