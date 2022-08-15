@@ -10,11 +10,31 @@ import (
 	"github.com/cockroachdb/pebble"
 )
 
+// ForceSync
+/*
+This is set at compile time. Could be 0 or 1, defaults is 0.
+It will force using Sync for NoSync functions (Set, Delete, Write)
+
+Used as a workaround for chain-upgrade issue: At the upgrade-block, the sdk will panic without flushing data to disk or
+closing dbs properly.
+
+Upgrade guide:
+	1. After seeing `UPGRADE "xxxx" NEED at height....`, restart current version with ForceSync=1
+	2. Restart new version with ForceSync=1, wait for new blocks
+	3. Restart new version with ForceSync=0 as normal
+*/
+var ForceSync = "0"
+var isForceSync = false
+
 func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewPebbleDB(name, dir)
 	}
 	registerDBCreator(PebbleDBBackend, dbCreator, false)
+
+	if ForceSync == "1" {
+		isForceSync = true
+	}
 }
 
 // PebbleDB is a PebbleDB backend.
@@ -117,7 +137,13 @@ func (db *PebbleDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	err := db.db.Set(key, value, pebble.NoSync)
+
+	wopts := pebble.NoSync
+	if isForceSync {
+		wopts = pebble.Sync
+	}
+
+	err := db.db.Set(key, value, wopts)
 	if err != nil {
 		return err
 	}
@@ -146,7 +172,12 @@ func (db *PebbleDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	err := db.db.Delete(key, pebble.NoSync)
+
+	wopts := pebble.NoSync
+	if isForceSync {
+		wopts = pebble.Sync
+	}
+	err := db.db.Delete(key, wopts)
 	if err != nil {
 		return err
 	}
@@ -290,7 +321,12 @@ func (b *pebbleDBBatch) Write() error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	err := b.batch.Commit(pebble.NoSync)
+
+	wopts := pebble.NoSync
+	if isForceSync {
+		wopts = pebble.Sync
+	}
+	err := b.batch.Commit(wopts)
 	if err != nil {
 		return err
 	}
