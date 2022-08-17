@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -35,7 +34,7 @@ func cleanupDBDir(dir, name string) {
 
 func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	// Default
-	dirname, err := ioutil.TempDir("", fmt.Sprintf("test_backend_%s_", backend))
+	dirname, err := os.MkdirTemp("", fmt.Sprintf("test_backend_%s_", backend))
 	require.Nil(t, err)
 	db, err := NewDB("testdb", backend, dirname)
 	require.NoError(t, err)
@@ -302,7 +301,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 		[]int64(nil), "reverse iterator from 2 (ex) to 4")
 
 	// Ensure that the iterators don't panic with an empty database.
-	dir2, err := ioutil.TempDir("", "tm-db-test")
+	dir2, err := os.MkdirTemp("", "tm-db-test")
 	require.NoError(t, err)
 	db2, err := NewDB(name, backend, dir2)
 	require.NoError(t, err)
