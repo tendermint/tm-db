@@ -1,0 +1,4 @@
+{
+    "makefile.extensionOutputFolder": "./.vscode",
+    "go.buildTags": "cleveldb rocksdb pebbledb"
+}
