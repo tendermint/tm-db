@@ -1,4 +1,6 @@
 {
-    "makefile.extensionOutputFolder": "./.vscode",
-    "go.buildTags": "cleveldb rocksdb pebbledb"
+    "go.buildTags": "cleveldb rocksdb pebbledb",
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "workspace",
+    "go.formatTool": "gofumpt"
 }
