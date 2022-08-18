@@ -25,7 +25,6 @@ func TestWithClevelDB(t *testing.T) {
 	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
 }
 
-//nolint: errcheck
 func BenchmarkRandomReadsWrites2(b *testing.B) {
 	b.StopTimer()
 
@@ -46,19 +45,23 @@ func BenchmarkRandomReadsWrites2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		// Write something
 		{
-			idx := (int64(rand.Int()) % numItems)
+			idx := (int64(rand.Int()) % numItems) //nolint:gosec
 			internal[idx]++
 			val := internal[idx]
 			idxBytes := int642Bytes(idx)
 			valBytes := int642Bytes(val)
-			db.Set(
+			err := db.Set(
 				idxBytes,
 				valBytes,
 			)
+			if err != nil {
+				fmt.Println("couldn't write something: cleveldb_test.go line 53")
+			}
+
 		}
 		// Read something
 		{
-			idx := (int64(rand.Int()) % numItems)
+			idx := (int64(rand.Int()) % numItems) //nolint:gosec
 			val := internal[idx]
 			idxBytes := int642Bytes(idx)
 			valBytes, err := db.Get(idxBytes)
