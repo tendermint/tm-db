@@ -2,4 +2,4 @@
 
 FROM archlinux
 
-RUN pacman -Syyu --noconfirm go base-devel rocksdb leveldb
+RUN pacman -Syyu --noconfirm go base-devel rocksdb leveldb git
