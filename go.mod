@@ -36,6 +36,3 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-// Breaking changes were released with the wrong tag (use v0.6.6 or later).
-retract v0.6.5
