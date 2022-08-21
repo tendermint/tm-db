@@ -7,13 +7,10 @@ on:
 
 jobs:
   golangci:
-    # We need to run the linter on the same image we use for building, since it
-    # needs the C libraries installed for the dependencies to typecheck.
     runs-on: ubuntu-latest
-    container: tendermintdev/docker-tm-db-testing
+    container: archlinux
     steps:
+      - run: pacman -Syyu --noconfirm go base-devel leveldb rocksdb
       - uses: actions/checkout@v3
       - uses: golangci/golangci-lint-action@v3.2.0
-        with:
-          args: --timeout 10m
-          github-token: ${{ secrets.github_token }}
+

@@ -15,26 +15,20 @@ const (
 	//   - stable
 	GoLevelDBBackend BackendType = "goleveldb"
 	// CLevelDBBackend represents cleveldb (uses levigo wrapper)
-	//   - fast
 	//   - requires gcc
 	//   - use cleveldb build tag (go build -tags cleveldb)
 	CLevelDBBackend BackendType = "cleveldb"
 	// MemDBBackend represents in-memory key value store, which is mostly used
 	// for testing.
 	MemDBBackend BackendType = "memdb"
-	// BoltDBBackend represents bolt (uses etcd's fork of bolt -
-	// github.com/etcd-io/bbolt)
-	//   - EXPERIMENTAL
-	//   - may be faster is some use-cases (random reads - indexer)
-	//   - use boltdb build tag (go build -tags boltdb)
-	BoltDBBackend BackendType = "boltdb"
-	// RocksDBBackend represents rocksdb (uses github.com/cosmos/gorocksdb)
-	//   - EXPERIMENTAL
+	// RocksDBBackend represents rocksdb (uses github.com/linxGnu/grocksdb)
 	//   - requires gcc
 	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend BackendType = "rocksdb"
-
-	BadgerDBBackend BackendType = "badgerdb"
+	// PebbleDBDBBackend represents pebble (uses github.com/cockroachdb/pebble)
+	//   - pure go
+	//   - use pebble build tag (go build -tags pebbledb)
+	PebbleDBBackend BackendType = "pebbledb"
 )
 
 type dbCreator func(name string, dir string) (DB, error)
