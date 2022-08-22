@@ -28,8 +28,6 @@ Go 1.19+
 
 - **PrefixDB [stable]:** A database which wraps another database and uses a static prefix for all keys. This allows multiple logical databases to be stored in a common underlying databases by using different namespaces. Used by the Cosmos SDK to give different modules their own namespaced database in a single application database.
 
-- **RemoteDB [experimental]:** A database that connects to distributed Tendermint db instances via [gRPC](https://grpc.io/). This can help with detaching difficult deployments such as LevelDB, and can also ease dependency management for Tendermint developers.
-
 ## Tests
 
 To test common databases, run `make test`. If all databases are available on the local machine, use `make test-all` to test them all.

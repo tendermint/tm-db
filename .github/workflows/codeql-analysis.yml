@@ -24,7 +24,7 @@ jobs:
   analyze:
     name: Analyze
     runs-on: ubuntu-latest
-    container: archlinux
+    container: ghcr.io/cosmos/cosmos-db/build-test:latest
     permissions:
       actions: read
       contents: read
@@ -38,7 +38,6 @@ jobs:
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
 
     steps:
-    - run: pacman -Syyu --noconfirm go base-devel rocksdb leveldb git
     - name: Checkout repository
       uses: actions/checkout@v3
 

@@ -8,9 +8,8 @@ on:
 jobs:
   golangci:
     runs-on: ubuntu-latest
-    container: archlinux
+    container: ghcr.io/cosmos/cosmos-db/build-test:latest
     steps:
-      - run: pacman -Syyu --noconfirm go base-devel leveldb rocksdb
       - uses: actions/checkout@v3
       - uses: golangci/golangci-lint-action@v3.2.0
 
