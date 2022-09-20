@@ -13,9 +13,9 @@ func TestGoLevelDBNewGoLevelDB(t *testing.T) {
 	defer cleanupDBDir("", name)
 
 	// Test we can't open the db twice for writing
-	wr1, err := NewGoLevelDB(name, "")
+	wr1, err := NewGoLevelDB(name, "", nil)
 	require.Nil(t, err)
-	_, err = NewGoLevelDB(name, "")
+	_, err = NewGoLevelDB(name, "", nil)
 	require.NotNil(t, err)
 	wr1.Close() // Close the db to release the lock
 
@@ -30,7 +30,7 @@ func TestGoLevelDBNewGoLevelDB(t *testing.T) {
 
 func BenchmarkGoLevelDBRandomReadsWrites(b *testing.B) {
 	name := fmt.Sprintf("test_%x", randStr(12))
-	db, err := NewGoLevelDB(name, "")
+	db, err := NewGoLevelDB(name, "", nil)
 	if err != nil {
 		b.Fatal(err)
 	}

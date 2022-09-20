@@ -1,3 +1,4 @@
+//go:build cleveldb
 // +build cleveldb
 
 package db
@@ -10,8 +11,8 @@ import (
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewCLevelDB(name, dir)
+	dbCreator := func(name string, dir string, opts Options) (DB, error) {
+		return NewCLevelDB(name, dir, opts)
 	}
 	registerDBCreator(CLevelDBBackend, dbCreator, false)
 }
@@ -26,14 +27,26 @@ type CLevelDB struct {
 
 var _ DB = (*CLevelDB)(nil)
 
-// NewCLevelDB creates a new CLevelDB.
-func NewCLevelDB(name string, dir string) (*CLevelDB, error) {
-	dbPath := filepath.Join(dir, name+".db")
-
+func defaultCleveldbOptions() *levigo.Options {
 	opts := levigo.NewOptions()
 	opts.SetCache(levigo.NewLRUCache(1 << 30))
 	opts.SetCreateIfMissing(true)
-	db, err := levigo.Open(dbPath, opts)
+	return opts
+}
+
+// NewCLevelDB creates a new CLevelDB.
+func NewCLevelDB(name string, dir string, opts Options) (*CLevelDB, error) {
+	do := defaultCleveldbOptions()
+
+	if opts != nil {
+		files := cast.ToInt(opts.Get("maxopenfiles"))
+		if files > 0 {
+			do.SetMaxOpenFiles(files)
+		}
+	}
+
+	dbPath := filepath.Join(dir, name+".db")
+	db, err := levigo.Open(dbPath, do)
 	if err != nil {
 		return nil, err
 	}
