@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,7 +13,7 @@ import (
 // Register a test backend for PrefixDB as well, with some unrelated junk data
 func init() {
 	// nolint: errcheck
-	registerDBCreator("prefixdb", func(name, dir string) (DB, error) {
+	registerDBCreator("prefixdb", func(name, dir string, opts Options) (DB, error) {
 		mdb := NewMemDB()
 		mdb.Set([]byte("a"), []byte{1})
 		mdb.Set([]byte("b"), []byte{2})
@@ -35,11 +34,11 @@ func cleanupDBDir(dir, name string) {
 
 func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	// Default
-	dirname, err := ioutil.TempDir("", fmt.Sprintf("test_backend_%s_", backend))
-	require.Nil(t, err)
-	db, err := NewDB("testdb", backend, dirname)
+	dbName := "testdb"
+	dir := os.TempDir()
+	db, err := NewDB(dbName, backend, dir)
 	require.NoError(t, err)
-	defer cleanupDBDir(dirname, "testdb")
+	defer os.RemoveAll(fmt.Sprintf("%s/%s.db", dir, dbName))
 
 	// A nonexistent key should return nil.
 	value, err := db.Get([]byte("a"))
@@ -166,7 +165,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 	dir := os.TempDir()
 	db, err := NewDB(name, backend, dir)
 	require.NoError(t, err)
-	defer cleanupDBDir(dir, name)
+	defer os.RemoveAll(fmt.Sprintf("%s/%s.db", dir, name))
 
 	for i := 0; i < 10; i++ {
 		if i != 6 { // but skip 6.
@@ -302,11 +301,11 @@ func testDBIterator(t *testing.T, backend BackendType) {
 		[]int64(nil), "reverse iterator from 2 (ex) to 4")
 
 	// Ensure that the iterators don't panic with an empty database.
-	dir2, err := ioutil.TempDir("", "tm-db-test")
 	require.NoError(t, err)
-	db2, err := NewDB(name, backend, dir2)
+	name2 := fmt.Sprintf("test_%x", randStr(11))
+	db2, err := NewDB(name2, backend, dir)
 	require.NoError(t, err)
-	defer cleanupDBDir(dir2, name)
+	defer os.RemoveAll(fmt.Sprintf("%s/%s.db", dir, name2))
 
 	itr, err = db2.Iterator(nil, nil)
 	require.NoError(t, err)

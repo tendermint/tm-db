@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/spf13/cast"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
@@ -11,8 +12,8 @@ import (
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewGoLevelDB(name, dir)
+	dbCreator := func(name string, dir string, opts Options) (DB, error) {
+		return OpenGoLevelDBWithOpts(name, dir, opts)
 	}
 	registerDBCreator(GoLevelDBBackend, dbCreator, false)
 }
@@ -23,10 +24,29 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
+// NewGoLevelDB open new go level database with default options.
+// Note: tendermint(v0.34.21) backend db is using this function,
+// it can be removed when tendermint discard the tm-db dependencies.
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
-	return NewGoLevelDBWithOpts(name, dir, nil)
+	return OpenGoLevelDBWithOpts(name, dir, nil)
 }
 
+// OpenGoLevelDBWithOpts open new go level database with default options
+// and custom options for the db clients.
+func OpenGoLevelDBWithOpts(name string, dir string, opts Options) (*GoLevelDB, error) {
+	defaultOpts := &opt.Options{}
+
+	if opts != nil {
+		files := cast.ToInt(opts.Get("maxopenfiles"))
+		if files > 0 {
+			defaultOpts.OpenFilesCacheCapacity = files
+		}
+	}
+
+	return NewGoLevelDBWithOpts(name, dir, defaultOpts)
+}
+
+// NewGoLevelDBWithOpts open new go level database with leveldb options.
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
 	dbPath := filepath.Join(dir, name+".db")
 	db, err := leveldb.OpenFile(dbPath, o)

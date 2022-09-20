@@ -14,7 +14,7 @@ import (
 
 func init() { registerDBCreator(BadgerDBBackend, badgerDBCreator, true) }
 
-func badgerDBCreator(dbName, dir string) (DB, error) {
+func badgerDBCreator(dbName, dir string, opts Options) (DB, error) {
 	return NewBadgerDB(dbName, dir)
 }
 

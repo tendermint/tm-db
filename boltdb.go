@@ -32,7 +32,7 @@ type BoltDB struct {
 var _ DB = (*BoltDB)(nil)
 
 // NewBoltDB returns a BoltDB with default options.
-func NewBoltDB(name, dir string) (DB, error) {
+func NewBoltDB(name, dir string, opts Options) (DB, error) {
 	return NewBoltDBWithOpts(name, dir, bbolt.DefaultOptions)
 }
 

@@ -19,13 +19,13 @@ func TestWithClevelDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "cleveldb")
 
-	db, err := NewCLevelDB(path, "")
+	db, err := NewCLevelDB(path, "", nil)
 	require.NoError(t, err)
 
 	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
 }
 
-//nolint: errcheck
+// nolint: errcheck
 func BenchmarkRandomReadsWrites2(b *testing.B) {
 	b.StopTimer()
 
@@ -34,7 +34,7 @@ func BenchmarkRandomReadsWrites2(b *testing.B) {
 	for i := 0; i < int(numItems); i++ {
 		internal[int64(i)] = int64(0)
 	}
-	db, err := NewCLevelDB(fmt.Sprintf("test_%x", randStr(12)), "")
+	db, err := NewCLevelDB(fmt.Sprintf("test_%x", randStr(12)), "", nil)
 	if err != nil {
 		b.Fatal(err.Error())
 		return

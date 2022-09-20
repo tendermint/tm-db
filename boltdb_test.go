@@ -17,7 +17,7 @@ func TestBoltDBNewBoltDB(t *testing.T) {
 	dir := os.TempDir()
 	defer cleanupDBDir(dir, name)
 
-	db, err := NewBoltDB(name, dir)
+	db, err := NewBoltDB(name, dir, nil)
 	require.NoError(t, err)
 	db.Close()
 }
@@ -26,7 +26,7 @@ func TestWithBoltDB(t *testing.T) {
 	dir := t.TempDir()
 	path := filepath.Join(dir, "boltdb")
 
-	db, err := NewBoltDB(path, "")
+	db, err := NewBoltDB(path, "", nil)
 	require.NoError(t, err)
 
 	t.Run("BoltDB", func(t *testing.T) { Run(t, db) })
@@ -34,7 +34,7 @@ func TestWithBoltDB(t *testing.T) {
 
 func BenchmarkBoltDBRandomReadsWrites(b *testing.B) {
 	name := fmt.Sprintf("test_%x", randStr(12))
-	db, err := NewBoltDB(name, "")
+	db, err := NewBoltDB(name, "", nil)
 	if err != nil {
 		b.Fatal(err)
 	}
