@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/spf13/cast"
 	"github.com/syndtr/goleveldb/leveldb"
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"github.com/syndtr/goleveldb/leveldb/opt"
@@ -11,8 +12,8 @@ import (
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewGoLevelDB(name, dir)
+	dbCreator := func(name string, dir string, opts Options) (DB, error) {
+		return NewGoLevelDB(name, dir, opts)
 	}
 	registerDBCreator(GoLevelDBBackend, dbCreator, false)
 }
@@ -23,8 +24,17 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
-func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
-	return NewGoLevelDBWithOpts(name, dir, nil)
+func NewGoLevelDB(name string, dir string, opts Options) (*GoLevelDB, error) {
+	defaultOpts := &opt.Options{}
+
+	if opts != nil {
+		files := cast.ToInt(opts.Get("maxopenfiles"))
+		if files > 0 {
+			defaultOpts.OpenFilesCacheCapacity = files
+		}
+	}
+
+	return NewGoLevelDBWithOpts(name, dir, defaultOpts)
 }
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {

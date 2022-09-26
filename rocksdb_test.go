@@ -32,4 +32,20 @@ func TestRocksDBStats(t *testing.T) {
 	assert.NotEmpty(t, db.Stats())
 }
 
-// TODO: Add tests for rocksdb
+func TestRocksDBWithOptions(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "rocksdb")
+
+	opts := make(OptionsMap, 0)
+	opts["maxopenfiles"] = 1000
+
+	defaultOpts := defaultRocksdbOptions()
+	files := cast.ToInt(opts.Get("maxopenfiles"))
+	defaultOpts.SetMaxOpenFiles(files)
+	require.Equal(t, opts["maxopenfiles"], defaultOpts.GetMaxOpenFiles())
+
+	db, err := NewRocksDB(path, "", opts)
+	require.NoError(t, err)
+
+	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
+}

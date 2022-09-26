@@ -37,7 +37,13 @@ const (
 	BadgerDBBackend BackendType = "badgerdb"
 )
 
-type dbCreator func(name string, dir string) (DB, error)
+type (
+	dbCreator func(name string, dir string, opts Options) (DB, error)
+
+	Options interface {
+		Get(string) interface{}
+	}
+)
 
 var backends = map[BackendType]dbCreator{}
 
@@ -51,6 +57,10 @@ func registerDBCreator(backend BackendType, creator dbCreator, force bool) {
 
 // NewDB creates a new database of type backend with the given name.
 func NewDB(name string, backend BackendType, dir string) (DB, error) {
+	return NewDBwithOptions(name, backend, dir, nil)
+}
+
+func NewDBwithOptions(name string, backend BackendType, dir string, opts Options) (DB, error) {
 	dbCreator, ok := backends[backend]
 	if !ok {
 		keys := make([]string, 0, len(backends))
@@ -61,7 +71,7 @@ func NewDB(name string, backend BackendType, dir string) (DB, error) {
 			backend, strings.Join(keys, ","))
 	}
 
-	db, err := dbCreator(name, dir)
+	db, err := dbCreator(name, dir, opts)
 	if err != nil {
 		return nil, fmt.Errorf("failed to initialize database: %w", err)
 	}

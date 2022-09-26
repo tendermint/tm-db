@@ -8,11 +8,12 @@ import (
 	"runtime"
 
 	"github.com/cosmos/gorocksdb"
+	"github.com/spf13/cast"
 )
 
 func init() {
-	dbCreator := func(name string, dir string) (DB, error) {
-		return NewRocksDB(name, dir)
+	dbCreator := func(name string, dir string, opts Options) (DB, error) {
+		return NewRocksDB(name, dir, opts)
 	}
 	registerDBCreator(RocksDBBackend, dbCreator, false)
 }
@@ -27,23 +28,36 @@ type RocksDB struct {
 
 var _ DB = (*RocksDB)(nil)
 
-func NewRocksDB(name string, dir string) (*RocksDB, error) {
-	// default rocksdb option, good enough for most cases, including heavy workloads.
-	// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
-	// compression: snappy as default, need to -lsnappy to enable.
+// defaultRocksdbOptions, good enough for most cases, including heavy workloads.
+// 1GB table cache, 512MB write buffer(may use 50% more on heavy workloads).
+// compression: snappy as default, need to -lsnappy to enable.
+func defaultRocksdbOptions() *grocksdb.Options {
 	bbto := gorocksdb.NewDefaultBlockBasedTableOptions()
 	bbto.SetBlockCache(gorocksdb.NewLRUCache(1 << 30))
 	bbto.SetFilterPolicy(gorocksdb.NewBloomFilter(10))
 
-	opts := gorocksdb.NewDefaultOptions()
-	opts.SetBlockBasedTableFactory(bbto)
+	rocksdbOpts := grocksdb.NewDefaultOptions()
+	rocksdbOpts.SetBlockBasedTableFactory(bbto)
 	// SetMaxOpenFiles to 4096 seems to provide a reliable performance boost
-	opts.SetMaxOpenFiles(4096)
-	opts.SetCreateIfMissing(true)
-	opts.IncreaseParallelism(runtime.NumCPU())
+	rocksdbOpts.SetMaxOpenFiles(4096)
+	rocksdbOpts.SetCreateIfMissing(true)
+	rocksdbOpts.IncreaseParallelism(runtime.NumCPU())
 	// 1.5GB maximum memory use for writebuffer.
-	opts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
-	return NewRocksDBWithOptions(name, dir, opts)
+	rocksdbOpts.OptimizeLevelStyleCompaction(512 * 1024 * 1024)
+	return rocksdbOpts
+}
+
+func NewRocksDB(name string, dir string, opts Options) (*RocksDB, error) {
+	defaultOpts := defaultRocksdbOptions()
+
+	if opts != nil {
+		files := cast.ToInt(opts.Get("maxopenfiles"))
+		if files > 0 {
+			defaultOpts.SetMaxOpenFiles(files)
+		}
+	}
+
+	return NewRocksDBWithOptions(name, dir, defaultOpts)
 }
 
 func NewRocksDBWithOptions(name string, dir string, opts *gorocksdb.Options) (*RocksDB, error) {
