@@ -13,7 +13,7 @@ import (
 
 func init() {
 	dbCreator := func(name string, dir string, opts Options) (DB, error) {
-		return NewGoLevelDB(name, dir, opts)
+		return NewGoLevelDBWithDbOpts(name, dir, opts)
 	}
 	registerDBCreator(GoLevelDBBackend, dbCreator, false)
 }
@@ -24,7 +24,12 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
-func NewGoLevelDB(name string, dir string, opts Options) (*GoLevelDB, error) {
+// NewCLevelDB creates a new CLevelDB.
+func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
+	return NewGoLevelDBWithOpts(name, dir, nil)
+}
+
+func NewGoLevelDBWithDbOpts(name string, dir string, opts Options) (*GoLevelDB, error) {
 	defaultOpts := &opt.Options{}
 
 	if opts != nil {
