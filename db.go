@@ -60,6 +60,7 @@ func NewDB(name string, backend BackendType, dir string) (DB, error) {
 	return NewDBwithOptions(name, backend, dir, nil)
 }
 
+// NewDBwithOptions creates a new database of type backend with the given name and the db options.
 func NewDBwithOptions(name string, backend BackendType, dir string, opts Options) (DB, error) {
 	dbCreator, ok := backends[backend]
 	if !ok {

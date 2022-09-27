@@ -24,7 +24,7 @@ type GoLevelDB struct {
 
 var _ DB = (*GoLevelDB)(nil)
 
-// NewCLevelDB creates a new CLevelDB.
+// NewGoLevelDB creates a new GoLevelDB.
 func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 	return NewGoLevelDBWithOpts(name, dir, nil)
 }
