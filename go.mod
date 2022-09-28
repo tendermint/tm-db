@@ -3,6 +3,7 @@ module github.com/tendermint/tm-db
 go 1.17
 
 require (
+	github.com/c2h5oh/datasize v0.0.0-20220606134207-859f65c6625b
 	github.com/cosmos/gorocksdb v1.2.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
@@ -10,6 +11,7 @@ require (
 	github.com/jmhodges/levigo v1.0.0
 	github.com/stretchr/testify v1.8.0
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
+	github.com/torquem-ch/mdbx-go v0.26.0
 	go.etcd.io/bbolt v1.3.6
 	google.golang.org/grpc v1.48.0
 )
