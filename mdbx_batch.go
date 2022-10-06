@@ -52,15 +52,15 @@ func (b *MDBXBatch) Write() error {
 	if b.ops == nil {
 		return errBatchClosed
 	}
-	err := b.db.env.Update(func(txn *mdbx.Txn) error {
+	err := b.db.Env.Update(func(txn *mdbx.Txn) error {
 		for _, op := range b.ops {
 			switch op.opType {
 			case opTypeSet:
-				if err := txn.Put(b.db.dbi, op.key, op.value, 0); err != nil {
+				if err := txn.Put(b.db.DBI, op.key, op.value, 0); err != nil {
 					return err
 				}
 			case opTypeDelete:
-				if err := txn.Del(b.db.dbi, op.key, nil); err != nil {
+				if err := txn.Del(b.db.DBI, op.key, nil); err != nil {
 					return err
 				}
 			}
