@@ -3,6 +3,7 @@
 ## Unreleased
 
 - remove mutex from prefixdb
+- Add mdbx backend.
 
 ## 0.6.7
 
