@@ -4,8 +4,10 @@
 package db
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 
 	"github.com/c2h5oh/datasize"
 	"github.com/torquem-ch/mdbx-go/mdbx"
@@ -112,8 +114,10 @@ func (db *MDBX) Set(key []byte, value []byte) error {
 }
 
 func (db *MDBX) SetSync(key []byte, value []byte) error {
-	// TODO
-	return db.Set(key, value)
+	if err := db.Set(key, value); err != nil {
+		return err
+	}
+	return db.env.Sync(true, false)
 }
 
 func (db *MDBX) Delete(key []byte) error {
@@ -131,8 +135,10 @@ func (db *MDBX) Delete(key []byte) error {
 }
 
 func (db *MDBX) DeleteSync(key []byte) error {
-	// TODO
-	return db.Delete(key)
+	if err := db.Delete(key); err != nil {
+		return err
+	}
+	return db.env.Sync(true, false)
 }
 
 func (db *MDBX) Close() error {
@@ -142,17 +148,33 @@ func (db *MDBX) Close() error {
 }
 
 func (db *MDBX) Print() error {
-	// TODO
+	itr, err := db.Iterator(nil, nil)
+	if err != nil {
+		return err
+	}
+	defer itr.Close()
+	for ; itr.Valid(); itr.Next() {
+		key := itr.Key()
+		value := itr.Value()
+		fmt.Printf("[%X]:\t[%X]\n", key, value)
+	}
 	return nil
 }
 
 func (db *MDBX) Stats() map[string]string {
-	_, err := db.env.Stat()
+	stat, err := db.env.Stat()
 	if err != nil {
 		return nil
 	}
-	// TODO
-	return nil
+	return map[string]string{
+		"mdbx.psize":          strconv.FormatUint(uint64(stat.PSize), 10),
+		"mdbx.depth":          strconv.FormatUint(uint64(stat.Depth), 10),
+		"mdbx.branch_pages":   strconv.FormatUint(stat.BranchPages, 10),
+		"mdbx.leaf_pages":     strconv.FormatUint(stat.LeafPages, 10),
+		"mdbx.overflow_pages": strconv.FormatUint(stat.OverflowPages, 10),
+		"mdbx.entries":        strconv.FormatUint(stat.Entries, 10),
+		"mdbx.last_tx_id":     strconv.FormatUint(stat.LastTxId, 10),
+	}
 }
 
 func (db *MDBX) NewBatch() Batch {
