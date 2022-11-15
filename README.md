@@ -1,4 +1,18 @@
-# Tendermint DB 
+# Tendermint DB
+
+## NOTE
+
+This repository is being deprecated, slowly.  
+
+* Tendermint will be moving to a sqlite solution, or such.
+  * This will be used for consensus information
+* Cosmos-SDK v0.46.5+ use https://github.com/cosmos/cosmos-db
+  * This is used by the cosmos-sdk to store application data
+* Updated work for use as a replace `go mod edit -replace github.com/tendermint/tm-db=github.com/osmosis-labs/tm-db` can be found at https://github.com/osmosis-labs/tm-db
+
+
+
+
 
 [![version](https://img.shields.io/github/tag/tendermint/tm-db.svg)](https://github.com/tendermint/tm-db/releases/latest)
 [![license](https://img.shields.io/github/license/tendermint/tm-db.svg)](https://github.com/tendermint/tm-db/blob/master/LICENSE)
