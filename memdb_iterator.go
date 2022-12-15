@@ -46,9 +46,11 @@ func newMemDBIteratorMtxChoice(db *MemDB, start []byte, end []byte, reverse bool
 		db.mtx.RLock()
 	}
 	go func() {
-		if useMtx {
-			defer db.mtx.RUnlock()
-		}
+		defer func() {
+			if useMtx {
+				db.mtx.RUnlock()
+			}
+		}()
 		// Because we use [start, end) for reverse ranges, while btree uses (start, end], we need
 		// the following variables to handle some reverse iteration conditions ourselves.
 		var (
