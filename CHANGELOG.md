@@ -3,6 +3,7 @@
 ## Unreleased
 
 - remove mutex from prefixdb
+- Add `NewRocksDBWithRawDB` for easier turning the options.
 
 ## 0.6.7
 

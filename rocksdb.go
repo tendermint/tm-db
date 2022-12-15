@@ -53,17 +53,20 @@ func NewRocksDBWithOptions(name string, dir string, opts *gorocksdb.Options) (*R
 	if err != nil {
 		return nil, err
 	}
+	return NewRocksDBWithRawDB(db), nil
+}
+
+func NewRocksDBWithRawDB(db *gorocksdb.DB) *RocksDB {
 	ro := gorocksdb.NewDefaultReadOptions()
 	wo := gorocksdb.NewDefaultWriteOptions()
 	woSync := gorocksdb.NewDefaultWriteOptions()
 	woSync.SetSync(true)
-	database := &RocksDB{
+	return &RocksDB{
 		db:     db,
 		ro:     ro,
 		wo:     wo,
 		woSync: woSync,
 	}
-	return database, nil
 }
 
 // Get implements DB.
