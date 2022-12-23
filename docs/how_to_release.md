@@ -9,13 +9,13 @@ Amend the top of this file with a section for the latest version (0.6.x etc).
 Be sure to include any bug fixes, improvements, dependency upgrades, and breaking changes included in this version. 
 (It's OK to exclude changes to tooling dependencies, like updates to Github Actions.)
 Finally, create a pull request for the changelog update.
-Once the tests pass and the pull request is approved, merge the change into master.
+Once the tests pass and the pull request is approved, merge the change into main.
 
 ## 2. Tag the latest commit with the latest version
 
 tm-db is provided as a golang [module](https://blog.golang.org/publishing-go-modules), which rely on git tags for versioning information. 
 
-Tag the changelog commit in master created in step 1 with the latest version.
+Tag the changelog commit in main created in step 1 with the latest version.
 Be sure to prefix the version tag with `v`. For example, `v0.6.5` for version 0.6.5.
 This tagging can be done [using github](https://docs.github.com/en/desktop/contributing-and-collaborating-using-github-desktop/managing-commits/managing-tags#creating-a-tag) or [using git](https://git-scm.com/book/en/v2/Git-Basics-Tagging) on the command line. 
 
