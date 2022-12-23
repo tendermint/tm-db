@@ -51,13 +51,14 @@ var _ protodb.DBServer = (*server)(nil)
 //
 // Dir is the directory on the file system in which the DB will be stored(if backed by disk) (TODO: remove)
 //
-// Name is representative filesystem entry's basepath
+// # Name is representative filesystem entry's basepath
 //
 // Type can be either one of:
-//  * cleveldb (if built with gcc enabled)
-//  * fsdb
-//  * memdB
-//  * goleveldb
+//   - cleveldb (if built with gcc enabled)
+//   - fsdb
+//   - memdB
+//   - goleveldb
+//
 // See https://godoc.org/github.com/tendermint/tendermint/libs/db#BackendType
 func (s *server) Init(ctx context.Context, in *protodb.Init) (*protodb.Entity, error) {
 	s.mu.Lock()
@@ -212,7 +213,7 @@ func (s *server) BatchWriteSync(c context.Context, b *protodb.Batch) (*protodb.N
 	return s.batchWrite(c, b, true)
 }
 
-func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*protodb.Nothing, error) {
+func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*protodb.Nothing, error) { //nolint:unparam
 	bat := s.db.NewBatch()
 	defer bat.Close()
 	for _, op := range b.Ops {

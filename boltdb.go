@@ -136,7 +136,7 @@ func (bdb *BoltDB) Close() error {
 }
 
 // Print implements DB.
-// nolint: errcheck
+//nolint: errcheck
 func (bdb *BoltDB) Print() error {
 	stats := bdb.db.Stats()
 	fmt.Printf("%v\n", stats)

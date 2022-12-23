@@ -13,7 +13,7 @@ import (
 
 // Register a test backend for PrefixDB as well, with some unrelated junk data
 func init() {
-	// nolint: errcheck
+	//nolint: errcheck
 	registerDBCreator("prefixdb", func(name, dir string) (DB, error) {
 		mdb := NewMemDB()
 		mdb.Set([]byte("a"), []byte{1})

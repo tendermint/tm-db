@@ -25,7 +25,7 @@ func TestWithClevelDB(t *testing.T) {
 	t.Run("ClevelDB", func(t *testing.T) { Run(t, db) })
 }
 
-// nolint: errcheck
+//nolint: errcheck
 func BenchmarkRandomReadsWrites2(b *testing.B) {
 	b.StopTimer()
 

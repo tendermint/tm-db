@@ -47,7 +47,7 @@ type dbCreator func(name string, dir string) (DB, error)
 
 var backends = map[BackendType]dbCreator{}
 
-func registerDBCreator(backend BackendType, creator dbCreator, force bool) {
+func registerDBCreator(backend BackendType, creator dbCreator, force bool) { //nolint:unparam
 	_, ok := backends[backend]
 	if !force && ok {
 		return

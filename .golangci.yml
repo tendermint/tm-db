@@ -1,49 +1,68 @@
+run:
+  tests: true
+  # timeout for analysis, e.g. 30s, 5m, default is 1m
+  timeout: 5m
+
 linters:
   disable-all: true
   enable:
-    - deadcode
     - depguard
     - dogsled
-    - dupl
     - errcheck
     - exportloopref
     - goconst
     - gocritic
     - gofumpt
-    - revive
     - gosec
     - gosimple
     - govet
     - ineffassign
-    - lll
     - misspell
     - nakedret
-    - prealloc
+    - nolintlint
+    - revive
     - staticcheck
     - stylecheck
     - typecheck
-    - revive
     - unconvert
+    - unparam
     - unused
-    - varcheck
-    - nolintlint
-
-run:
-  build-tags:
-    - cleveldb
-    - rocksdb
-    - badgerdb
-    - boltdb
 
 issues:
   exclude-rules:
-    - path: _test\.go
+    - text: "Use of weak random number generator"
       linters:
         - gosec
+    - text: "comment on exported var"
+      linters:
+        - golint
+    - text: "don't use an underscore in package name"
+      linters:
+        - golint
+    - text: "ST1003:"
+      linters:
+        - stylecheck
+    # FIXME: Disabled until golangci-lint updates stylecheck with this fix:
+    # https://github.com/dominikh/go-tools/issues/389
+    - text: "ST1016:"
+      linters:
+        - stylecheck
+    - path: "migrations"
+      text: "SA1019:"
+      linters:
+        - staticcheck
+
+  max-issues-per-linter: 10000
+  max-same-issues: 10000
+
 linters-settings:
+  dogsled:
+    max-blank-identifiers: 3
   maligned:
+    # print struct with more effective memory layout or not, false by default
     suggest-new: true
-  errcheck:
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
-    # default is false: such cases aren't reported by default.
-    check-blank: true
+  nolintlint:
+    allow-unused: false
+    allow-leading-space: true
+    require-explanation: false
+    require-specific: false
