@@ -1,5 +1,5 @@
 # This workflow builds and pushes a new version of the build container image
-# when the tools directory changes on master. Edit tools/Dockerfile.
+# when the tools directory changes on main. Edit tools/Dockerfile.
 #
 # This workflow does not push a new image until it is merged, so tests that
 # depend on changes in this image will not pass until this workflow succeeds.
@@ -13,7 +13,7 @@ on:
       - "tools/*"
   push:
     branches:
-      - master
+      - main
     paths:
       - "tools/*"
 
