@@ -3,6 +3,7 @@
 ## Unreleased
 
 - remove mutex from prefixdb
+- Migrate to linxGnu/grocksdb to support rocksdb v7
 
 ## 0.6.7
 
