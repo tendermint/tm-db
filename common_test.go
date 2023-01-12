@@ -3,8 +3,8 @@ package db
 import (
 	"bytes"
 	"encoding/binary"
-	"io/ioutil"
 	"math/rand"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -67,7 +67,7 @@ func checkValuePanics(t *testing.T, itr Iterator) {
 }
 
 func newTempDB(t *testing.T, backend BackendType) (db DB, dbDir string) {
-	dirname, err := ioutil.TempDir("", "db_common_test")
+	dirname, err := os.MkdirTemp("", "db_common_test")
 	require.NoError(t, err)
 	db, err = NewDB("testdb", backend, dirname)
 	require.NoError(t, err)
@@ -116,7 +116,6 @@ func benchmarkRandomReadsWrites(b *testing.B, db DB) {
 		internal[int64(i)] = int64(0)
 	}
 
-	// fmt.Println("ok, starting")
 	b.StartTimer()
 
 	for i := 0; i < b.N; i++ {

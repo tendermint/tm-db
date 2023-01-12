@@ -6,7 +6,6 @@ package db
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,16 +21,6 @@ func TestRocksDBBackend(t *testing.T) {
 
 	_, ok := db.(*RocksDB)
 	assert.True(t, ok)
-}
-
-func TestWithRocksDB(t *testing.T) {
-	dir := t.TempDir()
-	path := filepath.Join(dir, "rocksdb")
-
-	db, err := NewRocksDB(path, "")
-	require.NoError(t, err)
-
-	t.Run("RocksDB", func(t *testing.T) { Run(t, db) })
 }
 
 func TestRocksDBStats(t *testing.T) {

@@ -1,16 +1,5 @@
 # Changelog
 
-## Unreleased
-
-- remove mutex from prefixdb
-
-## 0.6.7
-
-**2022-2-21**
-
-- Use cosmos/rocksdb instead of techbot/rocksdb
-- Add `ForceCopmact` to goleveldb database
-
 ## 0.6.6
 
 **2021-11-08**
