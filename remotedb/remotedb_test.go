@@ -8,8 +8,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/tendermint/tm-db/remotedb"
-	"github.com/tendermint/tm-db/remotedb/grpcdb"
+	"github.com/CometBFT/CometBFT-db/remotedb"
+	"github.com/CometBFT/CometBFT-db/remotedb/grpcdb"
 )
 
 func TestRemoteDB(t *testing.T) {

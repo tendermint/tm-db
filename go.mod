@@ -1,4 +1,4 @@
-module github.com/tendermint/tm-db
+module github.com/CometBFT/CometBFT-db
 
 go 1.16
 
