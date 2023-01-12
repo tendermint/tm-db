@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 
-	db "github.com/CometBFT/CometBFT-db"
-	protodb "github.com/CometBFT/CometBFT-db/remotedb/proto"
+	db "github.com/cometbft/cometbft-db"
+	protodb "github.com/cometbft/cometbft-db/remotedb/proto"
 )
 
 // ListenAndServe is a blocking function that sets up a gRPC based

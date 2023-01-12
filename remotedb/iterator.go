@@ -1,8 +1,8 @@
 package remotedb
 
 import (
-	db "github.com/CometBFT/CometBFT-db"
-	protodb "github.com/CometBFT/CometBFT-db/remotedb/proto"
+	db "github.com/cometbft/cometbft-db"
+	protodb "github.com/cometbft/cometbft-db/remotedb/proto"
 )
 
 func makeIterator(dic protodb.DB_IteratorClient) db.Iterator {

@@ -1,6 +1,6 @@
 GOTOOLS = github.com/golangci/golangci-lint/cmd/golangci-lint
 PACKAGES=$(shell go list ./...)
-INCLUDE = -I=${GOPATH}/src/github.com/CometBFT/CometBFT-db -I=${GOPATH}/src -I=${GOPATH}/src/github.com/gogo/protobuf/protobuf
+INCLUDE = -I=${GOPATH}/src/github.com/cometbft/cometbft-db -I=${GOPATH}/src -I=${GOPATH}/src/github.com/gogo/protobuf/protobuf
 
 export GO111MODULE = on
 
@@ -48,9 +48,9 @@ tools:
 
 # generates certificates for TLS testing in remotedb
 gen_certs: clean_certs
-	certstrap init --common-name "tendermint.com" --passphrase ""
+	certstrap init --common-name "cometbft.com" --passphrase ""
 	certstrap request-cert --common-name "remotedb" -ip "127.0.0.1" --passphrase ""
-	certstrap sign "remotedb" --CA "tendermint.com" --passphrase ""
+	certstrap sign "remotedb" --CA "cometbft.com" --passphrase ""
 	mv out/remotedb.crt remotedb/test.crt
 	mv out/remotedb.key remotedb/test.key
 	rm -rf out
