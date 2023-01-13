@@ -3,7 +3,7 @@ module github.com/cometbft/cometbft-db
 go 1.16
 
 require (
-	github.com/dgraph-io/badger/v2 v2.2007.2
+	github.com/dgraph-io/badger/v2 v2.2007.4
 	github.com/gogo/protobuf v1.3.2
 	github.com/google/btree v1.0.0
 	github.com/jmhodges/levigo v1.0.0
