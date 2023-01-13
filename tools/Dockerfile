@@ -1,6 +1,6 @@
 # This file defines the container image used to build and test tm-db in CI.
-# The CI workflows use the latest tag of tendermintdev/docker-tm-db-testing
-# built from these settings.
+# The CI workflows use the latest tag of cometbft/cometbft-db-testing built
+# from these settings.
 #
 # The jobs defined in the Build & Push workflow will build and update the image
 # when changes to this file are merged.  If you have other changes that require
