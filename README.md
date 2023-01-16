@@ -12,7 +12,7 @@ Common database interface for various database backends. Primarily meant for app
 
 ### Minimum Go Version
 
-Go 1.13+
+Go 1.18+
 
 ## Supported Database Backends
 
