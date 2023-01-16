@@ -15,6 +15,6 @@ jobs:
     for your contributions."
           days-before-stale: -1
           days-before-close: -1
-          days-before-pr-stale: 20
-          days-before-pr-close: 10
+          days-before-pr-stale: 10
+          days-before-pr-close: 4
           exempt-pr-labels: "pinned, security, proposal, blocked, wip"

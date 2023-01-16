@@ -107,5 +107,8 @@ clean_certs:
 	## Note the $@ here is substituted for the %.pb.go
 	protoc $(INCLUDE) $< --gogo_out=Mgoogle/protobuf/timestamp.proto=github.com/golang/protobuf/ptypes/timestamp,plugins=grpc:../../..
 
+protoc_remotedb: remotedb/proto/defs.pb.go
 
-protoc_remotedb: remotedb/proto/defs.pb.go	
+vulncheck:
+		@go run golang.org/x/vuln/cmd/govulncheck@latest ./...
+.PHONY: vulncheck
