@@ -5,7 +5,7 @@ go 1.16
 require (
 	github.com/dgraph-io/badger/v2 v2.2007.4
 	github.com/gogo/protobuf v1.3.2
-	github.com/google/btree v1.0.0
+	github.com/google/btree v1.1.2
 	github.com/jmhodges/levigo v1.0.0
 	github.com/stretchr/testify v1.8.1
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
