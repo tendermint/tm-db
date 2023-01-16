@@ -18,7 +18,7 @@ jobs:
     # rocksdb, which are needed to build and test those modules.
     # To update the container image, see docker.yml.
     runs-on: ubuntu-latest
-    container: tendermintdev/docker-tm-db-testing
+    container: cometbft/cometbft-db-testing
     steps:
       - uses: actions/checkout@v3
       - name: test & coverage report creation
