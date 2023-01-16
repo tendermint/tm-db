@@ -1,3 +1,6 @@
+# To run locally:
+#   make docker-test
+
 name: Test
 on:
   push:
