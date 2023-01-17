@@ -6,7 +6,7 @@ package db
 import (
 	"bytes"
 
-	"github.com/tecbot/gorocksdb"
+	"github.com/cosmos/gorocksdb"
 )
 
 type rocksDBIterator struct {
@@ -56,7 +56,6 @@ func (itr *rocksDBIterator) Domain() ([]byte, []byte) {
 
 // Valid implements Iterator.
 func (itr *rocksDBIterator) Valid() bool {
-
 	// Once invalid, forever invalid.
 	if itr.isInvalid {
 		return false
@@ -75,9 +74,9 @@ func (itr *rocksDBIterator) Valid() bool {
 	}
 
 	// If key is end or past it, invalid.
-	var start = itr.start
-	var end = itr.end
-	var key = moveSliceToBytes(itr.source.Key())
+	start := itr.start
+	end := itr.end
+	key := moveSliceToBytes(itr.source.Key())
 	if itr.isReverse {
 		if start != nil && bytes.Compare(key, start) < 0 {
 			itr.isInvalid = true
