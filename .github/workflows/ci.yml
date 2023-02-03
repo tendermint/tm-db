@@ -30,5 +30,3 @@ jobs:
       - uses: codecov/codecov-action@v3
         with:
           file: ./coverage.txt
-          # TODO(thane): Re-enable once we make the repo public
-          fail_ci_if_error: false
