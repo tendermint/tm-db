@@ -1,7 +1,7 @@
 linters:
+  tests: true
   disable-all: true
   enable:
-    - deadcode
     - depguard
     - dogsled
     - dupl
@@ -25,7 +25,6 @@ linters:
     - revive
     - unconvert
     - unused
-    - varcheck
     - nolintlint
 
 run:
