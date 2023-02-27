@@ -211,7 +211,7 @@ func (s *server) BatchWriteSync(c context.Context, b *protodb.Batch) (*protodb.N
 	return s.batchWrite(c, b, true)
 }
 
-func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*protodb.Nothing, error) {
+func (s *server) batchWrite(c context.Context, b *protodb.Batch, sync bool) (*protodb.Nothing, error) { //nolint:unparam
 	bat := s.db.NewBatch()
 	defer bat.Close()
 	for _, op := range b.Ops {
