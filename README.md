@@ -79,6 +79,7 @@ local machine, use `make test-all` to test them all.
 To test all databases within a Docker container, run:
 
 ```bash
+make docker-test-image
 make docker-test
 ```
 
