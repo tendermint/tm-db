@@ -43,7 +43,7 @@ test-badgerdb:
 
 test-all:
 	@echo "--> Running go test"
-	@go test $(PACKAGES) -tags cleveldb,boltdb,rocksdb,badgerdb -v
+	@go test $(PACKAGES) -tags cleveldb,boltdb,rocksdb,grocksdb_clean_link,badgerdb -v
 .PHONY: test-all
 
 test-all-with-coverage:
@@ -54,7 +54,7 @@ test-all-with-coverage:
 		-race \
 		-coverprofile=coverage.txt \
 		-covermode=atomic \
-		-tags=memdb,goleveldb,cleveldb,boltdb,rocksdb,badgerdb \
+		-tags=memdb,goleveldb,cleveldb,boltdb,rocksdb,grocksdb_clean_link,badgerdb \
 		-v
 .PHONY: test-all-with-coverage
 
