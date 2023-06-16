@@ -7,13 +7,16 @@
 # updates here, merge the changes here first and let the image get updated (or
 # push a new version manually) before PRs that depend on them.
 
-FROM golang:1.19-bullseye AS build
+FROM golang:1.20 AS build
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libbz2-dev libgflags-dev libsnappy-dev libzstd-dev zlib1g-dev \
-    make tar wget
+    make tar wget build-essential gcc-11 g++-11 
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 11 
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-11 11
 
 FROM build AS install
 ARG LEVELDB=1.20

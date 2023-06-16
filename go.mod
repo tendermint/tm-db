@@ -1,6 +1,6 @@
 module github.com/cometbft/cometbft-db
 
-go 1.19
+go 1.20
 
 require (
 	github.com/dgraph-io/badger/v2 v2.2007.4
