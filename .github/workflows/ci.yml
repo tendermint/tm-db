@@ -22,7 +22,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Set up Docker Build
-        uses: docker/setup-buildx-action@v2.7.0
+        uses: docker/setup-buildx-action@v2.8.0
         with:
           driver: docker
 
