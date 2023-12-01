@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## v0.9.0
+
+*December 1, 2023*
+
+This release primarily updates some key dependencies, including adding support
+for RocksDB v8. It also bumps the minimum Go version to v1.21 in order for
+CometBFT to be able to use it in the E2E testing framework for the latest major
+releases.
+
+### DEPENDENCIES
+
+- Use RocksDB v8, testing with v8.8.1
+  ([\#97](https://github.com/cometbft/cometbft-db/pull/97))
+
+### GO VERSION
+
+- Bump minimum Go version to v1.21
+  ([\#98](https://github.com/cometbft/cometbft-db/pull/98))
+
 ## v0.8.0
 
 *Apr 26, 2023*
