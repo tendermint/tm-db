@@ -7,7 +7,7 @@
 # updates here, merge the changes here first and let the image get updated (or
 # push a new version manually) before PRs that depend on them.
 
-FROM golang:1.20 AS build
+FROM golang:1.21 AS build
 
 ENV LD_LIBRARY_PATH=/usr/local/lib
 
