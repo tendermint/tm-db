@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## v0.9.1
+
+*December 4, 2023*
+
+This release is precisely the same code-wise as v0.9.0, except that it builds
+the `cometbft/cometbft-db-testing` Docker image for both `linux/amd64` and
+`linux/arm64` platforms.
+
 ## v0.9.0
 
 *December 1, 2023*
@@ -40,10 +48,10 @@ upgrade to the latest version(s) of Go ASAP.
 
 ### DEPENDENCIES
 
-- Update to the latest version of golang.org/x/net
-  ([\#40](https://github.com/cometbft/cometbft-db/pull/40))
 - Switch rocksdb binding from gorocksdb to grocksdb, bump librocksdb dependency
   to `v7.10.2` ([\#42](https://github.com/cometbft/cometbft-db/pull/42))
+- Update to the latest version of golang.org/x/net
+  ([\#40](https://github.com/cometbft/cometbft-db/pull/40))
 
 ## v0.7.0
 
