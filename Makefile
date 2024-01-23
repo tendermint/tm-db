@@ -10,8 +10,6 @@ ifeq (1,$(NON_INTERACTIVE))
 	DOCKER_TEST_INTERACTIVE_FLAGS :=
 endif
 
-export GO111MODULE = on
-
 all: lint test
 
 ### go tests
@@ -89,31 +87,6 @@ docker-test:
 tools:
 	go get -v $(GOTOOLS)
 .PHONY: tools
-
-# generates certificates for TLS testing in remotedb
-gen_certs: clean_certs
-	certstrap init --common-name "cometbft.com" --passphrase ""
-	certstrap request-cert --common-name "remotedb" -ip "127.0.0.1" --passphrase ""
-	certstrap sign "remotedb" --CA "cometbft.com" --passphrase ""
-	mv out/remotedb.crt remotedb/test.crt
-	mv out/remotedb.key remotedb/test.key
-	rm -rf out
-.PHONY: gen_certs
-
-clean_certs:
-	rm -f db/remotedb/test.crt
-	rm -f db/remotedb/test.key
-.PHONY: clean_certs
-
-%.pb.go: %.proto
-	## If you get the following error,
-	## "error while loading shared libraries: libprotobuf.so.14: cannot open shared object file: No such file or directory"
-	## See https://stackoverflow.com/a/25518702
-	## Note the $< here is substituted for the %.proto
-	## Note the $@ here is substituted for the %.pb.go
-	protoc $(INCLUDE) $< --gogo_out=Mgoogle/protobuf/timestamp.proto=github.com/golang/protobuf/ptypes/timestamp,plugins=grpc:../../..
-
-protoc_remotedb: remotedb/proto/defs.pb.go
 
 vulncheck:
 		@go run golang.org/x/vuln/cmd/govulncheck@latest ./...
