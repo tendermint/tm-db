@@ -19,7 +19,7 @@ var (
 func init() {
 	registerDBCreator(BoltDBBackend, func(name, dir string) (DB, error) {
 		return NewBoltDB(name, dir)
-	}, false)
+	})
 }
 
 // BoltDB is a wrapper around etcd's fork of bolt (https://github.com/etcd-io/bbolt).

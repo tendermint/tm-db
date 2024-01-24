@@ -15,7 +15,7 @@ func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewRocksDB(name, dir)
 	}
-	registerDBCreator(RocksDBBackend, dbCreator, false)
+	registerDBCreator(RocksDBBackend, dbCreator)
 }
 
 // RocksDB is a RocksDB backend.

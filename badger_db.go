@@ -12,7 +12,7 @@ import (
 	"github.com/dgraph-io/badger/v2"
 )
 
-func init() { registerDBCreator(BadgerDBBackend, badgerDBCreator, true) }
+func init() { registerDBCreator(BadgerDBBackend, badgerDBCreator) }
 
 func badgerDBCreator(dbName, dir string) (DB, error) {
 	return NewBadgerDB(dbName, dir)

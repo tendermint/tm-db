@@ -17,7 +17,8 @@ func TestGoLevelDBNewGoLevelDB(t *testing.T) {
 	require.Nil(t, err)
 	_, err = NewGoLevelDB(name, "")
 	require.NotNil(t, err)
-	wr1.Close() // Close the db to release the lock
+	err = wr1.Close() // Close the db to release the lock
+	require.Nil(t, err)
 
 	// Test we can open the db twice for reading only
 	ro1, err := NewGoLevelDBWithOpts(name, "", &opt.Options{ReadOnly: true})
@@ -35,7 +36,8 @@ func BenchmarkGoLevelDBRandomReadsWrites(b *testing.B) {
 		b.Fatal(err)
 	}
 	defer func() {
-		db.Close()
+		err = db.Close()
+		require.NoError(b, err)
 		cleanupDBDir("", name)
 	}()
 

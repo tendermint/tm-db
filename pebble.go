@@ -11,7 +11,8 @@ import (
 	"github.com/cockroachdb/pebble"
 )
 
-// ForceSync
+// ForceSync is a a compile time flag to force using Sync for NoSync functions (Set, Delete, Write).
+
 /*
 This is set at compile time. Could be 0 or 1, defaults is 1.
 It forces using Sync for NoSync functions (Set, Delete, Write)
@@ -21,9 +22,8 @@ And the workaround (if using ForceSync=0):
 At the upgrade-block, the sdk will panic without flushing data to disk or closing dbs properly.
 
 Upgrade guide:
-	1. After seeing `UPGRADE "xxxx" NEED at height....`, restart current version with `-X github.com/tendermint/tm-db.ForceSync=1`
-	2. Restart new version as normal
-
+ 1. After seeing `UPGRADE "xxxx" NEED at height....`, restart current version with `-X github.com/tendermint/tm-db.ForceSync=1`
+ 2. Restart new version as normal
 
 Example: Upgrading sifchain from v0.14.0 to v0.15.0
 
@@ -39,7 +39,6 @@ go install -tags pebbledb -ldflags "-w -s -X github.com/cosmos/cosmos-sdk/types.
 
 $HOME/go/bin/sifnoded start --db_backend=pebbledb
 
-
 # step 2
 git reset --hard
 git checkout v0.15.0
@@ -48,16 +47,17 @@ go mod tidy
 go install -tags pebbledb -ldflags "-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb" ./cmd/sifnoded
 
 $HOME/go/bin/sifnoded start --db_backend=pebbledb
-
 */
-var ForceSync = "1"
-var isForceSync = false
+var (
+	ForceSync   = "1"
+	isForceSync = false
+)
 
 func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewPebbleDB(name, dir)
 	}
-	registerDBCreator(PebbleDBBackend, dbCreator, false)
+	registerDBCreator(PebbleDBBackend, dbCreator)
 
 	if ForceSync == "1" {
 		isForceSync = true
@@ -96,7 +96,6 @@ func (db *PebbleDB) Get(key []byte) ([]byte, error) {
 	}
 
 	res, closer, err := db.db.Get(key)
-
 	if err != nil {
 		if err == pebble.ErrNotFound {
 			return nil, nil
@@ -113,11 +112,12 @@ func (db *PebbleDB) Has(key []byte) (bool, error) {
 	if len(key) == 0 {
 		return false, errKeyEmpty
 	}
-	bytes, err := db.Get(key)
+
+	bytesPeb, err := db.Get(key)
 	if err != nil {
 		return false, err
 	}
-	return bytes != nil, nil
+	return bytesPeb != nil, nil
 }
 
 // Set implements DB.
@@ -211,7 +211,7 @@ func (db *PebbleDB) Print() error {
 }
 
 // Stats implements DB.
-func (db *PebbleDB) Stats() map[string]string {
+func (*PebbleDB) Stats() map[string]string {
 	return nil
 }
 
@@ -275,8 +275,8 @@ func (b *pebbleDBBatch) Set(key, value []byte) error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Set(key, value, nil)
-	return nil
+
+	return b.batch.Set(key, value, nil)
 }
 
 // Delete implements Batch.
@@ -287,8 +287,8 @@ func (b *pebbleDBBatch) Delete(key []byte) error {
 	if b.batch == nil {
 		return errBatchClosed
 	}
-	b.batch.Delete(key, nil)
-	return nil
+
+	return b.batch.Delete(key, nil)
 }
 
 // Write implements Batch.

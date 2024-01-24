@@ -12,7 +12,7 @@ import (
 
 // Register a test backend for PrefixDB as well, with some unrelated junk data
 func init() {
-	//nolint: errcheck
+	//nolint: errcheck, revive // probably should check errors?
 	registerDBCreator("prefixdb", func(name, dir string) (DB, error) {
 		mdb := NewMemDB()
 		mdb.Set([]byte("a"), []byte{1})
@@ -22,7 +22,7 @@ func init() {
 		mdb.Set([]byte("u"), []byte{21})
 		mdb.Set([]byte("z"), []byte{26})
 		return NewPrefixDB(mdb, []byte("test/")), nil
-	}, false)
+	})
 }
 
 func cleanupDBDir(dir, name string) {
@@ -33,6 +33,7 @@ func cleanupDBDir(dir, name string) {
 }
 
 func testBackendGetSetDelete(t *testing.T, backend BackendType) {
+	t.Helper()
 	// Default
 	dirname, err := os.MkdirTemp("", fmt.Sprintf("test_backend_%s_", backend))
 	require.Nil(t, err)
@@ -161,6 +162,8 @@ func TestDBIterator(t *testing.T) {
 }
 
 func testDBIterator(t *testing.T, backend BackendType) {
+	t.Helper()
+
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
 	db, err := NewDB(name, backend, dir)
@@ -317,6 +320,8 @@ func testDBIterator(t *testing.T, backend BackendType) {
 }
 
 func verifyIterator(t *testing.T, itr Iterator, expected []int64, msg string) {
+	t.Helper()
+
 	var list []int64
 	for itr.Valid() {
 		key := itr.Key()
@@ -335,6 +340,8 @@ func TestDBBatch(t *testing.T) {
 }
 
 func testDBBatch(t *testing.T, backend BackendType) {
+	t.Helper()
+
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
 	db, err := NewDB(name, backend, dir)
@@ -396,8 +403,12 @@ func testDBBatch(t *testing.T, backend BackendType) {
 
 	// it should be possible to close an empty batch, and to re-close a closed batch
 	batch = db.NewBatch()
-	batch.Close()
-	batch.Close()
+	if err := batch.Close(); err != nil {
+		require.NoError(t, err)
+	}
+	if err := batch.Close(); err != nil {
+		require.NoError(t, err)
+	}
 
 	// all other operations on a closed batch should error
 	require.Error(t, batch.Set([]byte("a"), []byte{9}))
@@ -407,6 +418,7 @@ func testDBBatch(t *testing.T, backend BackendType) {
 }
 
 func assertKeyValues(t *testing.T, db DB, expect map[string][]byte) {
+	t.Helper()
 	iter, err := db.Iterator(nil, nil)
 	require.NoError(t, err)
 	defer iter.Close()

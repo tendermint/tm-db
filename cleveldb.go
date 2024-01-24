@@ -14,7 +14,7 @@ func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewCLevelDB(name, dir)
 	}
-	registerDBCreator(CLevelDBBackend, dbCreator, false)
+	registerDBCreator(CLevelDBBackend, dbCreator)
 }
 
 // CLevelDB uses the C LevelDB database via a Go wrapper.

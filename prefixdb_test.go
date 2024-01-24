@@ -7,6 +7,7 @@ import (
 )
 
 func mockDBWithStuff(t *testing.T) DB {
+	t.Helper()
 	db := NewMemDB()
 	// Under "key" prefix
 	require.NoError(t, db.Set(bz("key"), bz("value")))
@@ -51,7 +52,8 @@ func TestPrefixDBIterator1(t *testing.T) {
 	checkItem(t, itr, bz("3"), bz("value3"))
 	checkNext(t, itr, false)
 	checkInvalid(t, itr)
-	itr.Close()
+	err = itr.Close()
+	require.NoError(t, err)
 }
 
 func TestPrefixDBReverseIterator1(t *testing.T) {
@@ -68,7 +70,8 @@ func TestPrefixDBReverseIterator1(t *testing.T) {
 	checkItem(t, itr, bz("1"), bz("value1"))
 	checkNext(t, itr, false)
 	checkInvalid(t, itr)
-	itr.Close()
+	err = itr.Close()
+	require.NoError(t, err)
 }
 
 func TestPrefixDBReverseIterator5(t *testing.T) {
@@ -85,7 +88,8 @@ func TestPrefixDBReverseIterator5(t *testing.T) {
 	checkItem(t, itr, bz("1"), bz("value1"))
 	checkNext(t, itr, false)
 	checkInvalid(t, itr)
-	itr.Close()
+	err = itr.Close()
+	require.NoError(t, err)
 }
 
 func TestPrefixDBReverseIterator6(t *testing.T) {
@@ -100,7 +104,8 @@ func TestPrefixDBReverseIterator6(t *testing.T) {
 	checkItem(t, itr, bz("2"), bz("value2"))
 	checkNext(t, itr, false)
 	checkInvalid(t, itr)
-	itr.Close()
+	err = itr.Close()
+	require.NoError(t, err)
 }
 
 func TestPrefixDBReverseIterator7(t *testing.T) {
@@ -113,5 +118,6 @@ func TestPrefixDBReverseIterator7(t *testing.T) {
 	checkItem(t, itr, bz("1"), bz("value1"))
 	checkNext(t, itr, false)
 	checkInvalid(t, itr)
-	itr.Close()
+	err = itr.Close()
+	require.NoError(t, err)
 }

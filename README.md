@@ -16,7 +16,7 @@ applications built on [CometBFT], such as the [Cosmos SDK].
 totally deprecating and removing this library from CometBFT. As such, we do not
 recommend depending on this library for new projects.
 
-### Minimum Go Version
+## Minimum Go Version
 
 Go 1.21+
 

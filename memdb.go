@@ -16,7 +16,7 @@ const (
 func init() {
 	registerDBCreator(MemDBBackend, func(name, dir string) (DB, error) {
 		return NewMemDB(), nil
-	}, false)
+	})
 }
 
 // item is a btree.Item with byte slices as keys and values
@@ -137,7 +137,7 @@ func (db *MemDB) DeleteSync(key []byte) error {
 }
 
 // Close implements DB.
-func (db *MemDB) Close() error {
+func (*MemDB) Close() error {
 	// Close is a noop since for an in-memory database, we don't have a destination to flush
 	// contents to nor do we want any data loss on invoking Close().
 	return nil
@@ -149,7 +149,10 @@ func (db *MemDB) Print() error {
 	defer db.mtx.RUnlock()
 
 	db.btree.Ascend(func(i btree.Item) bool {
-		item := i.(*item)
+		item, ok := i.(*item)
+		if !ok {
+			return false // or handle the error as appropriate
+		}
 		fmt.Printf("[%X]:\t[%X]\n", item.key, item.value)
 		return true
 	})
