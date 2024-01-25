@@ -1,2 +1,1 @@
-- Removed supprot for RemoteDB ([\#118](https://github.com/cometbft/cometbft-
-  db/issues/118))
+- Remove remotedb ([\#121](https://github.com/cometbft/cometbft-db/pull/121))

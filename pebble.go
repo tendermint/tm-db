@@ -11,57 +11,11 @@ import (
 	"github.com/cockroachdb/pebble"
 )
 
-// ForceSync is a a compile time flag to force using Sync for NoSync functions (Set, Delete, Write).
-
-/*
-This is set at compile time. Could be 0 or 1, defaults is 1.
-It forces using Sync for NoSync functions (Set, Delete, Write)
-
-Notice if ForceSync=0: performance will be better. However, there is an issue when upgrading.
-And the workaround (if using ForceSync=0):
-At the upgrade-block, the sdk will panic without flushing data to disk or closing dbs properly.
-
-Upgrade guide:
- 1. After seeing `UPGRADE "xxxx" NEED at height....`, restart current version with `-X github.com/tendermint/tm-db.ForceSync=1`
- 2. Restart new version as normal
-
-Example: Upgrading sifchain from v0.14.0 to v0.15.0
-
-# log:
-panic: UPGRADE "0.15.0" NEEDED at height: 8170210: {"binaries":{"linux/amd64":"https://github.com/Sifchain/sifnode/releases/download/v0.15.0/sifnoded-v0.15.0-linux-amd64.zip?checksum=0c03b5846c5a13dcc0d9d3127e4f0cee0aeddcf2165177b2f2e0d60dbcf1a5ea"}}
-
-# step1
-git reset --hard
-git checkout v0.14.0
-go mod edit -replace github.com/tendermint/tm-db=github.com/baabeetaa/tm-db@pebble
-go mod tidy
-go install -tags pebbledb -ldflags "-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb -X github.com/tendermint/tm-db.ForceSync=1" ./cmd/sifnoded
-
-$HOME/go/bin/sifnoded start --db_backend=pebbledb
-
-# step 2
-git reset --hard
-git checkout v0.15.0
-go mod edit -replace github.com/tendermint/tm-db=github.com/baabeetaa/tm-db@pebble
-go mod tidy
-go install -tags pebbledb -ldflags "-w -s -X github.com/cosmos/cosmos-sdk/types.DBBackend=pebbledb" ./cmd/sifnoded
-
-$HOME/go/bin/sifnoded start --db_backend=pebbledb
-*/
-var (
-	ForceSync   = "1"
-	isForceSync = false
-)
-
 func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewPebbleDB(name, dir)
 	}
 	registerDBCreator(PebbleDBBackend, dbCreator)
-
-	if ForceSync == "1" {
-		isForceSync = true
-	}
 }
 
 // PebbleDB is a PebbleDB backend.
@@ -130,10 +84,6 @@ func (db *PebbleDB) Set(key []byte, value []byte) error {
 	}
 
 	wopts := pebble.NoSync
-	if isForceSync {
-		wopts = pebble.Sync
-	}
-
 	err := db.db.Set(key, value, wopts)
 	if err != nil {
 		return err
@@ -163,9 +113,6 @@ func (db *PebbleDB) Delete(key []byte) error {
 	}
 
 	wopts := pebble.NoSync
-	if isForceSync {
-		wopts = pebble.Sync
-	}
 	err := db.db.Delete(key, wopts)
 	if err != nil {
 		return err
@@ -298,9 +245,6 @@ func (b *pebbleDBBatch) Write() error {
 	}
 
 	wopts := pebble.NoSync
-	if isForceSync {
-		wopts = pebble.Sync
-	}
 	err := b.batch.Commit(wopts)
 	if err != nil {
 		return err

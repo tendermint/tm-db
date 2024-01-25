@@ -23,16 +23,6 @@ func TestPebbleDBBackend(t *testing.T) {
 	assert.True(t, ok)
 }
 
-// func TestPebbleDBStats(t *testing.T) {
-// 	name := fmt.Sprintf("test_%x", randStr(12))
-// 	dir := os.TempDir()
-// 	db, err := NewDB(name, PebbleDBBackend, dir)
-// 	require.NoError(t, err)
-// 	defer cleanupDBDir(dir, name)
-
-// 	assert.NotEmpty(t, db.Stats())
-// }
-
 func BenchmarkPebbleDBRandomReadsWrites(b *testing.B) {
 	name := fmt.Sprintf("test_%x", randStr(12))
 	dir := os.TempDir()
