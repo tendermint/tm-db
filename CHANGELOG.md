@@ -1,5 +1,24 @@
 # CHANGELOG
 
+## v0.10.0
+
+*Jan 26, 2024*
+
+This release adds experimental support for
+[pebble](https://github.com/cockroachdb/pebble) and drops `remotedb`. If you
+experience any issues with pebble, please open an issue on Github.
+
+Special thanks to @faddat and @baabeetaa for their contributions to this
+release!
+
+### BREAKING CHANGES
+
+- Remove remotedb ([\#121](https://github.com/cometbft/cometbft-db/pull/121))
+
+### FEATURES
+
+- Add [pebbledb](https://github.com/cockroachdb/pebble) ([\#112](https://github.com/cometbft/cometbft-db/pull/112))
+
 ## v0.9.1
 
 *December 4, 2023*

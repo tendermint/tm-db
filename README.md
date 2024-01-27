@@ -64,7 +64,7 @@ Go 1.21+
   few extensions such as range deletion tombstones, table-level bloom filters,
   and updates to the MANIFEST format.
 
-  XXX: there are reports of broken upgrade process when using [Cosmos
+  CAVEAT: there are reports of broken upgrade process when using [Cosmos
   SDK](https://github.com/cosmos/cosmos-sdk).
 
 ## Meta-databases
