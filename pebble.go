@@ -207,6 +207,11 @@ var _ Batch = (*pebbleDBBatch)(nil)
 
 func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
 	return &pebbleDBBatch{
+		// For regular batch operations batch.db is going to be set to db
+		// and it is not needed to initialize the DB here.
+		// This is set to enable general DB operations like compaction
+		// (e.x. a call do pebbleDBBatch.db.Compact() would throw a nil pointer exception)
+		db:    db,
 		batch: db.db.NewBatch(),
 	}
 }
