@@ -122,6 +122,13 @@ func (db *CLevelDB) DeleteSync(key []byte) error {
 	return nil
 }
 
+// Compact implements DB and compacts the given range of the DB
+func (db *CLevelDB) Compact(start, end []byte) error {
+	// CompactRange of clevelDB does not return anything
+	db.db.CompactRange(levigo.Range{Start: start, Limit: end})
+	return nil
+}
+
 // FIXME This should not be exposed
 func (db *CLevelDB) DB() *levigo.DB {
 	return db.db
