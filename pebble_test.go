@@ -2,9 +2,9 @@ package db
 
 import (
 	"fmt"
+	"math/rand"
 	"os"
 	"reflect"
-	"strconv"
 	"sync"
 	"testing"
 
@@ -53,6 +53,7 @@ func TestPebbleDB_Iterator(t *testing.T) {
 		}
 	}
 
+	// Test full range iteration
 	itr, err := db.Iterator(nil, nil)
 	if err != nil {
 		t.Fatalf("Failed to create iterator: %v", err)
@@ -65,6 +66,27 @@ func TestPebbleDB_Iterator(t *testing.T) {
 		}
 		i++
 	}
+
+	// Test partial range iteration (e.g., keys "b" to "c")
+	startKey, endKey := keys[1], append(keys[2], 0) //nolint:gocritic // append 0 to make endKey exclusive
+	itr, err = db.Iterator(startKey, endKey)
+	if err != nil {
+		t.Fatalf("Failed to create iterator for range: %v", err)
+	}
+	defer itr.Close()
+
+	// Expect to only iterate over "b"
+	if itr.Valid() {
+		if !reflect.DeepEqual(itr.Key(), keys[1]) || !reflect.DeepEqual(itr.Value(), values[1]) {
+			t.Errorf("Iterator range key/value mismatch: got %v/%v, want %v/%v", itr.Key(), itr.Value(), keys[1], values[1])
+		}
+		itr.Next()
+		if itr.Valid() {
+			t.Errorf("Iterator range exceeded expected range with key: %v", itr.Key())
+		}
+	} else {
+		t.Errorf("Iterator for range did not find any elements")
+	}
 }
 
 func TestPebbleDBSetGet(t *testing.T) {
@@ -73,6 +95,7 @@ func TestPebbleDBSetGet(t *testing.T) {
 
 	key := []byte("key")
 	value := []byte("value")
+	updatedValue := []byte("updatedValue")
 
 	// Test Set operation
 	require.NoError(t, db.Set(key, value))
@@ -81,6 +104,18 @@ func TestPebbleDBSetGet(t *testing.T) {
 	gotValue, err := db.Get(key)
 	require.NoError(t, err)
 	assert.Equal(t, value, gotValue)
+
+	// Test Update operation
+	require.NoError(t, db.Set(key, updatedValue))
+	gotValue, err = db.Get(key)
+	require.NoError(t, err)
+	assert.Equal(t, updatedValue, gotValue)
+
+	// Test Delete operation
+	require.NoError(t, db.Delete(key))
+	gotValue, err = db.Get(key)
+	require.NoError(t, err)
+	assert.Nil(t, gotValue)
 
 	// Test Get non-existent key
 	gotValue, err = db.Get([]byte("non-existent"))
@@ -143,18 +178,28 @@ func TestPebbleDBConcurrency(t *testing.T) {
 	defer cleanup()
 
 	var wg sync.WaitGroup
-	writeCount := 100 // Number of writes per goroutine
-	goroutines := 10  // Number of goroutines
+	goroutines := 10 // Number of goroutines
+	keyPrefix := "key_"
+	valuePrefix := "value_"
 
-	// Perform concurrent writes
+	// Use a map to track all the keys and their expected values for later verification
+	expectedValues := make(map[string][]byte)
+	var mu sync.Mutex // Protects expectedValues
+
+	// Perform concurrent writes with randomized write counts
 	for i := 0; i < goroutines; i++ {
 		wg.Add(1)
 		go func(goroutineID int) {
 			defer wg.Done()
+			writeCount := rand.Intn(100) + 50 // Randomize number of writes between 50 and 149
 			for j := 0; j < writeCount; j++ {
-				key := []byte("key_" + strconv.Itoa(goroutineID) + "_" + strconv.Itoa(j))
-				value := []byte("value_" + strconv.Itoa(j))
+				key := []byte(fmt.Sprintf("%s%d_%d", keyPrefix, goroutineID, j))
+				value := []byte(fmt.Sprintf("%s%d", valuePrefix, j))
 				require.NoError(t, db.Set(key, value))
+
+				mu.Lock()
+				expectedValues[string(key)] = value
+				mu.Unlock()
 			}
 		}(i)
 	}
@@ -162,13 +207,11 @@ func TestPebbleDBConcurrency(t *testing.T) {
 	wg.Wait() // Wait for all writes to complete
 
 	// Verify data integrity
-	for i := 0; i < goroutines; i++ {
-		for j := 0; j < writeCount; j++ {
-			key := []byte("key_" + strconv.Itoa(i) + "_" + strconv.Itoa(j))
-			expectedValue := []byte("value_" + strconv.Itoa(j))
-			value, err := db.Get(key)
-			require.NoError(t, err)
-			assert.Equal(t, expectedValue, value)
-		}
+	mu.Lock()
+	defer mu.Unlock()
+	for key, expectedValue := range expectedValues {
+		value, err := db.Get([]byte(key))
+		require.NoError(t, err)
+		assert.Equal(t, expectedValue, value)
 	}
 }
