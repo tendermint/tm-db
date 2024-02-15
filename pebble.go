@@ -158,7 +158,7 @@ func (db *PebbleDB) Compact(start, end []byte) (err error) {
 		end = append(end, iter.Key()...)
 	}
 	err = db.db.Compact(start, end, true)
-	return
+	return err
 }
 
 // Close implements DB.
