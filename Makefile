@@ -88,6 +88,16 @@ docker-test:
 		make test-all-with-coverage
 .PHONY: docker-test
 
+docker-lint:
+	@echo "--> Running all tests with all databases with Docker (interactive flags: \"$(DOCKER_TEST_INTERACTIVE_FLAGS)\")"
+	@docker run $(DOCKER_TEST_INTERACTIVE_FLAGS) --rm --name cometbft-db-test \
+		-v `pwd`:/cometbft \
+		-w /cometbft \
+		--entrypoint "" \
+		$(DOCKER_TEST_IMAGE):$(DOCKER_TEST_IMAGE_VERSION) \
+		golangci-lint run ./...
+.PHONY: docker-test
+
 tools:
 	go get -v $(GOTOOLS)
 .PHONY: tools
