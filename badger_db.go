@@ -170,6 +170,11 @@ func (b *BadgerDB) Stats() map[string]string {
 	return nil
 }
 
+func (b *BadgerDB) Compact(start, end []byte) error {
+	// Explicit compaction is not currently supported in badger
+	return nil
+}
+
 func (b *BadgerDB) NewBatch() Batch {
 	wb := &badgerDBBatch{
 		db:         b.db,

@@ -33,6 +33,7 @@ func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, 
 	if err != nil {
 		return nil, err
 	}
+
 	database := &GoLevelDB{
 		db: db,
 	}
@@ -71,7 +72,8 @@ func (db *GoLevelDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	if err := db.db.Put(key, value, nil); err != nil {
+	err := db.db.Put(key, value, nil)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -85,7 +87,9 @@ func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	if err := db.db.Put(key, value, &opt.WriteOptions{Sync: true}); err != nil {
+
+	err := db.db.Put(key, value, &opt.WriteOptions{Sync: true})
+	if err != nil {
 		return err
 	}
 	return nil
@@ -96,7 +100,9 @@ func (db *GoLevelDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	if err := db.db.Delete(key, nil); err != nil {
+
+	err := db.db.Delete(key, nil)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -187,4 +193,9 @@ func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	}
 	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, true), nil
+}
+
+// Compact range
+func (db *GoLevelDB) Compact(start, end []byte) error {
+	return db.db.CompactRange(util.Range{Start: start, Limit: end})
 }

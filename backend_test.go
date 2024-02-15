@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -37,9 +39,10 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	// Default
 	dirname, err := os.MkdirTemp("", fmt.Sprintf("test_backend_%s_", backend))
 	require.Nil(t, err)
-	db, err := NewDB("testdb", backend, dirname)
+	name := fmt.Sprintf("testdb_%x", randStr(12))
+	db, err := NewDB(name, backend, dirname)
 	require.NoError(t, err)
-	defer cleanupDBDir(dirname, "testdb")
+	defer cleanupDBDir(dirname, name)
 
 	// A nonexistent key should return nil.
 	value, err := db.Get([]byte("a"))
@@ -133,6 +136,26 @@ func testBackendGetSetDelete(t *testing.T, backend BackendType) {
 	value, err = db.Get([]byte("x"))
 	require.NoError(t, err)
 	require.Equal(t, []byte{}, value)
+
+	err = db.Compact(nil, nil)
+	if strings.Contains(string(backend), "pebbledb") {
+		// In pebble the start and end will be the same so
+		// we expect an error
+		require.Error(t, err)
+	}
+
+	err = db.Set([]byte("y"), []byte{})
+	require.NoError(t, err)
+
+	err = db.Compact(nil, nil)
+	require.NoError(t, err)
+
+	if strings.Contains(string(backend), "pebbledb") {
+		// When running the test the folder can't be cleaned up and there
+		// is a panic on removing the tmp testing directories.
+		// The compaction process is slow to release the lock on the folder.
+		time.Sleep(time.Second * 5)
+	}
 }
 
 func TestBackendsGetSetDelete(t *testing.T) {
@@ -306,6 +329,7 @@ func testDBIterator(t *testing.T, backend BackendType) {
 	// Ensure that the iterators don't panic with an empty database.
 	dir2, err := os.MkdirTemp("", "tm-db-test")
 	require.NoError(t, err)
+	name = fmt.Sprintf("test_%x", randStr(12))
 	db2, err := NewDB(name, backend, dir2)
 	require.NoError(t, err)
 	defer cleanupDBDir(dir2, name)

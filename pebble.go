@@ -136,6 +136,34 @@ func (db *PebbleDB) DB() *pebble.DB {
 	return db.db
 }
 
+func (db *PebbleDB) Compact(start, end []byte) (err error) {
+	// Currently nil,nil is an invalid range in Pebble.
+	// This was taken from https://github.com/cockroachdb/pebble/issues/1474
+	// In case the start and end keys are the same
+	// pebbleDB will throw an error that it cannot compact.
+	if start != nil && end != nil {
+		return db.db.Compact(start, end, true)
+	}
+	iter, err := db.db.NewIter(nil)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err2 := iter.Close()
+		if err2 != nil {
+			err = err2
+		}
+	}()
+	if start == nil && iter.First() {
+		start = append(start, iter.Key()...)
+	}
+	if end == nil && iter.Last() {
+		end = append(end, iter.Key()...)
+	}
+	err = db.db.Compact(start, end, true)
+	return
+}
+
 // Close implements DB.
 func (db PebbleDB) Close() error {
 	db.db.Close()
@@ -176,7 +204,10 @@ func (db *PebbleDB) Iterator(start, end []byte) (Iterator, error) {
 		LowerBound: start,
 		UpperBound: end,
 	}
-	itr := db.db.NewIter(&o)
+	itr, err := db.db.NewIter(&o)
+	if err != nil {
+		return nil, err
+	}
 	itr.First()
 
 	return newPebbleDBIterator(itr, start, end, false), nil
@@ -191,7 +222,10 @@ func (db *PebbleDB) ReverseIterator(start, end []byte) (Iterator, error) {
 		LowerBound: start,
 		UpperBound: end,
 	}
-	itr := db.db.NewIter(&o)
+	itr, err := db.db.NewIter(&o)
+	if err != nil {
+		return nil, err
+	}
 	itr.Last()
 	return newPebbleDBIterator(itr, start, end, true), nil
 }
@@ -207,6 +241,11 @@ var _ Batch = (*pebbleDBBatch)(nil)
 
 func newPebbleDBBatch(db *PebbleDB) *pebbleDBBatch {
 	return &pebbleDBBatch{
+		// For regular batch operations batch.db is going to be set to db
+		// and it is not needed to initialize the DB here.
+		// This is set to enable general DB operations like compaction
+		// (e.x. a call do pebbleDBBatch.db.Compact() would throw a nil pointer exception)
+		db:    db,
 		batch: db.db.NewBatch(),
 	}
 }
