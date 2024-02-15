@@ -136,7 +136,6 @@ func TestPebbleDBCompaction(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, values[i], string(value))
 	}
-
 }
 
 func TestPebbleDBConcurrency(t *testing.T) {
