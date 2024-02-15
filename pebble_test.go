@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
-	"reflect"
 	"sync"
 	"testing"
 
@@ -44,49 +43,101 @@ func TestPebbleDB_Iterator(t *testing.T) {
 	db, cleanup := newTestPebbleDB(t)
 	defer cleanup()
 
+	// Insert test data
 	keys := [][]byte{[]byte("a"), []byte("b"), []byte("c")}
 	values := [][]byte{[]byte("1"), []byte("2"), []byte("3")}
-
 	for i, key := range keys {
-		if err := db.Set(key, values[i]); err != nil {
-			t.Fatalf("Failed to set key: %v", err)
-		}
+		require.NoError(t, db.Set(key, values[i]))
 	}
 
 	// Test full range iteration
+	testFullRangeIterator(t, db, keys, values)
+
+	// Test partial range iteration
+	testPartialRangeIterator(t, db, keys, values)
+
+	// Test reverse iterator
+	testReverseIterator(t, db, keys, values)
+
+	// Test edge cases: empty database, empty range, etc.
+	testIteratorEdgeCases(t, db)
+}
+
+func testFullRangeIterator(t *testing.T, db *PebbleDB, keys, values [][]byte) {
+	t.Helper()
 	itr, err := db.Iterator(nil, nil)
-	if err != nil {
-		t.Fatalf("Failed to create iterator: %v", err)
-	}
+	require.NoError(t, err)
 	defer itr.Close()
 
-	for i := 0; itr.Valid(); itr.Next() {
-		if !reflect.DeepEqual(itr.Key(), keys[i]) || !reflect.DeepEqual(itr.Value(), values[i]) {
-			t.Errorf("Iterator key/value mismatch: got %v/%v, want %v/%v", itr.Key(), itr.Value(), keys[i], values[i])
-		}
+	i := 0
+	for itr.Valid() {
+		require.Less(t, i, len(keys), "Iterator returned more keys than expected")
+		assert.Equal(t, keys[i], itr.Key(), "Key mismatch")
+		assert.Equal(t, values[i], itr.Value(), "Value mismatch")
+		itr.Next()
 		i++
 	}
+	assert.Equal(t, len(keys), i, "Iterator did not iterate over all keys")
+}
 
-	// Test partial range iteration (e.g., keys "b" to "c")
-	startKey, endKey := keys[1], append(keys[2], 0) //nolint:gocritic // append 0 to make endKey exclusive
-	itr, err = db.Iterator(startKey, endKey)
-	if err != nil {
-		t.Fatalf("Failed to create iterator for range: %v", err)
-	}
+func testPartialRangeIterator(t *testing.T, db *PebbleDB, keys, values [][]byte) {
+	t.Helper()
+	// Assuming keys are sorted, iterate from the second key to the third key
+	startKey := keys[1]
+	endKey := keys[2]
+	itr, err := db.Iterator(startKey, endKey)
+	require.NoError(t, err)
 	defer itr.Close()
 
-	// Expect to only iterate over "b"
 	if itr.Valid() {
-		if !reflect.DeepEqual(itr.Key(), keys[1]) || !reflect.DeepEqual(itr.Value(), values[1]) {
-			t.Errorf("Iterator range key/value mismatch: got %v/%v, want %v/%v", itr.Key(), itr.Value(), keys[1], values[1])
-		}
+		assert.Equal(t, startKey, itr.Key(), "Partial range iterator key mismatch")
+		assert.Equal(t, values[1], itr.Value(), "Partial range iterator value mismatch")
 		itr.Next()
-		if itr.Valid() {
-			t.Errorf("Iterator range exceeded expected range with key: %v", itr.Key())
-		}
-	} else {
-		t.Errorf("Iterator for range did not find any elements")
 	}
+	assert.False(t, itr.Valid(), "Partial range iterator expected to have only one valid entry")
+}
+
+func testReverseIterator(t *testing.T, db *PebbleDB, keys, values [][]byte) {
+	t.Helper()
+	itr, err := db.ReverseIterator(nil, nil)
+	require.NoError(t, err)
+	defer itr.Close()
+
+	i := len(keys) - 1
+	for itr.Valid() {
+		require.GreaterOrEqual(t, i, 0, "Reverse iterator returned more keys than expected")
+		assert.Equal(t, keys[i], itr.Key(), "Reverse iterator key mismatch")
+		assert.Equal(t, values[i], itr.Value(), "Reverse iterator value mismatch")
+		itr.Next()
+		i--
+	}
+	assert.Equal(t, -1, i, "Reverse iterator did not iterate over all keys")
+}
+
+func testIteratorEdgeCases(t *testing.T, db *PebbleDB) {
+	t.Helper()
+	// Test iterator with empty start or end key
+	_, err := db.Iterator([]byte{}, nil)
+	assert.Error(t, err, "Expected error for empty start key")
+
+	_, err = db.Iterator(nil, []byte{})
+	assert.Error(t, err, "Expected error for empty end key")
+
+	// Test reverse iterator with empty start or end key
+	_, err = db.ReverseIterator([]byte{}, nil)
+	assert.Error(t, err, "Expected error for empty start key in reverse iterator")
+
+	_, err = db.ReverseIterator(nil, []byte{})
+	assert.Error(t, err, "Expected error for empty end key in reverse iterator")
+
+	// Test iterator on an empty database
+	emptyDB, cleanup := newTestPebbleDB(t)
+	defer cleanup()
+
+	itr, err := emptyDB.Iterator(nil, nil)
+	require.NoError(t, err)
+	defer itr.Close()
+	assert.False(t, itr.Valid(), "Iterator on an empty database should be invalid")
 }
 
 func TestPebbleDBSetGet(t *testing.T) {
