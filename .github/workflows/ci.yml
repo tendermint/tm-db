@@ -27,17 +27,13 @@ jobs:
         with:
           driver: docker
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
+      - uses: actions/setup-go@v4
         with:
-          context: ./tools
-          file: ./tools/Dockerfile
-          tags: "cometbft/cometbft-db-testing:latest"
-          load: true
+          go-version: '1.22'
+          cache: false
 
       - name: test & coverage report creation
-        run: |
-          NON_INTERACTIVE=1 make docker-test
+        run: make test-all-with-coverage
 
       - uses: codecov/codecov-action@v4
         with:
