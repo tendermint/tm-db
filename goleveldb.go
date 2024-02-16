@@ -28,7 +28,18 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 }
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
-	dbPath := filepath.Join(dir, name+".db") //nolint:goconst
+	if o == nil {
+		o = &opt.Options{
+			WriteBuffer:                   64 * opt.MiB,
+			BlockCacheCapacity:            32 * opt.MiB,
+			BlockSize:                     4 * opt.KiB,
+			CompactionTableSize:           4 * opt.MiB,
+			CompactionTableSizeMultiplier: 2,
+			WriteL0PauseTrigger:           24,
+			WriteL0SlowdownTrigger:        17,
+		}
+	}
+	dbPath := filepath.Join(dir, name+".db")
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err

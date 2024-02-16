@@ -13,7 +13,6 @@ endif
 all: lint test
 
 ### go tests
-## By default this will only test memdb & goleveldb
 test:
 	@echo "--> Running go test"
 	@go test $(PACKAGES) -v
