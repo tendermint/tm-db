@@ -39,7 +39,7 @@ func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, 
 			WriteL0SlowdownTrigger:        17,
 		}
 	}
-	dbPath := filepath.Join(dir, name+".db")
+	dbPath := filepath.Join(dir, name+".db") //nolint:goconst // this is clearer if we do not make it a constant
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err
