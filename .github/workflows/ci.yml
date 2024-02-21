@@ -1,8 +1,12 @@
+# To run locally:
+#   make docker-test
+
 name: Test
 on:
   push:
     branches:
-      - master
+      - main
+  merge_group:
   pull_request:
 jobs:
   cleanup-runs:
@@ -11,20 +15,26 @@ jobs:
       - uses: rokroskar/workflow-run-cleanup-action@master
         env:
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/master'"
+    if: "!startsWith(github.ref, 'refs/tags/') && github.ref != 'refs/heads/main'"
 
   Test:
-    # The custom image here contains pre-built libraries for leveldb and
-    # rocksdb, which are needed to build and test those modules.
-    # To update the container image, see docker.yml.
     runs-on: ubuntu-latest
-    container: tendermintdev/docker-tm-db-testing
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Build
+        uses: docker/setup-buildx-action@v3.0.0
+        with:
+          driver: docker
+
+      - uses: actions/setup-go@v4
+        with:
+          go-version: '1.22'
+          cache: false
+
       - name: test & coverage report creation
-        run: |
-          CGO_ENABLED=1 go test ./... -mod=readonly -timeout 8m -race -coverprofile=coverage.txt -covermode=atomic -tags=memdb,goleveldb,cleveldb,boltdb,rocksdb,badgerdb -v
-      - uses: codecov/codecov-action@v3
+        run: make test-all-with-coverage
+
+      - uses: codecov/codecov-action@v4
         with:
           file: ./coverage.txt
-          fail_ci_if_error: true  

@@ -28,22 +28,27 @@ const (
 	//   - may be faster is some use-cases (random reads - indexer)
 	//   - use boltdb build tag (go build -tags boltdb)
 	BoltDBBackend BackendType = "boltdb"
-	// RocksDBBackend represents rocksdb (uses github.com/cosmos/gorocksdb)
+	// RocksDBBackend represents rocksdb (uses github.com/tecbot/gorocksdb)
 	//   - EXPERIMENTAL
 	//   - requires gcc
 	//   - use rocksdb build tag (go build -tags rocksdb)
 	RocksDBBackend BackendType = "rocksdb"
 
 	BadgerDBBackend BackendType = "badgerdb"
+
+	// PebbleDBDBBackend represents pebble (uses github.com/cockroachdb/pebble)
+	//   - EXPERIMENTAL
+	//   - use pebbledb build tag (go build -tags pebbledb)
+	PebbleDBBackend BackendType = "pebbledb"
 )
 
 type dbCreator func(name string, dir string) (DB, error)
 
 var backends = map[BackendType]dbCreator{}
 
-func registerDBCreator(backend BackendType, creator dbCreator, force bool) {
+func registerDBCreator(backend BackendType, creator dbCreator) {
 	_, ok := backends[backend]
-	if !force && ok {
+	if ok {
 		return
 	}
 	backends[backend] = creator

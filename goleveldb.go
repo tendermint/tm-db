@@ -14,7 +14,7 @@ func init() {
 	dbCreator := func(name string, dir string) (DB, error) {
 		return NewGoLevelDB(name, dir)
 	}
-	registerDBCreator(GoLevelDBBackend, dbCreator, false)
+	registerDBCreator(GoLevelDBBackend, dbCreator)
 }
 
 type GoLevelDB struct {
@@ -28,11 +28,23 @@ func NewGoLevelDB(name string, dir string) (*GoLevelDB, error) {
 }
 
 func NewGoLevelDBWithOpts(name string, dir string, o *opt.Options) (*GoLevelDB, error) {
-	dbPath := filepath.Join(dir, name+".db")
+	if o == nil {
+		o = &opt.Options{
+			WriteBuffer:                   64 * opt.MiB,
+			BlockCacheCapacity:            32 * opt.MiB,
+			BlockSize:                     4 * opt.KiB,
+			CompactionTableSize:           4 * opt.MiB,
+			CompactionTableSizeMultiplier: 2,
+			WriteL0PauseTrigger:           24,
+			WriteL0SlowdownTrigger:        17,
+		}
+	}
+	dbPath := filepath.Join(dir, name+".db") //nolint:goconst // this is clearer if we do not make it a constant
 	db, err := leveldb.OpenFile(dbPath, o)
 	if err != nil {
 		return nil, err
 	}
+
 	database := &GoLevelDB{
 		db: db,
 	}
@@ -71,7 +83,8 @@ func (db *GoLevelDB) Set(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	if err := db.db.Put(key, value, nil); err != nil {
+	err := db.db.Put(key, value, nil)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -85,7 +98,9 @@ func (db *GoLevelDB) SetSync(key []byte, value []byte) error {
 	if value == nil {
 		return errValueNil
 	}
-	if err := db.db.Put(key, value, &opt.WriteOptions{Sync: true}); err != nil {
+
+	err := db.db.Put(key, value, &opt.WriteOptions{Sync: true})
+	if err != nil {
 		return err
 	}
 	return nil
@@ -96,7 +111,9 @@ func (db *GoLevelDB) Delete(key []byte) error {
 	if len(key) == 0 {
 		return errKeyEmpty
 	}
-	if err := db.db.Delete(key, nil); err != nil {
+
+	err := db.db.Delete(key, nil)
+	if err != nil {
 		return err
 	}
 	return nil
@@ -166,10 +183,6 @@ func (db *GoLevelDB) Stats() map[string]string {
 	return stats
 }
 
-func (db *GoLevelDB) ForceCompact(start, limit []byte) error {
-	return db.db.CompactRange(util.Range{Start: start, Limit: limit})
-}
-
 // NewBatch implements DB.
 func (db *GoLevelDB) NewBatch() Batch {
 	return newGoLevelDBBatch(db)
@@ -191,4 +204,9 @@ func (db *GoLevelDB) ReverseIterator(start, end []byte) (Iterator, error) {
 	}
 	itr := db.db.NewIterator(&util.Range{Start: start, Limit: end}, nil)
 	return newGoLevelDBIterator(itr, start, end, true), nil
+}
+
+// Compact range
+func (db *GoLevelDB) Compact(start, end []byte) error {
+	return db.db.CompactRange(util.Range{Start: start, Limit: end})
 }

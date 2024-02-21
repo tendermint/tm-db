@@ -68,6 +68,9 @@ type DB interface {
 
 	// Stats returns a map of property values for all keys and the size of the cache.
 	Stats() map[string]string
+
+	// Compact explicitly
+	Compact(start, end []byte) error
 }
 
 // Batch represents a group of writes. They may or may not be written atomically depending on the
@@ -111,13 +114,14 @@ type Batch interface {
 // var itr Iterator = ...
 // defer itr.Close()
 //
-// for ; itr.Valid(); itr.Next() {
-//   k, v := itr.Key(); itr.Value()
-//   ...
-// }
-// if err := itr.Error(); err != nil {
-//   ...
-// }
+//	for ; itr.Valid(); itr.Next() {
+//	  k, v := itr.Key(); itr.Value()
+//	  ...
+//	}
+//
+//	if err := itr.Error(); err != nil {
+//	  ...
+//	}
 type Iterator interface {
 	// Domain returns the start (inclusive) and end (exclusive) limits of the iterator.
 	// CONTRACT: start, end readonly []byte

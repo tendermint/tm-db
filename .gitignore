@@ -12,5 +12,7 @@
 *.out
 
 .idea
-.vscode
 vendor/*
+
+# Code coverage
+coverage.txt
