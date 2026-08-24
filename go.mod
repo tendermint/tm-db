@@ -6,7 +6,7 @@ require (
 	github.com/cosmos/gorocksdb v1.2.0
 	github.com/dgraph-io/badger/v3 v3.2103.2
 	github.com/gogo/protobuf v1.3.2
-	github.com/google/btree v1.1.2
+	github.com/google/btree v1.1.3
 	github.com/jmhodges/levigo v1.0.0
 	github.com/stretchr/testify v1.8.0
 	github.com/syndtr/goleveldb v1.0.1-0.20200815110645-5c35d600f0ca
